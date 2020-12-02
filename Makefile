@@ -26,6 +26,9 @@ docker: homebrew
 	$(bcask) docker
 	open /Applications/Docker.app
 
+git:
+	./scripts/$@.sh
+
 awscli: homebrew
 	$(brin) awscli
 

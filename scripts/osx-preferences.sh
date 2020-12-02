@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -eux
 
 # ~/osx.sh — Originally from https://mths.be/osx
 

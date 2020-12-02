@@ -1,3 +1,5 @@
+#!/usr/bin/env bash -eux
+
 brew install zsh zsh-completions
 
 sudo echo "/etc/shells" >> /etc/shells

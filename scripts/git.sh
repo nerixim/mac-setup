@@ -1,3 +1,5 @@
+#!/usr/bin/env bash -eux
+
 git config --global user.name "Nikita Kamaev"
 git config --global user.email "hiyori.amatsuki@gmail.com"
 git config --global push.default current

@@ -34,6 +34,9 @@ sudo defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 0
 
+# Sleep after n minutes
+sudo systemsetup -setdisplaysleep 10
+sudo systemsetup -setcomputersleep 10
 
 # Save screenshots to the Pictures/Screenshots
 mkdir -p ${HOME}/Pictures/Screenshots

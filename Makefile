@@ -1,4 +1,5 @@
 bcask := brew cask install
+brin := brew install
 
 xcode:
 	./scripts/$@.sh
@@ -21,15 +22,29 @@ iterm: homebrew
 	open "./config/Solarized Dark.itermcolors"
 
 docker: homebrew
-	brew install docker
+	$(brin) docker
 	$(bcask) docker
 	open /Applications/Docker.app
 
 awscli: homebrew
-	brew install awscli
+	$(brin) awscli
+
+gcp-cli: homebrew
+	$(bcask) google-cloud-sdk
+
+rbenv: homebrew
+
+pyenv: homebrew
+	$(brin) pyenv
+
+yarn: homebrew
+	$(brin) yarn
 
 chrome: homebrew
 	$(bcask) --appdir="/Applications" google-chrome
 
 slack: homebrew
 	$(bcask) --appdir="/Applications" slack
+
+google-ime: homebrew
+	$(bcask) google-japanese-ime

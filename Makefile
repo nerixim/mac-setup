@@ -26,6 +26,9 @@ docker: homebrew
 	$(bcask) docker
 	open /Applications/Docker.app
 
+k8s: homebrew
+	./scripts/$@.sh
+
 git:
 	./scripts/$@.sh
 

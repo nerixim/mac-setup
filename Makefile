@@ -36,6 +36,7 @@ gcp-cli: homebrew
 	$(bcask) google-cloud-sdk
 
 rbenv: homebrew
+	command -v rbenv || scripts/$@.sh
 
 pyenv: homebrew
 	$(brin) pyenv

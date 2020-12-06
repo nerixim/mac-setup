@@ -23,5 +23,9 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$
 # enable natural text selection manually
 # iTerm → Preferences → Profiles → Keys → Presets... → Natural Text Editing
 
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+# iTermでSolarized Darkを使っている場合は背景色を少し暗くする必要あり
+# https://github.com/zsh-users/zsh-autosuggestions/issues/416#issuecomment-503457366
+
 # oh-my-zsh plugins (~/.zshrc)
-# plugins=(git docker docker-compose aws brew terraform)
+# plugins=(git docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions)

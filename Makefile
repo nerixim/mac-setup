@@ -51,3 +51,6 @@ slack: homebrew
 
 google-ime: homebrew
 	$(bcask) google-japanese-ime
+
+zoom: homebrew
+	$(bcask) zoom

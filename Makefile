@@ -49,6 +49,7 @@ yarn: homebrew
 
 terraform: homebrew
 	$(brin) tfenv tflint hashicorp/tap/terraform-ls
+	./scripts/$@.sh
 
 chrome: homebrew
 	$(bcask) --appdir="/Applications" google-chrome

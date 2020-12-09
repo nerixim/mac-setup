@@ -29,3 +29,9 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 
 # oh-my-zsh plugins (~/.zshrc)
 # plugins=(git docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions)
+
+# homebrewのcompletionsをohmyzshがロードする前に初期化する必要がある
+# https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
+
+echo 'alias be="bundle exec"' >> ~/.aliases
+echo 'source ~/.zsh_profile' >> ~/.zshrc

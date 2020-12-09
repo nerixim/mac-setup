@@ -47,6 +47,9 @@ pyenv: homebrew
 yarn: homebrew
 	$(brin) yarn
 
+tfenv: homebrew
+	$(brin) tfenv
+
 chrome: homebrew
 	$(bcask) --appdir="/Applications" google-chrome
 

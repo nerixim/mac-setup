@@ -47,8 +47,8 @@ pyenv: homebrew
 yarn: homebrew
 	$(brin) yarn
 
-tfenv: homebrew
-	$(brin) tfenv
+terraform: homebrew
+	$(brin) tfenv tflint hashicorp/tap/terraform-ls
 
 chrome: homebrew
 	$(bcask) --appdir="/Applications" google-chrome

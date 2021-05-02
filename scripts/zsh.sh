@@ -35,4 +35,5 @@ echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colo
 # https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
 
 echo 'alias be="bundle exec"' >> ~/.aliases
+echo 'alias pip="pip3"' >> ~/.aliases
 echo 'source ~/.zsh_profile' >> ~/.zshrc

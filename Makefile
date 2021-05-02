@@ -53,3 +53,6 @@ google-ime: homebrew
 
 zoom: homebrew
 	$(bcask) zoom
+
+dev-tools: homebrew
+	$(bcask) graphql-playground postman

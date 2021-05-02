@@ -38,17 +38,8 @@ awscli: homebrew
 gcp-cli: homebrew
 	$(bcask) google-cloud-sdk
 
-rbenv: homebrew
-	command -v rbenv || scripts/$@.sh
-
-pyenv: homebrew
-	$(brin) pyenv
-
-yarn: homebrew
-	$(brin) yarn
-
 terraform: homebrew
-	$(brin) tfenv tflint hashicorp/tap/terraform-ls
+	$(brin) tflint hashicorp/tap/terraform-ls
 	./scripts/$@.sh
 
 chrome: homebrew

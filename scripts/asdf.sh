@@ -6,6 +6,8 @@ brew install \
   unzip curl gpg \
   asdf
 
+echo 'source $(brew --prefix asdf)/asdf.sh' >> "${HOME}/.zsh_profile"
+
 asdf plugin add nodejs
 asdf plugin add ruby
 asdf plugin add python

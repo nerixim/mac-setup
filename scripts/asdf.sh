@@ -44,4 +44,6 @@ typesync
 EOF
 
 cat << EOF >> "$HOME/.default-python-packages"
+boto3
+ipython
 EOF

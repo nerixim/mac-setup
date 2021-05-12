@@ -18,7 +18,7 @@ asdf plugin add awscli
 
 cat << EOF >> "$HOME/.tool-versions"
 ruby 3.0.1 system
-nodejs 16.0.0 system
+nodejs 16.1.0 system
 python 3.9.4 system
 golang 1.16.4
 EOF

@@ -40,3 +40,4 @@ echo 'source ~/.zsh_profile' >> ~/.zshrc
 
 echo 'export GOPATH=$HOME/go'  >> ~/.zsh_profile
 echo 'export PATH="$PATH:$GOPATH/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"' >> ~/.zsh_profile
+echo 'export EDITOR=code'  >> ~/.zsh_profile

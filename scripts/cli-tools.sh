@@ -8,3 +8,5 @@ brew install tree bat htop
 brew install thefuck
 
 brew install httpie jq
+
+brew install tre-command

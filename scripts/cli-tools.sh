@@ -1,6 +1,6 @@
 #!/usr/bin/env bash -eux
 
-brew install git tig gitmoji
+brew install git tig gitmoji gitui
 
 echo 'export PATH=/usr/local/bin/git:$PATH' >> ~/.zshrc
 

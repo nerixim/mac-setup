@@ -10,3 +10,5 @@ brew install thefuck
 brew install httpie jq
 
 brew install tre-command
+
+brew install mas

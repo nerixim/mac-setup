@@ -1,4 +1,4 @@
-bcask := brew cask install
+bcask := brew install--cask
 brin := brew install
 
 xcode:

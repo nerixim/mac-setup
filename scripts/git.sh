@@ -10,7 +10,6 @@ git config --global pull.ff only
 git config --global core.ignorecase false
 git config --global color.ui true
 git config --global core.quotepath false
-git config --global core.ignorecase false
 
 git config --global alias.st status
 git config --global alias.df diff

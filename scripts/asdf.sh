@@ -41,6 +41,7 @@ yarn
 typescript
 ts-node
 typesync
+aws-cdk
 EOF
 
 cat << EOF >> "$HOME/.default-python-packages"

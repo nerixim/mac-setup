@@ -42,6 +42,7 @@ typescript
 ts-node
 typesync
 aws-cdk
+esbuild
 EOF
 
 cat << EOF >> "$HOME/.default-python-packages"

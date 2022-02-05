@@ -16,6 +16,7 @@ osx-preferences:
 vscode: homebrew
 	$(bcask) visual-studio-code
 	echo 'export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"' >> ~/.zshrc
+	echo 'export EDITOR=code' >> ~/.zshrc
 
 iterm: homebrew
 	$(bcask) --appdir="~/Applications" iterm2

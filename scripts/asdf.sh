@@ -11,14 +11,15 @@ echo 'source $(brew --prefix asdf)/asdf.sh' >> "${HOME}/.zsh_profile"
 asdf plugin add nodejs
 asdf plugin add ruby
 asdf plugin add python
+asdf plugin-add poetry https://github.com/asdf-community/asdf-poetry.git
 asdf plugin add golang
 asdf plugin add terraform
 # asdf plugin add direnv
 asdf plugin add awscli
 
 cat << EOF >> "$HOME/.tool-versions"
-ruby 3.0.1 system
-nodejs 16.1.0 system
+ruby 3.1.0 system
+nodejs 16.13.2 system
 python 3.9.4 system
 golang 1.16.4
 EOF
@@ -48,4 +49,5 @@ EOF
 cat << EOF >> "$HOME/.default-python-packages"
 boto3
 ipython
+black
 EOF

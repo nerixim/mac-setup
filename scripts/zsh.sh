@@ -29,7 +29,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 
 # oh-my-zsh plugins (~/.zshrc)
 echo 'Add oh-my-zsh plugins as necessary'
-echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn asdf)'
+echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn asdf pip)'
 
 # homebrewのcompletionsをohmyzshがロードする前に初期化する必要がある
 # https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh

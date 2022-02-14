@@ -11,7 +11,7 @@ echo 'source $(brew --prefix asdf)/asdf.sh' >> "${HOME}/.zsh_profile"
 asdf plugin add nodejs
 asdf plugin add ruby
 asdf plugin add python
-asdf plugin-add poetry https://github.com/asdf-community/asdf-poetry.git
+asdf plugin add poetry https://github.com/asdf-community/asdf-poetry.git
 asdf plugin add golang
 asdf plugin add terraform
 # asdf plugin add direnv

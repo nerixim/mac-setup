@@ -42,8 +42,8 @@ terraform: homebrew
 	$(brin) tflint hashicorp/tap/terraform-ls
 	./scripts/$@.sh
 
-chrome: homebrew
-	$(bcask) --appdir="/Applications" google-chrome
+browser: homebrew
+	$(bcask) --appdir="/Applications" google-chrome firefox brave-browser
 
 slack: homebrew
 	$(bcask) --appdir="/Applications" slack

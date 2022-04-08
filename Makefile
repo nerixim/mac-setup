@@ -56,3 +56,9 @@ zoom: homebrew
 
 dev-tools: homebrew
 	$(bcask) graphql-playground postman
+
+zsh:
+	./scripts/$@.sh
+
+asdf:
+	./scripts/$@.sh

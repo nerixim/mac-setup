@@ -1,4 +1,4 @@
-bcask := brew install--cask
+bcask := brew install --cask
 brin := brew install
 
 xcode:
@@ -15,7 +15,7 @@ osx-preferences:
 
 vscode: homebrew
 	$(bcask) visual-studio-code
-	echo 'export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"' >> ~/.zshrc
+	echo 'export PATH="$$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"' >> ~/.zshrc
 
 iterm: homebrew
 	$(bcask) --appdir="~/Applications" iterm2

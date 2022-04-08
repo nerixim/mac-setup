@@ -2,7 +2,7 @@
 
 brew install zsh zsh-completions
 
-sudo echo "/etc/shells" >> /etc/shells
+echo "/usr/local/bin/zsh" | sudo tee -a /etc/shells
 chsh -s /usr/local/bin/zsh
 
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh

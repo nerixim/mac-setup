@@ -1,6 +1,6 @@
 #!/usr/bin/env bash -eux
 
-brew install gh
+brew install git gh
 # gh auth login
 
 git config --global user.name "Nikita Kamaev"

@@ -22,7 +22,6 @@ iterm: homebrew
 	open "./config/Solarized Dark.itermcolors"
 
 docker: homebrew
-	$(brin) docker
 	$(bcask) docker
 	open /Applications/Docker.app
 

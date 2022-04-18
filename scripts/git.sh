@@ -1,6 +1,6 @@
 #!/usr/bin/env bash -eux
 
-brew install gh tig
+brew install git gh tig
 # gh auth login
 
 git config --global user.name "Nikita Kamaev"

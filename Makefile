@@ -19,6 +19,8 @@ vscode: homebrew
 
 iterm: homebrew
 	$(bcask) --appdir="~/Applications" iterm2
+	# 暫定
+	$(bcask) fig
 	open "./config/Solarized Dark.itermcolors"
 
 docker: homebrew

@@ -39,6 +39,6 @@ echo 'alias pip="pip3"' >> ~/.aliases
 echo 'source ~/.zsh_profile' >> ~/.zshrc
 echo 'source ~/.aliases' >> ~/.zshrc
 
-echo 'export GOPATH=$HOME/go'  >> ~/.zsh_profile
+echo 'export GOPATH=$HOME/go' >> ~/.zsh_profile
 echo 'export PATH="$PATH:$GOPATH/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"' >> ~/.zsh_profile
-echo 'export EDITOR="code -w"'  >> ~/.zsh_profile
+echo 'export EDITOR="code -w"' >> ~/.zsh_profile

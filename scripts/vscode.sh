@@ -21,7 +21,6 @@ code --install-extension mads-hartmann.bash-ide-vscode
 code --install-extension timonwong.shellcheck
 
 code --install-extension rebornix.ruby
-gem install solargraph
 code --install-extension castwide.solargraph
 code --install-extension misogi.ruby-rubocop
 code --install-extension sporto.rails-go-to-spec

@@ -10,7 +10,7 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 
 ###############################################################################
-# General UI/UX                                                               #
+# General UI/UX #
 ###############################################################################
 
 # Disable the sound effects on boot
@@ -27,7 +27,7 @@ sudo defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
 
 ###############################################################################
-# Screen                                                                      #
+# Screen #
 ###############################################################################
 
 # Require password immediately after sleep or screen saver begins
@@ -64,7 +64,7 @@ defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
 
 ###############################################################################
-# Dock, Dashboard, and hot corners                                            #
+# Dock, Dashboard, and hot corners#
 ###############################################################################
 
 # Enable highlight hover effect for the grid view of a stack (Dock)
@@ -81,7 +81,7 @@ defaults write com.apple.dock autohide -bool true
 
 
 ###############################################################################
-# Activity Monitor                                                            #
+# Activity Monitor#
 ###############################################################################
 
 # Show the main window when launching Activity Monitor

@@ -21,7 +21,7 @@ git config --global alias.br branch
 git config --global alias.ps push
 git config --global alias.pl pull
 git config --global alias.ck checkout
-git config --global alias.graph "log --pretty=format:'%Cgreen[%cd] %Cblue%h %Cred<%cn> %Creset%s' --date=short  --decorate --graph --branches --tags --remotes"
+git config --global alias.graph "log --pretty=format:'%Cgreen[%cd] %Cblue%h %Cred<%cn> %Creset%s' --date=short --decorate --graph --branches --tags --remotes"
 git config --global core.excludesFile '~/.gitignore'
 
 echo "alias git-prune-merged=\"git branch --merged | egrep -v '(^\*|master|main|dev|develop)' | xargs git branch -d\"" >> ~/.aliases

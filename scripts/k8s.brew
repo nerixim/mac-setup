@@ -1,11 +1,11 @@
-brew "kubectl"
-brew "kustomize"
-cask "lens"
-brew "stern"
-brew "k9s"
-brew "kubectx"
+brew 'kubectl'
+brew 'kustomize'
+cask 'lens'
+brew 'stern'
+brew 'k9s'
+brew 'kubectx'
 
 # brew tap farmotive/k8s
 # brew install kpoof
 
-brew "derailed/popeye/popeye"
+brew 'derailed/popeye/popeye'

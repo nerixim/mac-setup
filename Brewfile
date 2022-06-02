@@ -37,6 +37,7 @@ brew 'awslogs'
 brew 'curl'
 brew 'direnv'
 brew 'gh'
+brew 'ghq'
 brew 'git'
 brew 'jq'
 brew 'mysql' # for installing client libs
@@ -55,6 +56,8 @@ brew 'bat'
 brew 'htop'
 brew 'httpie'
 brew 'tre-command'
+brew 'peco'
+brew 'ripgrep'
 
 # docker
 brew 'unison'

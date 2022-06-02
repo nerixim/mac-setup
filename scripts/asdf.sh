@@ -18,10 +18,10 @@ asdf plugin add terraform
 asdf plugin add awscli
 
 cat << EOF >> "$HOME/.tool-versions"
-ruby 3.1.0 system
-nodejs 16.13.2 system
-python 3.9.4 system
-golang 1.16.4
+ruby 3.1.2 system
+nodejs 16.15.0 system
+python 3.9.13 system
+golang 1.18.3
 EOF
 
 echo 'legacy_version_file = yes' > "$HOME/.asdfrc"

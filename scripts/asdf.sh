@@ -1,11 +1,5 @@
 #!/usr/bin/env bash -eux
 
-brew install \
-  coreutils automake autoconf openssl \
-  libyaml readline libxslt libtool unixodbc \
-  unzip curl gpg \
-  asdf
-
 echo 'source $(brew --prefix asdf)/asdf.sh' >> "${HOME}/.zsh_profile"
 
 asdf plugin add nodejs

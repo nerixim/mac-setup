@@ -1,6 +1,8 @@
 #!/usr/bin/env bash -eux
 
-brew install git gh tig
+# brewでインストールしたgitを使う
+echo 'export PATH=/usr/local/bin/git:$PATH' >> ~/.zshrc
+
 # gh auth login
 
 git config --global user.name "Nikita Kamaev"

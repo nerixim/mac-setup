@@ -11,37 +11,10 @@ asdf plugin add terraform
 # asdf plugin add direnv
 asdf plugin add awscli
 
-cat << EOF >> "$HOME/.tool-versions"
-ruby 3.1.2 system
-nodejs 16.15.0 system
-python 3.9.13 system
-golang 1.18.3
-EOF
+cp .tool-versions "$HOME"
 
 echo 'legacy_version_file = yes' > "$HOME/.asdfrc"
 
-cat << EOF >> "$HOME/.default-gems"
-bundler
-pry
-solargraph
-rubocop
-rubocop-rspec
-rubocop-rake
-rubocop-rails
-rubocop-performance
-EOF
-
-cat << EOF >> "$HOME/.default-npm-packages"
-yarn
-typescript
-ts-node
-typesync
-aws-cdk
-esbuild
-EOF
-
-cat << EOF >> "$HOME/.default-python-packages"
-boto3
-ipython
-black
-EOF
+cp .default-gems "$HOME"
+cp .default-npm-packages "$HOME"
+cp .default-python-packages "$HOME"

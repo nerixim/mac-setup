@@ -9,6 +9,7 @@ git config --global user.name "Nikita Kamaev"
 git config --global user.email "hiyori.amatsuki@gmail.com"
 git config --global push.default current
 git config --global remote.pushDefault origin
+git config --global --add --bool push.autoSetupRemote true
 git config --global pull.ff only
 git config --global core.ignorecase false
 git config --global color.ui true

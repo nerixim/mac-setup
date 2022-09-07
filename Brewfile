@@ -61,6 +61,7 @@ brew 'ripgrep' # instead of grep
 brew 'zoxide' # cd on steroids
 brew 'fzf' # fuzzy finder
 brew 'git-delta' # git diff on steroids
+brew 'fd' # instead of find
 
 # docker
 brew 'unison'

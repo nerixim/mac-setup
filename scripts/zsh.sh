@@ -34,11 +34,20 @@ echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colo
 # homebrewのcompletionsをohmyzshがロードする前に初期化する必要がある
 # https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
 
-echo 'alias be="bundle exec"' >> ~/.aliases
-echo 'alias pip="pip3"' >> ~/.aliases
-echo 'source ~/.zsh_profile' >> ~/.zshrc
-echo 'source ~/.aliases' >> ~/.zshrc
+cat << 'EOF' >> ~/.aliases
+alias be="bundle exec"
+alias pip="pip3"
+EOF
 
-echo 'export GOPATH=$HOME/go' >> ~/.zsh_profile
-echo 'export PATH="$PATH:$GOPATH/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"' >> ~/.zsh_profile
-echo 'export EDITOR="code -w"' >> ~/.zsh_profile
+cat << 'EOF' >> ~/.zshrc
+source ~/.zsh_profile
+source ~/.aliases
+EOF
+
+cat << 'EOF' >> ~/.zsh_profile
+export GOPATH=$HOME/go
+export PATH="$PATH:$GOPATH/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+export EDITOR="code -w"
+source $(brew --prefix asdf)/asdf.sh
+eval "$(zoxide init zsh)"
+EOF

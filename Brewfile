@@ -36,7 +36,7 @@ brew 'awscli'
 brew 'awslogs'
 brew 'curl'
 brew 'direnv'
-brew 'gh'
+brew 'gh' # GitHub CLI
 brew 'ghq'
 brew 'git'
 brew 'jq'
@@ -48,18 +48,19 @@ brew 'zsh'
 brew 'zsh-completions'
 brew 'kayac/tap/ecspresso'
 cask 'ngrok'
-cask 'fig'
-brew 'gitmoji'
+cask 'fig' # CLI autocomplete
+brew 'gitmoji' # emoji for commit messages
 brew 'gitui'
-brew 'tree'
-brew 'bat'
-brew 'htop'
-brew 'httpie'
-brew 'tre-command'
-brew 'peco'
-brew 'ripgrep'
-brew 'zoxide'
-brew 'fzf'
+brew 'tree' # for tree command
+brew 'bat' # instead of cat
+brew 'htop' # instead of top
+brew 'httpie' # instead of curl
+brew 'tre-command' # instead of tree
+brew 'peco' # pager
+brew 'ripgrep' # instead of grep
+brew 'zoxide' # cd on steroids
+brew 'fzf' # fuzzy finder
+brew 'git-delta' # git diff on steroids
 
 # docker
 brew 'unison'

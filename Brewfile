@@ -58,6 +58,8 @@ brew 'httpie'
 brew 'tre-command'
 brew 'peco'
 brew 'ripgrep'
+brew 'zoxide'
+brew 'fzf'
 
 # docker
 brew 'unison'

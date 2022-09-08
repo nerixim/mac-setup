@@ -6,6 +6,7 @@ echo 'export PATH=/usr/local/bin/git:$PATH' >> ~/.zshrc
 # gh auth login
 
 cat ../config/gitconfig >> ~/.gitconfig
+cat ../config/gitignore >> ~/.gitignore
 
 cat << 'EOF' >> ~/.aliases
 alias git-prune-merged="git branch --merged | egrep -v '(^\*|master|main|dev|develop)' | xargs git branch -d"

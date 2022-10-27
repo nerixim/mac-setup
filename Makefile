@@ -43,3 +43,6 @@ zsh:
 
 asdf:
 	./scripts/$@.sh
+
+android:
+	./scripts/$@.sh

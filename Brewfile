@@ -62,6 +62,10 @@ brew 'zoxide' # cd on steroids
 brew 'fzf' # fuzzy finder
 brew 'git-delta' # git diff on steroids
 brew 'fd' # instead of find
+brew 'dust' # instead of du
+brew 'duf' # instead of df
+brew 'prettyping' # instead of ping
+brew 'procs' # instead of ps
 
 # docker
 brew 'unison'

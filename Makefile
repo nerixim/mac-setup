@@ -32,12 +32,6 @@ terraform: homebrew
 	$(brin) tflint hashicorp/tap/terraform-ls
 	./scripts/$@.sh
 
-zoom: homebrew
-	$(bcask) zoom
-
-dev-tools: homebrew
-	$(bcask) graphql-playground postman
-
 zsh:
 	./scripts/$@.sh
 
@@ -46,3 +40,7 @@ asdf:
 
 android:
 	./scripts/$@.sh
+
+xcode-app: homebrew
+	mas install 497799835
+	$(brin) cocoapods

@@ -72,13 +72,27 @@ brew 'unison'
 brew 'eugenmayer/dockersync/unox'
 
 ## Desktop apps
-cask 'visual-studio-code'
+cask 'visual-studio-code', args: { appdir: '~/Applications' }
 cask 'docker'
 cask 'google-japanese-ime'
 cask 'iterm2', args: { appdir: '~/Applications' }
-cask 'slack', args: { appdir: '~/Applications' }
+cask 'google-drive'
+cask 'alfred', args: { appdir: '~/Applications' }
+cask 'figma', args: { appdir: '~/Applications' }
+cask 'graphql-playground', args: { appdir: '~/Applications' }
+cask 'postman', args: { appdir: '~/Applications' }
+cask 'zoom', args: { appdir: '~/Applications' }
+cask 'discord', args: { appdir: '~/Applications' }
 
 # Browsers
-cask 'google-chrome'
-cask 'firefox'
-cask 'brave-browser'
+cask 'google-chrome', args: { appdir: '~/Applications' }
+cask 'chromium', args: { appdir: '~/Applications' }
+cask 'firefox', args: { appdir: '~/Applications' }
+cask 'brave-browser', args: { appdir: '~/Applications' }
+
+mas 'Slack', id: 803453959
+mas 'Spark', id: 1176895641
+mas 'CopyClip', id: 595191960
+mas 'Telegram', id: 747648890
+mas 'LINE', id: 539883307
+mas 'Prime Video', id: 545519333 # Amazon Music

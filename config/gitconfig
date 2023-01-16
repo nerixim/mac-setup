@@ -2,6 +2,9 @@
 	name = Nikita Kamaev
 	email = hiyori.amatsuki@gmail.com
 
+[init]
+	defaultBranch = main
+
 [push]
 	default = current
 	autoSetupRemote = true

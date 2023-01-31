@@ -1,6 +1,6 @@
 #!/usr/bin/env bash -eux
 
-echo 'source $(brew --prefix asdf)/asdf.sh' >> "${HOME}/.zsh_profile"
+echo 'source $(brew --prefix asdf)/libexec/asdf.sh' >> "${HOME}/.zsh_profile"
 
 asdf plugin add nodejs
 asdf plugin add ruby

@@ -16,5 +16,8 @@ sudo softwareupdate -ia --verbose
 
 echo "------------------------------"
 echo "Installing Xcode Command Line Tools."
-# Install Xcode command line tools
-xcode-select --install
+# Install Xcode command line tools (fails if already installed)
+xcode-select --install || true
+
+# Install Rosetta (fails on Intel Macs)
+sudo softwareupdate --install-rosetta --agree-to-license || true

@@ -51,3 +51,6 @@ export EDITOR="code -w"
 source $(brew --prefix asdf)/asdf.sh
 eval "$(zoxide init zsh)"
 EOF
+
+echo '$(thefuck --alias f)' >> ~/.zsh_profile
+eval $(thefuck --alias f)

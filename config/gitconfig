@@ -2,6 +2,10 @@
 	name = Nikita Kamaev
 	email = hiyori.amatsuki@gmail.com
 
+# レポごとにメアドとか設定を変える場合は以下のようにする
+# [includeIf "gitdir:~/work/xxx/"]
+#   path = ~/.gitconfig_xxx
+
 [init]
 	defaultBranch = main
 
@@ -51,6 +55,17 @@
 
 [ghq]
 	root = ~/ghq
+
+# レポごとにghq getのパスを指定する
+# [ghq "https://github.com/xxx"]
+# 	root = ~/work/xxx
+
+# 常にsshでcloneする
+[url "git@github.com:"]
+    insteadOf = https://github.com/
+
+[url "git@gitlab.com:"]
+    insteadOf = https://gitlab.com/
 
 [delta]
 	navigate = true	# use n and N to move between diff sections

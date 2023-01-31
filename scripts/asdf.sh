@@ -10,6 +10,7 @@ asdf plugin add golang
 asdf plugin add terraform
 # asdf plugin add direnv
 asdf plugin add awscli
+asdf plugin-add java https://github.com/halcyon/asdf-java.git
 
 cp .tool-versions "$HOME"
 

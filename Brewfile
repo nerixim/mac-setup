@@ -83,6 +83,7 @@ cask 'graphql-playground', args: { appdir: '~/Applications' }
 cask 'postman', args: { appdir: '~/Applications' }
 cask 'zoom', args: { appdir: '~/Applications' }
 cask 'discord', args: { appdir: '~/Applications' }
+cask 'notion', args: { appdir: '~/Applications' }
 
 # Browsers
 cask 'google-chrome', args: { appdir: '~/Applications' }

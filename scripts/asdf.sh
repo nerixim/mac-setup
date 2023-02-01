@@ -2,20 +2,21 @@
 
 echo 'source $(brew --prefix asdf)/libexec/asdf.sh' >> "${HOME}/.zsh_profile"
 
-asdf plugin add nodejs
-asdf plugin add ruby
-asdf plugin add python
-asdf plugin add poetry https://github.com/asdf-community/asdf-poetry.git
-asdf plugin add golang
-asdf plugin add terraform
+asdf plugin add nodejs || true
+asdf plugin add ruby || true
+asdf plugin add python || true
+asdf plugin add poetry https://github.com/asdf-community/asdf-poetry.git || true
+asdf plugin add golang || true
+asdf plugin add terraform || true
 # asdf plugin add direnv
-asdf plugin add awscli
-asdf plugin-add java https://github.com/halcyon/asdf-java.git
+# asdf plugin add awscli
+asdf plugin-add java https://github.com/halcyon/asdf-java.git || true
 
-cp .tool-versions "$HOME"
+BASEDIR="$(dirname "$0")/"
+cp ${BASEDIR}/.tool-versions "$HOME"
 
 echo 'legacy_version_file = yes' > "$HOME/.asdfrc"
 
-cp .default-gems "$HOME"
-cp .default-npm-packages "$HOME"
-cp .default-python-packages "$HOME"
+cp ${BASEDIR}/.default-gems "$HOME"
+cp ${BASEDIR}/.default-npm-packages "$HOME"
+cp ${BASEDIR}/.default-python-packages "$HOME"

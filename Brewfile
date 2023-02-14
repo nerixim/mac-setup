@@ -5,6 +5,7 @@ tap 'homebrew/core'
 tap 'homebrew/services'
 tap 'kayac/tap'
 brew 'mas'
+brew 'duti'
 
 # GNU Utils
 brew 'coreutils'
@@ -40,6 +41,7 @@ brew 'gh' # GitHub CLI
 brew 'ghq'
 brew 'git'
 brew 'jq'
+brew 'yq'
 brew 'mysql' # for installing client libs
 brew 'postgresql' # for installing client libs
 brew 'thefuck'

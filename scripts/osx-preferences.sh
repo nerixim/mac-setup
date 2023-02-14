@@ -98,3 +98,9 @@ defaults write com.apple.ActivityMonitor ShowCategory -int 0
 # Sort Activity Monitor results by CPU usage
 defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
+
+# Associate source code-like files with VS Code
+# https://alexpeattie.com/blog/associate-source-code-files-with-editor-in-macos-using-duti/
+curl "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml" \
+  | yq -r "to_entries | (map(.value.extensions) | flatten) - [null] | unique | .[]" \
+  | xargs -L 1 -I "{}" duti -s com.microsoft.VSCode {} all

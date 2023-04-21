@@ -8,8 +8,8 @@ fi
 
 asdf plugin-add java https://github.com/halcyon/asdf-java.git
 # 2022/10の時点でv11までしか使えない
-asdf install java adoptopenjdk-11.0.8+10
-asdf global java adpotopenjdk-11.0.8+10
+asdf install java adoptopenjdk-11.0.18+10
+asdf global java adoptopenjdk-11.0.18+10
 asdf reshim java
 
 brew install android-commandlinetools

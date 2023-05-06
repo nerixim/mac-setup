@@ -28,6 +28,9 @@ git:
 gcp-cli: homebrew
 	$(bcask) google-cloud-sdk
 
+azure-cli: homebrew
+	$(brin) azure-cli
+
 terraform: homebrew
 	$(brin) tflint hashicorp/tap/terraform-ls
 	./scripts/$@.sh

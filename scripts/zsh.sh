@@ -27,24 +27,26 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 # iTermでSolarized Darkを使っている場合は背景色を少し暗くする必要あり
 # https://github.com/zsh-users/zsh-autosuggestions/issues/416#issuecomment-503457366
 
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
 # oh-my-zsh plugins (~/.zshrc)
 echo 'Add oh-my-zsh plugins as necessary'
-echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn asdf pip)'
+echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn asdf pip zsh-syntax-highlighting)'
 
 # homebrewのcompletionsをohmyzshがロードする前に初期化する必要がある
 # https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
 
-cat << 'EOF' >> ~/.aliases
+cat <<'EOF' >>~/.aliases
 alias be="bundle exec"
 alias pip="pip3"
 EOF
 
-cat << 'EOF' >> ~/.zshrc
+cat <<'EOF' >>~/.zshrc
 source ~/.zsh_profile
 source ~/.aliases
 EOF
 
-cat << 'EOF' >> ~/.zsh_profile
+cat <<'EOF' >>~/.zsh_profile
 export GOPATH=$HOME/go
 export PATH="$PATH:$GOPATH/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export EDITOR="code -w"
@@ -52,5 +54,5 @@ source $(brew --prefix asdf)/asdf.sh
 eval "$(zoxide init zsh)"
 EOF
 
-echo '$(thefuck --alias f)' >> ~/.zsh_profile
+echo '$(thefuck --alias f)' >>~/.zsh_profile
 eval $(thefuck --alias f)

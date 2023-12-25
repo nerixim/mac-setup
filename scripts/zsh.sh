@@ -31,7 +31,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 
 # oh-my-zsh plugins (~/.zshrc)
 echo 'Add oh-my-zsh plugins as necessary'
-echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn asdf pip zsh-syntax-highlighting)'
+echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn pip zsh-syntax-highlighting)'
 
 # homebrewのcompletionsをohmyzshがロードする前に初期化する必要がある
 # https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
@@ -50,7 +50,6 @@ cat <<'EOF' >>~/.zsh_profile
 export GOPATH=$HOME/go
 export PATH="$PATH:$GOPATH/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export EDITOR="code -w"
-source $(brew --prefix asdf)/asdf.sh
 eval "$(zoxide init zsh)"
 EOF
 

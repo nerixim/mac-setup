@@ -1,0 +1,32 @@
+[env]
+# supports arbitrary env vars so rtx can be used like direnv/dotenv
+# NODE_ENV = 'production'
+
+[tools]
+node = ['16', '18', '20']
+ruby = ['3.3.0', '3.2.2', '2.7.8', '2.6.9']
+python = ['3.10.7']
+golang = ['1.19.1']
+flutter = ['3.16.2-stable']
+java = ['adoptopenjdk-17.0.9+9']
+
+# send arbitrary options to the plugin, passed as:
+# RTX_TOOL_OPTS__VENV=.venv
+# python = {version='3.10', virtualenv='.venv'}
+
+[plugins]
+# specify a custom repo url
+# note this will only be used if the plugin does not already exist
+python = 'https://github.com/asdf-community/asdf-python'
+ruby = 'https://github.com/asdf-vm/asdf-ruby.git'
+node = 'https://github.com/asdf-vm/asdf-nodejs.git'
+golang = 'https://github.com/asdf-community/asdf-golang.git'
+flutter = 'https://github.com/oae/asdf-flutter.git'
+java = 'https://github.com/halcyon/asdf-java.git'
+
+[alias.node] # project-local aliases
+# my_custom_node = '20'
+
+[settings]
+legacy_version_file = true # enabled by default (unlike asdf)
+trusted_config_paths = []

@@ -1,60 +1,63 @@
 [user]
-	name = Nikita Kamaev
-	email = hiyori.amatsuki@gmail.com
+name = Nikita Kamaev
+email = hiyori.amatsuki@gmail.com
 
 # レポごとにメアドとか設定を変える場合は以下のようにする
 # [includeIf "gitdir:~/work/xxx/"]
 #   path = ~/.gitconfig_xxx
 
 [init]
-	defaultBranch = main
+defaultBranch = main
 
 [push]
-	default = current
-	autoSetupRemote = true
+default = current
+autoSetupRemote = true
 
 [pull]
-	ff = only
+ff = only
 
 [fetch]
-	prune = true
+prune = true
 
 [rebase]
-    autostash = true
+autostash = true
 
 [core]
-	ignorecase = false
-	quotepath = false
-	excludesFile = ~/.gitignore
-	pager = delta
+ignorecase = false
+quotepath = false
+excludesFile = ~/.gitignore
+pager = delta
 
 [interactive]
-	diffFilter = delta --color-only
+diffFilter = delta --color-only
 
 [advice]
-	skippedCherryPicks = false
+skippedCherryPicks = false
 
 [add.interactive]
-	useBuiltin = false # required for git 2.37.0
+useBuiltin = false # required for git 2.37.0
 
 [color]
-	ui = true
+ui = true
 
 [alias]
-	st = status
-	df = diff
-	co = commit
-	br = branch
-	ps = push
-	pl = pull
-	ck = checkout
-	graph = log --pretty=format:'%Cgreen[%cd] %Cblue%h %Cred<%cn> %Creset%s' --date=short  --decorate --graph --branches --tags --remotes
+st = status
+df = diff
+co = commit
+br = branch
+ps = push
+pl = pull
+ck = checkout
+graph = log --pretty=format:'%Cgreen[%cd] %Cblue%h %Cred<%cn> %Creset%s' --date=short --decorate --graph --branches --tags --remotes
+rc = rebase --continue
+s = status -s
+mend = commit --amend
 
 [remote]
-	pushDefault = origin
+pushDefault = origin
 
 [ghq]
-	root = ~/ghq
+root = ~/ghq
 
 # レポごとにghq getのパスを指定する
 # [ghq "https://github.com/xxx"]
@@ -62,17 +65,17 @@
 
 # 常にsshでcloneする
 [url "git@github.com:"]
-    insteadOf = https://github.com/
+insteadOf = https://github.com/
 
 [url "git@gitlab.com:"]
-    insteadOf = https://gitlab.com/
+insteadOf = https://gitlab.com/
 
 [delta]
-	navigate = true	# use n and N to move between diff sections
-	light = false	  # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+navigate = true # use n and N to move between diff sections
+light = false   # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
 
 [merge]
-	conflictstyle = diff3
+conflictstyle = diff3
 
 [diff]
-	colorMoved = default
+colorMoved = default

@@ -38,7 +38,7 @@ terraform: homebrew
 zsh:
 	./scripts/$@.sh
 
-rtx:
+mise:
 	./scripts/$@.sh
 
 android:

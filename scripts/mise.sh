@@ -1,9 +1,9 @@
 #!/usr/bin/env bash -eux
 
-echo 'eval "$(/opt/homebrew/bin/rtx activate zsh)"' >>~/.zsh_profile
+echo 'eval "$(/opt/homebrew/bin/mise activate zsh)"' >>~/.zsh_profile
 
 BASEDIR="$(dirname "$0")/"
-cp ${BASEDIR}/.rtx.toml "$HOME"
+cp ${BASEDIR}/.mise.toml "$HOME"
 
 cp ${BASEDIR}/.default-gems "$HOME"
 cp ${BASEDIR}/.default-npm-packages "$HOME"

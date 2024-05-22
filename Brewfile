@@ -32,8 +32,7 @@ brew 'unzip'
 brew 'zlib'
 
 # Dev tools
-# brew 'asdf'
-brew 'rtx'
+brew 'mise'
 brew 'awscli'
 brew 'awslogs'
 brew 'curl'

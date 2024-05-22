@@ -11,7 +11,7 @@ fi
 # asdf install java adoptopenjdk-11.0.18+10
 # asdf global java adoptopenjdk-11.0.18+10
 # asdf reshim java
-rtx use --global node@adoptopenjdk-11.0.18+10
+mise use --global node@adoptopenjdk-11.0.18+10
 
 brew install android-commandlinetools
 yes | sdkmanager --licenses

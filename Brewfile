@@ -68,6 +68,7 @@ brew 'dust' # instead of du
 brew 'duf' # instead of df
 brew 'prettyping' # instead of ping
 brew 'procs' # instead of ps
+brew 'eza' # instead of ls
 
 # docker
 brew 'unison'
@@ -92,6 +93,8 @@ cask 'google-chrome', args: { appdir: '~/Applications' }
 cask 'chromium', args: { appdir: '~/Applications' }
 cask 'firefox', args: { appdir: '~/Applications' }
 cask 'brave-browser', args: { appdir: '~/Applications' }
+
+cask 'flux', args: { appdir: '~/Applications' }
 
 mas 'Slack', id: 803453959
 mas 'Spark', id: 1176895641

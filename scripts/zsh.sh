@@ -31,7 +31,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 
 # oh-my-zsh plugins (~/.zshrc)
 echo 'Add oh-my-zsh plugins as necessary'
-echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn pip zsh-syntax-highlighting)'
+echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn pip zsh-syntax-highlighting macos)'
 
 # homebrewのcompletionsをohmyzshがロードする前に初期化する必要がある
 # https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
@@ -39,6 +39,14 @@ echo 'plugins=(git gitfast docker docker-compose aws brew terraform kubectl colo
 cat <<'EOF' >>~/.aliases
 alias be="bundle exec"
 alias pip="pip3"
+alias ls="eza"
+alias cat="bat"
+alias ps="procs"
+alias df="duf"
+alias du="dust"
+alias find="fd"
+alias grep="ripgrep"
+alias top="htop"
 EOF
 
 cat <<'EOF' >>~/.zshrc

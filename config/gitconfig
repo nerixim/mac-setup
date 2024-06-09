@@ -52,6 +52,7 @@ graph = log --pretty=format:'%Cgreen[%cd] %Cblue%h %Cred<%cn> %Creset%s' --date=
 rc = rebase --continue
 s = status -s
 mend = commit --amend
+alias = config --get-regexp "alias.*"
 
 [remote]
 pushDefault = origin

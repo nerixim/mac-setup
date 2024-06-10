@@ -7,6 +7,7 @@ node = ['20', '22']
 ruby = ['3.3.0', '3.2.2']
 python = ['3.12.3']
 golang = ['1.22.3']
+terraform = ['1.8.5']
 # flutter = ['3.22.0-stable']
 # java = ['adoptopenjdk-17.0.9+9']
 

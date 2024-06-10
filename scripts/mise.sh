@@ -12,3 +12,6 @@ cp ${BASEDIR}/.default-python-packages "$HOME"
 # set default rubocop config
 ghq get nerixim/ruby-code-style
 cp ~/ghq/github.com/nerixim/ruby-code-style/.base.rubocop.yml ~/.rubocop.yml
+
+# for shell completion
+mise use -g usage

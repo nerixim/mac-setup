@@ -48,6 +48,7 @@ alias du="dust"
 alias find="fd"
 alias grep="ripgrep"
 alias top="htop"
+alias cd="z"
 EOF
 
 cat <<'EOF' >>~/.zshrc

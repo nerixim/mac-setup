@@ -57,6 +57,7 @@ source ~/.aliases
 EOF
 
 cat <<'EOF' >>~/.zsh_profile
+export LANG="en_US.UTF-8"
 export GOPATH=$HOME/go
 export PATH="$PATH:$GOPATH/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export EDITOR="code -w"

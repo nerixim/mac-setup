@@ -69,6 +69,7 @@ brew 'duf' # instead of df
 brew 'prettyping' # instead of ping
 brew 'procs' # instead of ps
 brew 'eza' # instead of ls
+brew 'wget'
 
 # docker
 brew 'unison'

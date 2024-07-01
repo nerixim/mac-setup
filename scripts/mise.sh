@@ -15,3 +15,11 @@ cp ~/ghq/github.com/nerixim/ruby-code-style/.base.rubocop.yml ~/.rubocop.yml
 
 # for shell completion
 mise use -g usage
+
+echo <<~'EOF'
+To install all runtimes, run install:
+mise install
+
+Rustup insn't included, install it manually:
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+EOF

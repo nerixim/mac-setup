@@ -1,7 +1,5 @@
 tap 'eugenmayer/dockersync'
 tap 'homebrew/bundle'
-tap 'homebrew/cask'
-tap 'homebrew/core'
 tap 'homebrew/services'
 tap 'kayac/tap'
 brew 'mas'

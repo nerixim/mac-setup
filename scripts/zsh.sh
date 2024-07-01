@@ -21,7 +21,7 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$
 # Set ZSH_THEME="powerlevel10k/powerlevel10k" in ~/.zshrc.
 
 # enable natural text selection manually
-# iTerm → Preferences → Profiles → Keys → Presets... → Natural Text Editing
+# iTerm → Preferences → Profiles → Keys → Presets... → Import
 
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 # iTermでSolarized Darkを使っている場合は背景色を少し暗くする必要あり

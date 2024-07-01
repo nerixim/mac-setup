@@ -69,5 +69,15 @@ export EDITOR="code -w"
 eval "$(zoxide init zsh)"
 EOF
 
+cat <<'EOF'
+*************
+Setup completions:
+Add following BEFORE source $ZSH/oh-my-zsh.sh
+
+FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+rm -f ~/.zcompdump; compinit
+*************
+EOF
+
 echo '$(thefuck --alias f)' >>~/.zsh_profile
 eval $(thefuck --alias f)

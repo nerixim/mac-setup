@@ -1,5 +1,5 @@
 yarn
 typescript
-ts-node
+tsx
 aws-cdk
 esbuild

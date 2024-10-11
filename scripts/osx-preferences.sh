@@ -6,8 +6,11 @@
 sudo -v
 
 # Keep-alive: update existing `sudo` time stamp until `osx.sh` has finished
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
+while true; do
+  sudo -n true
+  sleep 60
+  kill -0 "$$" || exit
+done 2>/dev/null &
 
 ###############################################################################
 # General UI/UX #
@@ -26,7 +29,6 @@ sudo defaults write com.apple.driver.AppleBluetoothMultitouchTrackpad TrackpadCo
 sudo defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 sudo defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 sudo defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-
 
 ###############################################################################
 # Screen #
@@ -64,7 +66,6 @@ defaults write com.apple.finder ShowPathbar -bool true
 # Disable the warning when changing a file extension
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-
 ###############################################################################
 # Dock, Dashboard, and hot corners#
 ###############################################################################
@@ -80,7 +81,6 @@ defaults write com.apple.dock mineffect -string "scale"
 
 # Automatically hide and show the Dock
 defaults write com.apple.dock autohide -bool true
-
 
 ###############################################################################
 # Activity Monitor#
@@ -101,6 +101,10 @@ defaults write com.apple.ActivityMonitor SortDirection -int 0
 
 # Associate source code-like files with VS Code
 # https://alexpeattie.com/blog/associate-source-code-files-with-editor-in-macos-using-duti/
-curl "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml" \
-  | yq -r "to_entries | (map(.value.extensions) | flatten) - [null] | unique | .[]" \
-  | xargs -L 1 -I "{}" duti -s com.microsoft.VSCode {} all
+curl "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml" |
+  yq -r "to_entries | (map(.value.extensions) | flatten) - [null] | unique | .[]" |
+  xargs -L 1 -I "{}" duti -s com.microsoft.VSCode {} all
+
+# Show hidden files in Finder
+defaults write com.apple.finder AppleShowAllFiles -boolean true
+killall Finder

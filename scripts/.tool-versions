@@ -1,4 +1,4 @@
-ruby 3.1.2 system
-nodejs 18.8.0 system
-python 3.10.7 system
-golang 1.19.1
+ruby 3.3.5 system
+nodejs 22.10.0 system
+python 3.12.7 system
+golang 1.23.2 system

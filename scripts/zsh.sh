@@ -54,6 +54,7 @@ alias grep="ripgrep"
 alias top="htop"
 alias d="docker"
 alias dc="docker compose"
+alias dcps="docker compose ps --format 'table {{.Service}} | {{.State}} | {{range .Publishers}}{{.URL}}:{{.PublishedPort}}{{end}}'"
 EOF
 
 cat <<'EOF' >>~/.zshrc

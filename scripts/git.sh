@@ -28,3 +28,10 @@ function ghq-fzf() {
 zle -N ghq-fzf
 bindkey '^g' ghq-fzf
 EOF
+
+cat <<'EOF' >>~/.aliases
+alias lg=lazygit
+EOF
+
+mkdir -p ~/.config/lazygit
+cp ${BASEDIR}/config/lazygit.yml ~/.config/lazygit/config.yml

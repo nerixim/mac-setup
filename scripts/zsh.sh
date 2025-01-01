@@ -82,3 +82,5 @@ EOF
 
 echo '$(thefuck --alias f)' >>~/.zsh_profile
 eval $(thefuck --alias f)
+
+setopt auto_cd

@@ -33,5 +33,6 @@ cat <<'EOF' >>~/.aliases
 alias lg=lazygit
 EOF
 
-mkdir -p ~/.config/lazygit
-cp ${BASEDIR}/config/lazygit.yml ~/.config/lazygit/config.yml
+lazygit_cfg_dir=$(lg --print-config-dir)
+mkdir -p "${lazygit_cfg_dir}"
+cp ${BASEDIR}/config/lazygit.yml "${lazygit_cfg_dir}/config.yml"

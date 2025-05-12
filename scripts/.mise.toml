@@ -16,7 +16,7 @@ pnpm = '9'
 # RTX_TOOL_OPTS__VENV=.venv
 # python = {version='3.10', virtualenv='.venv'}
 
-[plugins]
+[alias]
 # specify a custom repo url
 # note this will only be used if the plugin does not already exist
 python = 'https://github.com/asdf-community/asdf-python'
@@ -26,8 +26,6 @@ golang = 'https://github.com/asdf-community/asdf-golang.git'
 flutter = 'https://github.com/oae/asdf-flutter.git'
 java = 'https://github.com/halcyon/asdf-java.git'
 
-[alias.node] # project-local aliases
-# my_custom_node = '20'
 
 [settings]
 legacy_version_file = true # enabled by default (unlike asdf)

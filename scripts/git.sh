@@ -1,22 +1,29 @@
-#!/usr/bin/env bash -eux
+#!/usr/bin/env bash
+set -eux
 
-# brewでインストールしたgitを使う
-echo 'export PATH=/usr/local/bin/git:$PATH' >>~/.zshrc
+BASEDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${BASEDIR}/lib.sh"
+
+# Homebrew's git is already first on PATH via `brew shellenv` (/opt/homebrew/bin).
+# The old `export PATH=/usr/local/bin/git:$PATH` was a no-op (that's a file, not
+# a dir) — removed.
 
 # gh auth login
 
-BASEDIR="$(dirname "$0")/.."
+grep -q 'mac-setup-gitconfig' ~/.gitconfig 2>/dev/null || {
+  printf '\n# mac-setup-gitconfig\n' >>~/.gitconfig
+  cat "${BASEDIR}/../config/gitconfig" >>~/.gitconfig
+}
+grep -q 'mac-setup-gitignore' ~/.gitignore 2>/dev/null || {
+  printf '\n# mac-setup-gitignore\n' >>~/.gitignore
+  cat "${BASEDIR}/../config/gitignore" >>~/.gitignore
+}
 
-cat ${BASEDIR}/config/gitconfig >>~/.gitconfig
-cat ${BASEDIR}/config/gitignore >>~/.gitignore
+append_once ~/.aliases "alias git-prune-merged=\"git branch --merged | egrep -v '(^\\*|master|main|dev|develop)' | xargs git branch -d\""
+append_once ~/.aliases 'alias git-pull-recursive="find . -type d -depth 1 -exec git --git-dir={}/.git --work-tree=./{} pull --prune \;"'
+append_once ~/.aliases 'alias lg=lazygit'
 
-cat <<'EOF' >>~/.aliases
-alias git-prune-merged="git branch --merged | egrep -v '(^\*|master|main|dev|develop)' | xargs git branch -d"
-alias git-pull-recursive="find . -type d -depth 1 -exec git --git-dir={}/.git --work-tree=./{} pull --prune \;"
-EOF
-
-cat <<'EOF' >>~/.aliases
-# ghq
+block_once ~/.aliases ghq-fzf <<'EOF'
 function ghq-fzf() {
   local src=$(ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.*")
   if [ -n "$src" ]; then
@@ -29,10 +36,6 @@ zle -N ghq-fzf
 bindkey '^g' ghq-fzf
 EOF
 
-cat <<'EOF' >>~/.aliases
-alias lg=lazygit
-EOF
-
-lazygit_cfg_dir=$(lg --print-config-dir)
+lazygit_cfg_dir=$(lazygit --print-config-dir)
 mkdir -p "${lazygit_cfg_dir}"
-cp ${BASEDIR}/config/lazygit.yml "${lazygit_cfg_dir}/config.yml"
+cp "${BASEDIR}/../config/lazygit.yml" "${lazygit_cfg_dir}/config.yml"

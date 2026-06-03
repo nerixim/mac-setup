@@ -1,4 +1,8 @@
-#!/usr/bin/env bash -eux
+#!/usr/bin/env bash
+set -eux
 
-echo 'export TF_CLI_ARGS_plan="--parallelism=30"' >> ~/.zshrc
-echo 'export TF_CLI_ARGS_fmt="-recursive"' >> ~/.zshrc
+BASEDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${BASEDIR}/lib.sh"
+
+append_once ~/.zshrc 'export TF_CLI_ARGS_plan="--parallelism=30"'
+append_once ~/.zshrc 'export TF_CLI_ARGS_fmt="-recursive"'

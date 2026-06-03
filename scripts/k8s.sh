@@ -1,4 +1,8 @@
-#!/usr/bin/env bash -eux
+#!/usr/bin/env bash
+set -eux
 
-HOMEBREW_BUNDLE_FILE=k8s.brew brew bundle
-echo "source <(kubectl completion zsh)" >> ~/.zshrc
+BASEDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${BASEDIR}/lib.sh"
+
+HOMEBREW_BUNDLE_FILE="${BASEDIR}/k8s.brew" brew bundle
+append_once ~/.zshrc "source <(kubectl completion zsh)"

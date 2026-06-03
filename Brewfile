@@ -40,15 +40,15 @@ brew 'ghq'
 brew 'git'
 brew 'jq'
 brew 'yq'
-brew 'mysql' # for installing client libs
-brew 'postgresql' # for installing client libs
+brew 'mysql-client' # client libs only (was 'mysql' — a full server)
+brew 'libpq' # postgres client libs only (was 'postgresql' — a full server)
 brew 'thefuck'
 brew 'tig'
 brew 'zsh'
 brew 'zsh-completions'
 brew 'kayac/tap/ecspresso'
 cask 'ngrok'
-cask 'fig' # CLI autocomplete
+# 'fig' removed — Fig was acquired by AWS and discontinued (now Amazon Q CLI).
 brew 'gitmoji' # emoji for commit messages
 brew 'gitui'
 brew 'tree' # for tree command
@@ -81,7 +81,7 @@ cask 'iterm2', args: { appdir: '~/Applications' }
 cask 'google-drive'
 cask 'alfred', args: { appdir: '~/Applications' }
 cask 'figma', args: { appdir: '~/Applications' }
-cask 'graphql-playground', args: { appdir: '~/Applications' }
+# 'graphql-playground' removed — project discontinued (use Postman/Insomnia/Apollo).
 cask 'postman', args: { appdir: '~/Applications' }
 cask 'zoom', args: { appdir: '~/Applications' }
 cask 'discord', args: { appdir: '~/Applications' }

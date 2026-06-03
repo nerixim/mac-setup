@@ -4,10 +4,6 @@ set -eux
 BASEDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${BASEDIR}/lib.sh"
 
-# Homebrew's git is already first on PATH via `brew shellenv` (/opt/homebrew/bin).
-# The old `export PATH=/usr/local/bin/git:$PATH` was a no-op (that's a file, not
-# a dir) — removed.
-
 # gh auth login
 
 grep -q 'mac-setup-gitconfig' ~/.gitconfig 2>/dev/null || {

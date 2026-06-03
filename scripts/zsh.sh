@@ -62,8 +62,8 @@ export EDITOR="code -w"
 # Homebrew (Apple Silicon)
 eval "$(/opt/homebrew/bin/brew shellenv)"
 eval "$(zoxide init zsh)"
-eval "$(atuin init zsh)"
-eval "$(pay-respects zsh --alias f)"
+command -v atuin >/dev/null && eval "$(atuin init zsh)"
+command -v pay-respects >/dev/null && eval "$(pay-respects zsh --alias f)"
 setopt auto_cd
 unsetopt nomatch  # let next.js-style globs with [] pass through
 # Secrets live outside the repo; sourced if present so ~/.zshrc is safe to share.

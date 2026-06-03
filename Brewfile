@@ -42,7 +42,7 @@ brew 'jq'
 brew 'yq'
 brew 'mysql-client' # client libs only (was 'mysql' — a full server)
 brew 'libpq' # postgres client libs only (was 'postgresql' — a full server)
-brew 'thefuck'
+brew 'pay-respects' # `f` to fix the last command (Rust; replaced slow Python 'thefuck')
 brew 'tig'
 brew 'zsh'
 brew 'zsh-completions'
@@ -50,7 +50,8 @@ brew 'kayac/tap/ecspresso'
 cask 'ngrok'
 # 'fig' removed — Fig was acquired by AWS and discontinued (now Amazon Q CLI).
 brew 'gitmoji' # emoji for commit messages
-brew 'gitui'
+brew 'lazydocker' # docker TUI (pairs with lazygit + d/dc aliases)
+# 'gitui' removed — redundant with tig (log browsing) + lazygit (operations).
 brew 'tree' # for tree command
 brew 'bat' # instead of cat
 brew 'htop' # instead of top
@@ -68,6 +69,10 @@ brew 'prettyping' # instead of ping
 brew 'procs' # instead of ps
 brew 'eza' # instead of ls
 brew 'wget'
+brew 'atuin' # searchable shell history (replaces Ctrl-R)
+brew 'yazi' # terminal file manager (Rust)
+brew 'difftastic' # syntax-aware structural diff
+brew 'zellij' # terminal multiplexer (try locally: `make zellij` then `zellij`)
 
 # docker
 brew 'unison'

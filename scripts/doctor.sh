@@ -52,7 +52,7 @@ section "iTerm2 profile"
   || no "iTerm dynamic profile missing" "make iterm"
 
 section "Core CLI tools"
-for t in rg fd eza bat delta lazygit gh ghq fzf zoxide jq yq direnv; do
+for t in rg fd eza bat delta tig lazygit lazydocker gh ghq fzf zoxide atuin yazi difft jq yq direnv; do
   command -v "$t" >/dev/null && ok "$t" || no "$t missing" "brew install $t"
 done
 

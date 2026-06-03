@@ -2,7 +2,7 @@ bcask := brew install --cask
 brin := brew install
 
 .PHONY: all xcode homebrew osx-preferences vscode iterm k8s git gcp-cli azure-cli \
-        terraform zsh mise android xcode-app doctor mise-bump secrets
+        terraform zsh mise android xcode-app doctor mise-bump secrets zellij
 
 all: xcode homebrew osx-preferences vscode iterm git zsh mise
 
@@ -52,6 +52,10 @@ android:
 xcode-app: homebrew
 	mas install 497799835
 	$(brin) cocoapods
+
+# Install zellij + starter config (opt-in; not part of `make all`).
+zellij: homebrew
+	./scripts/$@.sh
 
 # Verify the machine matches the desired state (read-only). Run anytime.
 doctor:

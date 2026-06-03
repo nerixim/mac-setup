@@ -53,6 +53,7 @@ rc = rebase --continue
 s = status -s
 mend = commit --amend
 alias = config --get-regexp "alias.*"
+dft = difftool # syntax-aware diff via difftastic (delta stays the default pager)
 
 [remote]
 pushDefault = origin
@@ -80,3 +81,10 @@ conflictstyle = diff3
 
 [diff]
 colorMoved = default
+tool = difftastic
+
+[difftool]
+prompt = false
+
+[difftool "difftastic"]
+cmd = difft "$LOCAL" "$REMOTE"

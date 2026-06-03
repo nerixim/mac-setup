@@ -1,0 +1,10 @@
+// Minimal Zellij starter config. Dump the full default to explore options:
+//   zellij setup --dump-config
+// Themes: zellij ships many; set e.g. `theme "solarized-dark"` once you confirm
+// the name with `zellij setup --dump-config | grep -A2 themes`.
+
+default_shell "zsh"
+default_layout "compact"
+pane_frames false
+copy_on_select true
+show_startup_tips false

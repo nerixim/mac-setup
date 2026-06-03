@@ -1,6 +1,11 @@
 bcask := brew install --cask
 brin := brew install
 
+.PHONY: all xcode homebrew osx-preferences vscode iterm k8s git gcp-cli azure-cli \
+        terraform zsh mise android xcode-app doctor mise-bump secrets
+
+all: xcode homebrew osx-preferences vscode iterm git zsh mise
+
 xcode:
 	./scripts/$@.sh
 	touch $@
@@ -14,10 +19,10 @@ osx-preferences:
 	touch $@
 
 vscode: homebrew
-	echo 'export PATH="$$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"' >> ~/.zshrc
+	./scripts/$@.sh
 
 iterm: homebrew
-	open "./config/Solarized Dark.itermcolors"
+	./scripts/$@.sh
 
 k8s: homebrew
 	./scripts/$@.sh
@@ -47,3 +52,20 @@ android:
 xcode-app: homebrew
 	mas install 497799835
 	$(brin) cocoapods
+
+# Verify the machine matches the desired state (read-only). Run anytime.
+doctor:
+	./scripts/$@.sh
+
+# Show outdated mise runtimes and upgrade within the pinned ranges.
+mise-bump:
+	mise outdated || true
+	mise upgrade
+
+# Scaffold ~/.secrets (chmod 600) for tokens that must stay out of the repo.
+secrets:
+	@test -f ~/.secrets || { \
+	  printf '# Sourced from ~/.zsh_profile. Keep OUT of git.\n# export SOME_TOKEN=...\n' > ~/.secrets; \
+	  chmod 600 ~/.secrets; \
+	  echo "created ~/.secrets (chmod 600)"; \
+	}

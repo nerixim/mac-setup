@@ -22,13 +22,25 @@ sudo nvram SystemAudioVolume=" "
 # Check for software updates daily, not just once per week
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 
-# Trackpad: map bottom right corner to right-click
+# Trackpad: tap-to-click, and map the bottom-right CORNER to secondary (right) click.
+#
+# IMPORTANT: multitouch trackpad prefs are read from the per-user -currentHost
+# (ByHost) domain and must be written AS THE USER. The previous version wrote them
+# to the plain domain and via `sudo` (root's domain) — so macOS never read them and
+# corner right-click silently did nothing. Changes apply after logout/restart.
 defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
-sudo defaults write com.apple.driver.AppleBluetoothMultitouchTrackpad TrackpadCornerSecondaryClick -int 2
+defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
-sudo defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-sudo defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-sudo defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+# Built-in trackpad
+defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadRightClick -bool false
+defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadCornerSecondaryClick -int 2
+# Magic / Bluetooth trackpad
+defaults -currentHost write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool false
+defaults -currentHost write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadCornerSecondaryClick -int 2
+# Global secondary-click enable + corner behavior
+defaults -currentHost write NSGlobalDomain com.apple.trackpad.enableSecondaryClick -bool true
+defaults -currentHost write NSGlobalDomain com.apple.trackpad.trackpadCornerClickBehavior -int 1
 
 ###############################################################################
 # Screen #
@@ -82,6 +94,19 @@ defaults write com.apple.dock mineffect -string "scale"
 # Automatically hide and show the Dock
 defaults write com.apple.dock autohide -bool true
 
+# Remove the auto-hide delay and speed up the show/hide animation
+defaults write com.apple.dock autohide-delay -float 0
+defaults write com.apple.dock autohide-time-modifier -float 0.4
+
+# Minimize windows into their application's icon
+defaults write com.apple.dock minimize-to-application -bool true
+
+# Don't show recently used apps in the Dock
+defaults write com.apple.dock show-recents -bool false
+
+# Don't automatically rearrange Spaces based on most recent use
+defaults write com.apple.dock mru-spaces -bool false
+
 ###############################################################################
 # Activity Monitor#
 ###############################################################################
@@ -107,4 +132,8 @@ curl "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/lang
 
 # Show hidden files in Finder
 defaults write com.apple.finder AppleShowAllFiles -boolean true
-killall Finder
+
+# Apply what we can without a logout.
+for app in Finder Dock SystemUIServer; do killall "$app" 2>/dev/null || true; done
+
+echo "NOTE: trackpad corner right-click takes effect after you log out and back in."

@@ -23,11 +23,8 @@ sudo nvram SystemAudioVolume=" "
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 
 # Trackpad: tap-to-click, and map the bottom-right CORNER to secondary (right) click.
-#
-# IMPORTANT: multitouch trackpad prefs are read from the per-user -currentHost
-# (ByHost) domain and must be written AS THE USER. The previous version wrote them
-# to the plain domain and via `sudo` (root's domain) — so macOS never read them and
-# corner right-click silently did nothing. Changes apply after logout/restart.
+# Multitouch prefs are read only from the per-user -currentHost (ByHost) domain and
+# must be written as the user (not sudo). Changes apply after logout/restart.
 defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1

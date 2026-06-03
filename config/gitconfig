@@ -53,7 +53,7 @@ rc = rebase --continue
 s = status -s
 mend = commit --amend
 alias = config --get-regexp "alias.*"
-dft = difftool # syntax-aware diff via difftastic (delta stays the default pager)
+dft = difftool # syntax-aware diff via difftastic
 
 [remote]
 pushDefault = origin

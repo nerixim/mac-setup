@@ -18,6 +18,12 @@ cp ~/ghq/github.com/nerixim/ruby-code-style/.base.rubocop.yml ~/.rubocop.yml
 # for shell completion
 mise use -g usage
 
+# pay-respects (`f` command corrector) has no brew formula — install via cargo.
+# Needs the Rust toolchain (see the rustup note below); skipped if cargo is absent.
+if command -v cargo >/dev/null; then
+  cargo install pay-respects
+fi
+
 cat <<'EOF'
 To install all pinned runtimes:
   mise install

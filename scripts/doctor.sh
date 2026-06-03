@@ -25,6 +25,8 @@ if grep -qE '^\s*alias (grep|find)=' ~/.aliases 2>/dev/null; then
   no "grep/find aliased (breaks scripts & muscle memory)" "remove the alias from ~/.aliases"
 else ok "no grep/find aliases"; fi
 grep -q 'source ~/.aliases' ~/.zshrc 2>/dev/null && ok "~/.aliases sourced" || no "~/.aliases not sourced" "make zsh"
+[ -f ~/.p10k.zsh ] && ok "~/.p10k.zsh present (prompt config)" || no "~/.p10k.zsh missing" "make zsh"
+grep -q 'powerlevel10k/powerlevel10k' ~/.zshrc 2>/dev/null && ok "p10k theme set" || no "ZSH_THEME not powerlevel10k" "make zsh"
 
 section "Secrets hygiene"
 if grep -rqE '(ghp_|github_pat_|gho_|AKIA)[A-Za-z0-9]' ~/.zshrc ~/.zsh_profile 2>/dev/null; then

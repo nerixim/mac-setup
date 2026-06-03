@@ -24,6 +24,16 @@ clone_once https://github.com/romkatv/powerlevel10k.git            "${ZSH_CUSTOM
 clone_once https://github.com/zsh-users/zsh-autosuggestions        "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
 clone_once https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
 
+# ---- configure ~/.zshrc (oh-my-zsh writes a default one we patch in place) ----
+# Restore the tuned Powerlevel10k prompt config instead of re-running `p10k configure`.
+cp "${BASEDIR}/../config/p10k.zsh" ~/.p10k.zsh
+if [ -f ~/.zshrc ]; then
+  # macOS/BSD sed needs the empty backup-extension arg.
+  sed -i '' 's|^ZSH_THEME=.*|ZSH_THEME="powerlevel10k/powerlevel10k"|' ~/.zshrc
+  sed -i '' 's|^plugins=.*|plugins=(git gitfast docker docker-compose aws brew terraform kubectl colored-man-pages zsh-autosuggestions yarn pip zsh-syntax-highlighting macos mise)|' ~/.zshrc
+fi
+append_once ~/.zshrc '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh'
+
 # ---- aliases ----
 # NOTE: grep/find are intentionally NOT aliased to ripgrep/fd — those tools are
 # not flag-compatible and break muscle memory and scripts. Use `rg` / `fd` directly.
@@ -61,17 +71,12 @@ EOF
 
 cat <<'EOF'
 *************
-Completions: add the following BEFORE `source $ZSH/oh-my-zsh.sh` in ~/.zshrc
-(Homebrew completions must be on FPATH before oh-my-zsh runs compinit):
+ZSH_THEME, plugins, and ~/.p10k.zsh are configured automatically.
+
+One manual step remains — Homebrew completions must be on FPATH BEFORE
+`source $ZSH/oh-my-zsh.sh` (so oh-my-zsh's compinit picks them up). Add near the
+top of ~/.zshrc, before that line:
 
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-  rm -f ~/.zcompdump; compinit
-
-Suggested oh-my-zsh plugins:
-  plugins=(git gitfast docker docker-compose aws brew terraform kubectl \
-           colored-man-pages zsh-autosuggestions yarn pip \
-           zsh-syntax-highlighting macos mise)
-
-Set ZSH_THEME="powerlevel10k/powerlevel10k" in ~/.zshrc
 *************
 EOF

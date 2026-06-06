@@ -34,6 +34,9 @@ if [ -f ~/.zshrc ]; then
 fi
 append_once ~/.zshrc '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh'
 
+# Seed atuin from existing shell history (only logs new commands otherwise).
+command -v atuin >/dev/null && atuin import auto || true
+
 # ---- aliases ----
 # NOTE: grep/find are intentionally NOT aliased to ripgrep/fd — those tools are
 # not flag-compatible and break muscle memory and scripts. Use `rg` / `fd` directly.

@@ -17,14 +17,9 @@ pnpm = '9'
 # python = {version='3.10', virtualenv='.venv'}
 
 [alias]
-# specify a custom repo url
-# note this will only be used if the plugin does not already exist
-python = 'https://github.com/asdf-community/asdf-python'
-ruby = 'https://github.com/asdf-vm/asdf-ruby.git'
-node = 'https://github.com/asdf-vm/asdf-nodejs.git'
-golang = 'https://github.com/asdf-community/asdf-golang.git'
+# node/python/java/ruby/go use mise's faster first-party core plugins.
+# flutter has no core plugin, so pin the asdf one.
 flutter = 'https://github.com/oae/asdf-flutter.git'
-java = 'https://github.com/halcyon/asdf-java.git'
 
 
 [settings]

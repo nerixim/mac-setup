@@ -1,0 +1,14 @@
+# Baseline global mise config. Installed to ~/.config/mise/config.toml by mise.sh.
+# node/python/ruby/go/java use mise's first-party core plugins (no asdf aliases).
+
+[tools]
+node = ["24.12.0", "22.14.0", "20.17.0"]
+ruby = ['3.4.1', '3.3.6']
+python = ['3.13.1']
+go = ['1.25.3']
+terraform = ['1.9.7']
+pnpm = '9'
+
+[settings]
+legacy_version_file = true # honor project-level .tool-versions/.nvmrc/.ruby-version
+trusted_config_paths = []

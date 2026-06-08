@@ -27,7 +27,8 @@ so re-running any target reconciles state rather than duplicating lines.
 
 - **Secrets** (tokens, keys) go in `~/.secrets` (chmod 600), sourced from
   `~/.zsh_profile`. Never commit them; keep them out of `~/.zshrc`.
-- **Runtime versions** are pinned in `scripts/.mise.toml` (single source of truth).
+- **Runtime versions** are pinned in `scripts/mise-config.toml`, installed to the
+  single global mise config at `~/.config/mise/config.toml`.
 - **iTerm2** ships as a Dynamic Profile (`config/iterm-profile.json` ->
   `~/Library/Application Support/iTerm2/DynamicProfiles/nerzie.json`), auto-loaded
   by iTerm — no manual Preferences import.

@@ -6,7 +6,8 @@ BASEDIR="$(cd "$(dirname "$0")" && pwd)"
 
 append_once ~/.zsh_profile 'eval "$(/opt/homebrew/bin/mise activate zsh)"'
 
-cp "${BASEDIR}/.mise.toml" "$HOME"
+mkdir -p ~/.config/mise
+cp "${BASEDIR}/mise-config.toml" ~/.config/mise/config.toml
 cp "${BASEDIR}/.default-gems" "$HOME"
 cp "${BASEDIR}/.default-npm-packages" "$HOME"
 cp "${BASEDIR}/.default-python-packages" "$HOME"

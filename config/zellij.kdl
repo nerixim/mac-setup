@@ -7,4 +7,5 @@ default_shell "zsh"
 default_layout "compact"
 pane_frames false
 copy_on_select true
+copy_command "pbcopy" // pipe to macOS clipboard (default OSC52 isn't forwarded by iTerm2)
 show_startup_tips false

@@ -12,3 +12,4 @@ pnpm = '9'
 [settings]
 legacy_version_file = true # honor project-level .tool-versions/.nvmrc/.ruby-version
 trusted_config_paths = []
+activate_aggressive = true # keep mise tool bins ahead of other PATH prepends (bun, etc.)

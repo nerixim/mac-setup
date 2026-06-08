@@ -1,6 +1,4 @@
 tap 'eugenmayer/dockersync'
-tap 'homebrew/bundle'
-tap 'homebrew/services'
 tap 'kayac/tap'
 brew 'mas'
 brew 'duti'

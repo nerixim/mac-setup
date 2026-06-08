@@ -1,6 +1,5 @@
-[user]
-name = Nikita Kamaev
-email = hiyori.amatsuki@gmail.com
+# user.name / user.email are set interactively by scripts/git.sh, not committed
+# here (keeps a personal email out of the repo).
 
 # レポごとにメアドとか設定を変える場合は以下のようにする
 # [includeIf "gitdir:~/work/xxx/"]

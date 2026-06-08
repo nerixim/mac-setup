@@ -4,7 +4,9 @@ set -eux
 BASEDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${BASEDIR}/lib.sh"
 
-append_once ~/.zsh_profile 'eval "$(/opt/homebrew/bin/mise activate zsh)"'
+# Activate at the END of ~/.zshrc so it runs after other PATH prepends.
+# (activate_aggressive in the config also forces mise bins to the front.)
+append_once ~/.zshrc 'eval "$(/opt/homebrew/bin/mise activate zsh)"'
 
 mkdir -p ~/.config/mise
 cp "${BASEDIR}/mise-config.toml" ~/.config/mise/config.toml

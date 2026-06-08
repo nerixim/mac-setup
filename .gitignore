@@ -5,3 +5,5 @@ osx-preferences
 .DS_Store
 
 Brewfile.lock.json
+
+node_modules/

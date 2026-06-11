@@ -1,0 +1,37 @@
+# Formulae/casks deliberately NOT tracked in the Brewfile.
+# `make brew-diff` hides anything listed here. One name per line.
+
+# novelty
+aalib
+cmatrix
+cowsay
+figlet
+lolcat
+pipes-sh
+toilet
+asciinema
+
+# libs / transitive deps that surface as on-request leaves
+bison
+gd
+jpeg
+libedit
+libiconv
+libmagic
+libzip
+re2c
+shared-mime-info
+vips
+ossp-uuid
+docutils
+innoextract
+unbound
+socat
+putty
+openssl@1.1
+python@3.11
+python@3.12
+
+# leftovers being phased out (remove from machine when convenient)
+gitui
+mysql

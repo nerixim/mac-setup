@@ -41,6 +41,7 @@ brew 'yq'
 brew 'mysql-client' # client libs only, no server
 brew 'libpq' # postgres client libs only, no server
 brew 'tig'
+brew 'lazygit' # git TUI (configured in config/lazygit.yml)
 brew 'zsh'
 brew 'zsh-completions'
 brew 'kayac/tap/ecspresso'

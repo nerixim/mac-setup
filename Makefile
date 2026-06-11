@@ -2,7 +2,7 @@ bcask := brew install --cask
 brin := brew install
 
 .PHONY: all xcode homebrew osx-preferences vscode iterm k8s git gcp-cli azure-cli \
-        terraform zsh mise android xcode-app doctor mise-bump secrets zellij
+        terraform zsh mise android xcode-app doctor brew-diff mise-bump secrets zellij
 
 all: xcode homebrew osx-preferences vscode iterm git zsh mise
 
@@ -59,6 +59,10 @@ zellij: homebrew
 
 # Verify the machine matches the desired state (read-only). Run anytime.
 doctor:
+	./scripts/$@.sh
+
+# Show brew formulae/casks installed but not tracked in the Brewfile (read-only).
+brew-diff:
 	./scripts/$@.sh
 
 # Show outdated mise runtimes and upgrade within the pinned ranges.

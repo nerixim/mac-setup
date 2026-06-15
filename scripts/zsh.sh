@@ -25,8 +25,7 @@ clone_once https://github.com/zsh-users/zsh-autosuggestions        "${ZSH_CUSTOM
 clone_once https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
 
 # ---- configure ~/.zshrc (oh-my-zsh writes a default one we patch in place) ----
-# Restore the tuned Powerlevel10k prompt config instead of re-running `p10k configure`.
-cp "${BASEDIR}/../config/p10k.zsh" ~/.p10k.zsh
+# ~/.p10k.zsh is symlinked from stow/home/ by scripts/stow.sh (run `make stow`).
 if [ -f ~/.zshrc ]; then
   # macOS/BSD sed needs the empty backup-extension arg.
   sed -i '' 's|^ZSH_THEME=.*|ZSH_THEME="powerlevel10k/powerlevel10k"|' ~/.zshrc

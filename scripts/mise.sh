@@ -10,9 +10,8 @@ append_once ~/.zshrc 'eval "$(/opt/homebrew/bin/mise activate zsh)"'
 
 mkdir -p ~/.config/mise
 cp "${BASEDIR}/mise-config.toml" ~/.config/mise/config.toml
-cp "${BASEDIR}/.default-gems" "$HOME"
-cp "${BASEDIR}/.default-npm-packages" "$HOME"
-cp "${BASEDIR}/.default-python-packages" "$HOME"
+# .default-gems / .default-npm-packages / .default-python-packages are symlinked
+# from stow/home/ by scripts/stow.sh (run `make stow`).
 
 # set default rubocop config
 ghq get nerixim/ruby-code-style

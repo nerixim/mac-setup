@@ -27,7 +27,60 @@ grep -q 'mac-setup-gitignore' ~/.gitignore 2>/dev/null || {
   cat "${BASEDIR}/../config/gitignore" >>~/.gitignore
 }
 
-append_once ~/.aliases "alias git-prune-merged=\"git branch --merged | egrep -v '(^\\*|master|main|dev|develop)' | xargs git branch -d\""
+if [ -f ~/.aliases ]; then
+  aliases_tmp=$(mktemp)
+  grep -v '^alias git-prune-merged=' ~/.aliases >"${aliases_tmp}" || true
+  mv "${aliases_tmp}" ~/.aliases
+fi
+
+block_once ~/.aliases git-prune-merged <<'EOF'
+function git-prune-merged() {
+  local protected='^(master|main|dev|develop)$'
+  local deleted=0
+  local skipped=0
+  local branch
+  local branches
+  local current_root
+  local worktree_path
+  local worktrees
+
+  current_root=$(git rev-parse --show-toplevel)
+
+  worktrees=$(git worktree list --porcelain | awk '
+    /^worktree / { worktree_path = substr($0, 10) }
+    /^branch refs\/heads\// { print substr($0, 19) "\t" worktree_path }
+  ')
+  while IFS=$'\t' read -r branch worktree_path; do
+    [[ -z "$branch" || "$branch" =~ $protected || "$worktree_path" == "$current_root" ]] && continue
+    git branch -vv --list "$branch" | rg -q '\[.*: gone\]' || continue
+
+    if [[ -n "$(git -C "$worktree_path" status --porcelain)" ]]; then
+      echo "Skipping $branch: worktree has local changes at $worktree_path"
+      skipped=1
+      continue
+    fi
+
+    git worktree remove "$worktree_path" && git branch -D -- "$branch" && deleted=1
+  done <<< "$worktrees"
+
+  branches=$(git branch --merged | rg -v '^[*+]' | sed 's/^ *//' | rg -v "$protected" || true)
+  for branch in ${(f)branches}; do
+    [[ -z "$branch" ]] && continue
+    git branch -d -- "$branch" && deleted=1
+  done
+
+  branches=$(git branch -vv | rg -v '^[*+]' | rg '\[.*: gone\]' | sed 's/^ *//' | awk '{print $1}' | rg -v "$protected" || true)
+  for branch in ${(f)branches}; do
+    [[ -z "$branch" ]] && continue
+    git show-ref --verify --quiet "refs/heads/$branch" || continue
+    git branch -D -- "$branch" && deleted=1
+  done
+
+  if (( deleted == 0 && skipped == 0 )); then
+    echo "No merged or gone branches to delete."
+  fi
+}
+EOF
 append_once ~/.aliases 'alias git-pull-recursive="find . -type d -depth 1 -exec git --git-dir={}/.git --work-tree=./{} pull --prune \;"'
 append_once ~/.aliases 'alias lg=lazygit'
 

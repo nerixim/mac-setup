@@ -25,6 +25,13 @@ so re-running any target reconciles state rather than duplicating lines.
 
 ## Conventions
 
+- **Dotfiles** under `stow/home/` are symlinked into `$HOME` with GNU stow
+  (`make stow`) — the repo file *is* the live file, so there's no copy/write-back
+  drift. Covers `.default-*` package lists, `.p10k.zsh`, and zellij config. Files
+  that are appended/generated (`.zshrc`, `.aliases`, gitconfig, iTerm, lazygit)
+  stay script-managed instead.
+- **Brewfile** is a curated baseline, not a full machine dump. `make brew-diff`
+  shows installed-but-untracked packages (minus `scripts/.brew-ignore`) to promote.
 - **Secrets** (tokens, keys) go in `~/.secrets` (chmod 600), sourced from
   `~/.zsh_profile`. Never commit them; keep them out of `~/.zshrc`.
 - **Runtime versions** are pinned in `scripts/mise-config.toml`, installed to the

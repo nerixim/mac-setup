@@ -48,6 +48,7 @@ brew 'kayac/tap/ecspresso'
 cask 'ngrok'
 brew 'gitmoji' # emoji for commit messages
 brew 'lazydocker' # docker TUI
+brew 'stow' # symlink-farm manager for dotfiles
 brew 'tree' # for tree command
 brew 'bat' # instead of cat
 brew 'htop' # instead of top

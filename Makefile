@@ -1,10 +1,10 @@
 bcask := brew install --cask
 brin := brew install
 
-.PHONY: all xcode homebrew osx-preferences vscode iterm k8s git gcp-cli azure-cli \
+.PHONY: all xcode homebrew osx-preferences stow vscode iterm k8s git gcp-cli azure-cli \
         terraform zsh mise android xcode-app doctor brew-diff mise-bump secrets zellij
 
-all: xcode homebrew osx-preferences vscode iterm git zsh mise
+all: xcode homebrew osx-preferences stow vscode iterm git zsh mise
 
 xcode:
 	./scripts/$@.sh
@@ -17,6 +17,10 @@ homebrew: xcode
 osx-preferences:
 	./scripts/$@.sh
 	touch $@
+
+# Symlink dotfiles from stow/home/ into $HOME (default-* lists, p10k, zellij).
+stow:
+	./scripts/$@.sh
 
 vscode: homebrew
 	./scripts/$@.sh

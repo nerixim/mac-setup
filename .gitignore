@@ -7,3 +7,5 @@ osx-preferences
 Brewfile.lock.json
 
 node_modules/
+
+blueish.json

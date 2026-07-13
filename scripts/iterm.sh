@@ -17,12 +17,27 @@ mkdir -p "${DP_DIR}"
 jq '. + {Name: "nerzie", Guid: "nerzie-dynamic-profile"} | {Profiles: [.]}' \
   "${BASEDIR}/../config/iterm-profile.json" >"${DP_DIR}/nerzie.json"
 
-cat <<'EOF'
+# Make nerzie the default profile. Its per-profile Keyboard Map carries the tab
+# bindings (Cmd+Left=prev tab, Cmd+Right=next tab), which only apply when nerzie
+# is the active profile. iTerm reads "Default Bookmark Guid" at launch and
+# rewrites the plist on quit, so we can only set it safely while iTerm is closed;
+# otherwise the running instance would clobber our write. Fall back to a one-line
+# manual instruction in that case.
+NERZIE_GUID="nerzie-dynamic-profile"
+if pgrep -xq iTerm2; then
+  set_default_note='iTerm2 is running — set the default by hand once: Settings → Profiles → nerzie → Other Actions → Set as Default. (Or fully quit iTerm and re-run `make iterm`.)'
+else
+  defaults write com.googlecode.iterm2 "Default Bookmark Guid" -string "${NERZIE_GUID}"
+  set_default_note='Default profile set to "nerzie" (applies next launch).'
+fi
+
+cat <<EOF
 *************
 iTerm2 dynamic profile installed as "nerzie".
-- Open iTerm2 → it appears under Preferences → Profiles automatically.
-- Set it as default: Preferences → Profiles → select "nerzie" → Other Actions → Set as Default.
-- Natural-text-selection / key mappings: Preferences → Keys → Presets → Import →
-  config/nerzie.itermkeymap  (one-time; not expressible as a dynamic profile).
+- ${set_default_note}
+- Cmd+Left/Right tab switching ships in the profile's key map — no preset import
+  needed once nerzie is the default profile.
+- Optional global/natural-text-selection bindings (apply to every profile):
+  Settings → Keys → Key Bindings → Presets → Import → config/nerzie.itermkeymap.
 *************
 EOF

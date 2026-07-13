@@ -44,5 +44,10 @@ so re-running any target reconciles state rather than duplicating lines.
 
 - `chsh -s /opt/homebrew/bin/zsh` — set login shell (needs your password).
 - Trackpad corner right-click applies after a logout/login.
-- iTerm key map: Preferences -> Keys -> Presets -> Import -> `config/nerzie.itermkeymap`.
+- iTerm default profile: `make iterm` sets "nerzie" as default automatically, but
+  only while iTerm is **closed** (it rewrites its plist on quit). If iTerm was
+  running, set it once: Settings -> Profiles -> nerzie -> Other Actions -> Set as
+  Default. Cmd+Left/Right tab switching rides in the profile's key map.
+- Optional global key bindings (every profile): Settings -> Keys -> Key Bindings
+  -> Presets -> Import -> `config/nerzie.itermkeymap`.
 - oh-my-zsh completions / theme lines: see the notes printed by `make zsh`.

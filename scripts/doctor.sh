@@ -56,6 +56,14 @@ section "iTerm2 profile"
 [ -f "$HOME/Library/Application Support/iTerm2/DynamicProfiles/nerzie.json" ] \
   && ok "dynamic profile 'nerzie' installed" \
   || no "iTerm dynamic profile missing" "make iterm"
+# Cmd+Left/Right tab switching works via either path: nerzie set as default
+# (its per-profile key map) OR the global keymap preset binding cmd+arrows.
+def=$(defaults read com.googlecode.iterm2 "Default Bookmark Guid" 2>/dev/null || echo unset)
+glob=$(defaults read com.googlecode.iterm2 GlobalKeyMap 2>/dev/null | grep -c '0xf702-0x300000' || true)
+if [ "$def" = nerzie-dynamic-profile ]; then ok "Cmd+Left/Right tab switch via nerzie default profile"
+elif [ "${glob:-0}" -gt 0 ]; then ok "Cmd+Left/Right tab switch via global keymap preset"
+else no "Cmd+Left/Right tab switch not configured" \
+       "make iterm with iTerm closed (sets nerzie default), or import config/nerzie.itermkeymap"; fi
 
 section "Core CLI tools"
 for t in rg fd eza bat delta tig lazygit lazydocker gh ghq fzf zoxide atuin yazi difft jq yq direnv; do

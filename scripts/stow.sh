@@ -3,7 +3,8 @@ set -eux
 
 # Symlink the dotfiles under stow/home/ into $HOME via GNU stow, so the repo file
 # IS the live file (edit once, no copy/write-back drift). Covers: .default-gems,
-# .default-npm-packages, .default-python-packages, .p10k.zsh, .config/zellij/.
+# .default-npm-packages, .default-python-packages, .p10k.zsh, .terraformrc,
+# .config/zellij/.
 BASEDIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(dirname "$BASEDIR")"
 

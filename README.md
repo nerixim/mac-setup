@@ -27,9 +27,14 @@ so re-running any target reconciles state rather than duplicating lines.
 
 - **Dotfiles** under `stow/home/` are symlinked into `$HOME` with GNU stow
   (`make stow`) — the repo file *is* the live file, so there's no copy/write-back
-  drift. Covers `.default-*` package lists, `.p10k.zsh`, and zellij config. Files
-  that are appended/generated (`.zshrc`, `.aliases`, gitconfig, iTerm, lazygit)
-  stay script-managed instead.
+  drift. Covers `.default-*` package lists, `.p10k.zsh`, `.terraformrc`, and
+  zellij config. Files that are appended/generated (`.zshrc`, `.aliases`,
+  gitconfig, iTerm, lazygit) stay script-managed instead.
+- **Terraform** uses a shared provider plugin cache (`~/.terraformrc` ->
+  `~/.terraform.d/plugin-cache`, dir created by `make terraform`). Without it
+  each module's `.terraform/` carries its own provider binaries — that was 76 GB
+  across two repos. Deleting any `.terraform/` is always safe; `terraform init`
+  rebuilds it from the cache.
 - **Brewfile** is a curated baseline, not a full machine dump. `make brew-diff`
   shows installed-but-untracked packages (minus `scripts/.brew-ignore`) to promote.
 - **Secrets** (tokens, keys) go in `~/.secrets` (chmod 600), sourced from

@@ -12,22 +12,32 @@ open "${BASEDIR}/../config/Solarized Dark.itermcolors" || true
 # DynamicProfiles/ on launch (and live-reloads it) — no manual Preferences import.
 # We wrap the exported profile JSON in the required {"Profiles":[ ... ]} envelope
 # and force a stable Name/Guid so re-running updates the same profile in place.
+# iTerm watches DynamicProfiles/ and parses a file the moment it appears, so a
+# direct `>` redirect lets it read a half-written file ("malformed" warning).
+# Write next to the directory and rename in — same volume, so the rename is atomic.
 DP_DIR="${HOME}/Library/Application Support/iTerm2/DynamicProfiles"
 mkdir -p "${DP_DIR}"
+tmp="${DP_DIR}/../nerzie.json.tmp"
 jq '. + {Name: "nerzie", Guid: "nerzie-dynamic-profile"} | {Profiles: [.]}' \
-  "${BASEDIR}/../config/iterm-profile.json" >"${DP_DIR}/nerzie.json"
+  "${BASEDIR}/../config/iterm-profile.json" >"${tmp}"
+mv -f "${tmp}" "${DP_DIR}/nerzie.json"
 
 # Make nerzie the default profile. Its per-profile Keyboard Map carries the tab
 # bindings (Cmd+Left=prev tab, Cmd+Right=next tab), which only apply when nerzie
 # is the active profile. iTerm reads "Default Bookmark Guid" at launch and
-# rewrites the plist on quit, so we can only set it safely while iTerm is closed;
-# otherwise the running instance would clobber our write. Fall back to a one-line
-# manual instruction in that case.
+# rewrites the plist on quit, so a write while it runs gets clobbered. This
+# script is normally run FROM iTerm, so instead of asking for a manual step we
+# leave a detached waiter that writes the key right after iTerm exits; the next
+# launch then starts with nerzie as default. (Already-open windows keep their
+# current profile either way — open a new tab to get nerzie.)
 NERZIE_GUID="nerzie-dynamic-profile"
+set_default_guid='defaults write com.googlecode.iterm2 "Default Bookmark Guid" -string "'"${NERZIE_GUID}"'"'
 if pgrep -xq iTerm2; then
-  set_default_note='iTerm2 is running — set the default by hand once: Settings → Profiles → nerzie → Other Actions → Set as Default. (Or fully quit iTerm and re-run `make iterm`.)'
+  nohup bash -c "while pgrep -xq iTerm2; do sleep 2; done; sleep 1; ${set_default_guid}" >/dev/null 2>&1 &
+  disown
+  set_default_note='iTerm2 is running — the default profile switches to "nerzie" automatically after you fully quit iTerm2 (Cmd+Q) once; relaunch and it is the default.'
 else
-  defaults write com.googlecode.iterm2 "Default Bookmark Guid" -string "${NERZIE_GUID}"
+  eval "${set_default_guid}"
   set_default_note='Default profile set to "nerzie" (applies next launch).'
 fi
 

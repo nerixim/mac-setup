@@ -18,9 +18,10 @@ command -v brew >/dev/null && [ "$(brew --prefix 2>/dev/null)" = /opt/homebrew ]
   || no "brew not active in this shell" 'eval "$(/opt/homebrew/bin/brew shellenv)"'
 
 section "Shell"
-[ "$SHELL" = /opt/homebrew/bin/zsh ] \
-  && ok "login shell is Homebrew zsh" \
-  || no "login shell is $SHELL" "chsh -s /opt/homebrew/bin/zsh"
+login_shell=$(dscl . -read "$HOME" UserShell 2>/dev/null | awk '{print $2}')
+[ "$(readlink -f "${login_shell:-/bin/sh}")" = "$(readlink -f /opt/homebrew/bin/zsh)" ] \
+  && ok "login shell is Homebrew zsh ($login_shell)" \
+  || no "login shell is ${login_shell:-unknown}" "make zsh  # or: sudo chsh -s /opt/homebrew/bin/zsh $USER"
 if grep -qE '^\s*alias (grep|find)=' ~/.aliases 2>/dev/null; then
   no "grep/find aliased (breaks scripts & muscle memory)" "remove the alias from ~/.aliases"
 else ok "no grep/find aliases"; fi
@@ -42,10 +43,13 @@ else ok "no obvious tokens in shell rc files"; fi
 [ -f ~/.secrets ] && ok "~/.secrets present" || printf '  \033[33m–\033[0m ~/.secrets not present (fine if you have no secrets)\n'
 
 section "Trackpad (right-click)"
-v=$(defaults -currentHost read com.apple.AppleMultitouchTrackpad TrackpadCornerSecondaryClick 2>/dev/null || echo unset)
-[ "$v" = 2 ] \
-  && ok "bottom-right corner = secondary click (currentHost)" \
-  || no "corner right-click not set in currentHost domain (=$v)" "make osx-preferences  # then log out/in"
+# The driver honors the value only when BOTH the global and ByHost domains carry it.
+for host in "" "-currentHost"; do
+  v=$(defaults ${host} read com.apple.AppleMultitouchTrackpad TrackpadCornerSecondaryClick 2>/dev/null || echo unset)
+  [ "$v" = 2 ] \
+    && ok "bottom-right corner = secondary click (${host:-global} domain)" \
+    || no "corner right-click not set in ${host:-global} domain (=$v)" "make osx-preferences  # then log out/in"
+done
 
 section "Runtimes (mise)"
 if command -v mise >/dev/null; then

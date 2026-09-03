@@ -1,0 +1,614 @@
+<!--
+  Infra Overview template — copy this file, fill the slots, publish via Artifact.
+  RULES:
+  - Do NOT restyle. Change content, duplicate repeating elements, delete unused sections.
+  - Colors only via tokens. Env accents: env-a = primary/prod, env-b = secondary env,
+    env-c = preview/staging. Semantic ok/warn/danger are NOT env colors.
+  - Every identifier (resource name, domain, cron expr, secret name, account id,
+    version, size) gets class="mono".
+  - Diagram nodes use .glyph monograms (2–4 letters) by default. Prefer official
+    vendor icons inlined as <svg> when fetchable — see "Official icon sources"
+    in SKILL.md for AWS/GCP/Azure/simple-icons/devicon URLs and inlining prep.
+    Never hand-draw logo approximations; CSP blocks hotlinks.
+  - Keep every <table> inside .table-wrap.
+  - Keep the sticky TOC links in sync with the sections you keep.
+  - Keep the <script> block at the end intact (reveal, scrollspy, stat count-up).
+  - data-tip="..." on any element adds a hover tooltip — use for detail that
+    doesn't fit a node-meta or table cell. <details class="disclosure"> collapses
+    secondary/long tables; never collapse primary content.
+  - Artifact wraps this file: no <!DOCTYPE>/<html>/<head>/<body> tags.
+-->
+<title>SYSTEM_NAME — Infrastructure Overview</title>
+<style>
+:root{
+  color-scheme: light dark;
+  --bg:            light-dark(#f6f7f9, #111318);
+  --surface:       light-dark(#ffffff, #191c22);
+  --surface-2:     light-dark(#eff1f4, #20242c);
+  --border:        light-dark(#e2e5ea, #2b303a);
+  --border-strong: light-dark(#c6cbd4, #3c424e);
+  --text:          light-dark(#171a20, #e8eaee);
+  --muted:         light-dark(#5f6672, #9aa1ad);
+  --faint:         light-dark(#98a0ac, #6a7280);
+  --env-a:    light-dark(#2456c8, #82a7ff);
+  --env-a-bg: light-dark(#ecf1fc, #1c2740);
+  --env-b:    light-dark(#8447d6, #b995f2);
+  --env-b-bg: light-dark(#f3eefc, #2a2040);
+  --env-c:    light-dark(#0c8577, #4ecfbc);
+  --env-c-bg: light-dark(#e8f7f4, #103029);
+  --ok:       light-dark(#1a7f37, #67c47f);
+  --ok-bg:    light-dark(#ebf7ee, #14291a);
+  --warn:     light-dark(#9a5b0a, #dfae52);
+  --warn-bg:  light-dark(#fcf5e8, #2d2413);
+  --danger:   light-dark(#c22f2f, #f28585);
+  --danger-bg:light-dark(#fcefef, #331719);
+  --mono: ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --ease: cubic-bezier(.22,1,.36,1);
+  --lift: 0 8px 24px -14px light-dark(rgba(23,26,32,.28), rgba(0,0,0,.65));
+  interpolate-size: allow-keywords;
+}
+:root[data-theme="dark"]{ color-scheme: dark; }
+:root[data-theme="light"]{ color-scheme: light; }
+
+*{ box-sizing:border-box }
+html{ scroll-behavior:smooth }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto } }
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font:400 14px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI","Hiragino Sans",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{ max-width:1160px; margin:0 auto; padding:40px 28px 56px }
+a{ color:var(--env-a) }
+:focus-visible{ outline:2px solid var(--env-a); outline-offset:2px; border-radius:4px }
+::selection{ background:color-mix(in srgb, var(--env-a) 22%, transparent) }
+.mono{ font-family:var(--mono); font-size:.93em }
+code{ font-family:var(--mono); font-size:.9em; background:var(--surface-2); padding:1px 5px; border-radius:5px }
+
+/* Masthead */
+.overline{ font:600 11px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--env-a); margin:0 0 10px }
+h1{ font-size:29px; font-weight:700; letter-spacing:-.02em; line-height:1.15; margin:0 0 16px; text-wrap:balance }
+.meta-pills{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px }
+.pill{ font-size:12px; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:99px; padding:5px 12px }
+.pill b{ color:var(--text); font-family:var(--mono); font-weight:600 }
+.sources{ font-size:12.5px; color:var(--muted); max-width:85ch; margin:0 }
+
+/* Sticky TOC */
+.toc{
+  position:sticky; top:0; z-index:10; display:flex; flex-wrap:wrap; gap:2px;
+  margin:24px -8px 0; padding:10px 8px; border-bottom:1px solid var(--border);
+  background:color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+}
+.toc a{ font-size:12.5px; font-weight:500; color:var(--muted); text-decoration:none; padding:5px 10px; border-radius:7px }
+.toc a:hover{ color:var(--text); background:var(--surface-2) }
+section{ margin:52px 0 0; scroll-margin-top:58px }
+
+/* Stat strip */
+.stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin:28px 0 0 }
+.stat{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px }
+.stat .value{ font:600 24px/1.2 var(--mono); font-variant-numeric:tabular-nums; letter-spacing:-.02em }
+.stat .label{ font-size:11px; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-top:3px }
+
+/* Section headings */
+h2{ font-size:19px; font-weight:650; letter-spacing:-.01em; margin:0 0 6px }
+.lede{ font-size:13px; color:var(--muted); max-width:80ch; margin:0 0 16px }
+h3{ font:600 11px var(--mono); text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:22px 0 10px }
+
+/* Architecture diagram */
+.diagram{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px 22px; margin:0 }
+.tier{ display:flex; justify-content:center; align-items:stretch; gap:18px; flex-wrap:wrap; padding:6px 0 }
+.node{ display:flex; flex-direction:column; align-items:center; gap:7px; min-width:104px; max-width:150px; text-align:center }
+.glyph{
+  display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px;
+  border-radius:12px; font:700 12px var(--mono); letter-spacing:.02em;
+  color:var(--g, var(--muted));
+  background:color-mix(in srgb, var(--g, var(--muted)) 11%, transparent);
+  border:1px solid color-mix(in srgb, var(--g, var(--muted)) 28%, transparent);
+}
+.node-name{ font-size:12.5px; font-weight:600; line-height:1.3 }
+.node-meta{ font-size:11px; color:var(--muted); line-height:1.45 }
+.arrow{ align-self:center; color:var(--faint); font-size:17px }
+.flow{ text-align:center; color:var(--faint); font-size:16px; line-height:1; padding:6px 0 }
+.boundary{ position:relative; border:1.5px dashed var(--border-strong); border-radius:14px; padding:24px 18px 16px; margin:12px 0 }
+.boundary-label{
+  position:absolute; top:-8px; left:16px; padding:0 8px; background:var(--surface);
+  font:600 10.5px var(--mono); letter-spacing:.07em; text-transform:uppercase; color:var(--muted);
+}
+.group{ position:relative; flex:1; min-width:220px; max-width:340px; border:1px solid var(--border); border-radius:12px; background:var(--surface-2); padding:20px 14px 12px }
+.group-label{
+  position:absolute; top:-8px; left:12px; padding:0 7px; background:var(--surface);
+  font:600 10.5px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+}
+.group.env-a{ border-color:color-mix(in srgb, var(--env-a) 45%, var(--border)) } .group.env-a .group-label{ color:var(--env-a) }
+.group.env-b{ border-color:color-mix(in srgb, var(--env-b) 45%, var(--border)) } .group.env-b .group-label{ color:var(--env-b) }
+.group.env-c{ border-color:color-mix(in srgb, var(--env-c) 45%, var(--border)) } .group.env-c .group-label{ color:var(--env-c) }
+.diagram-aside{ margin:18px 0 0; padding:14px 0 0; border-top:1px dashed var(--border) }
+
+/* Card grid (batch plane etc.) */
+.card-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px }
+.card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 16px 14px }
+.card h4{ font-size:13px; font-weight:650; margin:0 0 11px; display:flex; align-items:center; gap:9px }
+.card h4 .glyph{ width:26px; height:26px; border-radius:8px; font-size:10px }
+.row-list{ display:flex; flex-direction:column; gap:6px }
+.row{ display:flex; align-items:center; gap:10px; background:var(--surface-2); border-radius:8px; padding:7px 11px }
+.row .name{ flex:1; font:550 12px var(--mono) }
+.row .meta{ font-size:11px; color:var(--muted); white-space:nowrap }
+.tag{ font:500 10.5px var(--mono); padding:2.5px 8px; border-radius:99px; background:var(--surface); border:1px solid var(--border); color:var(--muted); white-space:nowrap }
+.tag.warn{ background:var(--warn-bg); border-color:transparent; color:var(--warn) }
+.tag.ok{ background:var(--ok-bg); border-color:transparent; color:var(--ok) }
+.kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:5px 24px; font-size:12.5px; color:var(--muted) }
+.kv b{ color:var(--text); font-weight:600 }
+
+/* Tables */
+.table-wrap{ overflow-x:auto; background:var(--surface); border:1px solid var(--border); border-radius:14px }
+table{ width:100%; border-collapse:collapse; font-size:13px }
+th{ text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); background:var(--surface-2); padding:9px 14px; white-space:nowrap }
+td{ padding:9px 14px; border-top:1px solid var(--border); vertical-align:top }
+tbody tr:hover td{ background:color-mix(in srgb, var(--surface-2) 45%, transparent) }
+td.diff{ background:color-mix(in srgb, var(--warn) 8%, transparent); font-weight:500 }
+tbody tr:hover td.diff{ background:color-mix(in srgb, var(--warn) 13%, transparent) }
+
+/* Badges */
+.badge{ display:inline-block; font-size:11px; font-weight:600; padding:3px 9px; border-radius:6px }
+.badge.env-a{ background:var(--env-a-bg); color:var(--env-a) }
+.badge.env-b{ background:var(--env-b-bg); color:var(--env-b) }
+.badge.env-c{ background:var(--env-c-bg); color:var(--env-c) }
+.badge.ok{ background:var(--ok-bg); color:var(--ok) }
+.badge.warn{ background:var(--warn-bg); color:var(--warn) }
+.badge.danger{ background:var(--danger-bg); color:var(--danger) }
+
+/* Pipeline */
+.pipeline{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:18px }
+.pipeline-title{ font:600 11px var(--mono); text-transform:uppercase; letter-spacing:.08em; color:var(--muted) }
+.track{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:8px }
+.step{ font-size:12.5px; font-weight:550; padding:6px 12px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); white-space:nowrap }
+.step.hot{ background:var(--env-a-bg); border-color:color-mix(in srgb, var(--env-a) 40%, transparent); color:var(--env-a) }
+.step.alt{ background:var(--env-c-bg); border-color:color-mix(in srgb, var(--env-c) 40%, transparent); color:var(--env-c) }
+.step.off{ background:var(--danger-bg); border-color:color-mix(in srgb, var(--danger) 35%, transparent); color:var(--danger); text-decoration:line-through }
+.sep{ color:var(--faint); font-size:14px }
+.pipeline .kv{ padding-top:14px; border-top:1px dashed var(--border) }
+
+/* Callouts */
+.callout{ font-size:13px; line-height:1.55; padding:12px 16px; border-radius:12px; border-left:3px solid var(--warn); background:var(--warn-bg); margin:14px 0 0 }
+.callout b:first-child{ color:var(--warn) }
+.callout.info{ border-left-color:var(--env-a); background:var(--env-a-bg) } .callout.info b:first-child{ color:var(--env-a) }
+.callout.danger{ border-left-color:var(--danger); background:var(--danger-bg) } .callout.danger b:first-child{ color:var(--danger) }
+
+/* Roadmap chips */
+.chips{ display:flex; flex-wrap:wrap; gap:8px }
+a.chip{ display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:99px; padding:6px 13px }
+a.chip:hover{ border-color:var(--border-strong) }
+a.chip .id{ font:600 11.5px var(--mono); color:var(--env-a) }
+
+footer{ margin-top:64px; padding-top:18px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); line-height:1.8 }
+footer b{ color:var(--text) }
+
+/* ===== Micro-interactions (all guarded for reduced motion) ===== */
+.toc a{ transition:color .18s, background-color .18s }
+.toc a.active{ color:var(--env-a); background:var(--env-a-bg) }
+
+.stat, .card, a.chip{ transition:transform .3s var(--ease), box-shadow .3s var(--ease), border-color .2s }
+.stat:hover, .card:hover, a.chip:hover{ transform:translateY(-1px); box-shadow:var(--lift); border-color:var(--border-strong) }
+.glyph{ transition:transform .25s var(--ease) }
+.node:hover > .glyph, .card h4:hover .glyph{ transform:scale(1.07) }
+.step{ transition:transform .2s var(--ease) }
+.step:hover{ transform:translateY(-1px) }
+
+/* Scroll reveal: JS adds .reveal to below-fold sections, .in when they enter */
+.reveal{ opacity:0; transform:translateY(12px); transition:opacity .55s ease, transform .55s var(--ease) }
+.reveal.in{ opacity:1; transform:none }
+
+/* Tooltip: data-tip="text" on any element */
+[data-tip]{ position:relative; cursor:help }
+[data-tip]::after{
+  content:attr(data-tip); position:absolute; left:50%; bottom:calc(100% + 9px);
+  transform:translate(-50%, 4px); width:max-content; max-width:250px; text-align:left;
+  background:light-dark(#1c2027, #2e333d); color:light-dark(#f2f4f7, #eef0f4);
+  font-size:11.5px; font-weight:400; line-height:1.5; padding:7px 11px; border-radius:9px;
+  box-shadow:0 8px 24px -8px rgba(0,0,0,.35);
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s var(--ease); z-index:30;
+}
+[data-tip]::before{
+  content:""; position:absolute; left:50%; bottom:calc(100% + 4px);
+  transform:translate(-50%, 4px) rotate(45deg); width:9px; height:9px; border-radius:2px;
+  background:light-dark(#1c2027, #2e333d);
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s var(--ease); z-index:29;
+}
+[data-tip]:hover::after, [data-tip]:focus-visible::after,
+[data-tip]:hover::before, [data-tip]:focus-visible::before{ opacity:1; transform:translate(-50%, 0) rotate(0) }
+[data-tip]:hover::before, [data-tip]:focus-visible::before{ transform:translate(-50%, 0) rotate(45deg) }
+
+/* Disclosure: <details class="disclosure"> for secondary/long tables */
+details.disclosure{ background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:12px }
+details.disclosure > summary{
+  list-style:none; cursor:pointer; display:flex; align-items:center; gap:11px;
+  padding:12px 16px; font-size:13px; font-weight:600; user-select:none;
+}
+details.disclosure > summary::-webkit-details-marker{ display:none }
+details.disclosure > summary::before{
+  content:""; flex:none; width:7px; height:7px; margin-left:3px;
+  border-right:1.6px solid var(--muted); border-bottom:1.6px solid var(--muted);
+  transform:rotate(-45deg); transition:transform .3s var(--ease);
+}
+details[open].disclosure > summary::before{ transform:rotate(45deg) translate(-1px,-1px) }
+details.disclosure > summary:hover{ background:var(--surface-2) }
+details.disclosure > summary .count{ font:500 11px var(--mono); color:var(--muted); margin-left:auto }
+details.disclosure .table-wrap{ border:0; border-top:1px solid var(--border); border-radius:0 }
+details.disclosure::details-content{
+  opacity:0; block-size:0; overflow:hidden;
+  transition:block-size .35s var(--ease), opacity .3s ease, content-visibility .35s allow-discrete;
+}
+details[open].disclosure::details-content{ opacity:1; block-size:auto }
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ transition:none !important; animation:none !important }
+  .reveal{ opacity:1; transform:none }
+}
+
+@media (max-width:640px){ .wrap{ padding:24px 16px 44px } h1{ font-size:23px } .tier{ gap:12px } }
+</style>
+
+<div class="wrap">
+
+<!-- ===== Masthead: system name, verification pills, sources ===== -->
+<header>
+  <p class="overline">Infrastructure Overview</p>
+  <h1>SYSTEM_NAME</h1>
+  <div class="meta-pills">
+    <span class="pill">Verified <b>2026-01-01</b></span>
+    <span class="pill">Region <b>region-1</b></span>
+    <span class="pill">Accounts <b>111111111111</b> prod · <b>222222222222</b> staging</span>
+  </div>
+  <p class="sources">Sources: cloud API (live, read-only) · Terraform (NN files) · CI workflows (NN) · issue tracker</p>
+</header>
+
+<!-- ===== Sticky TOC: keep hrefs in sync with sections kept below ===== -->
+<nav class="toc">
+  <a href="#serving">Serving</a>
+  <a href="#batch">Batch</a>
+  <a href="#envs">Environments</a>
+  <a href="#cicd">CI/CD</a>
+  <a href="#schedule">Scheduled</a>
+  <a href="#secrets">Secrets</a>
+  <a href="#monitoring">Monitoring</a>
+  <a href="#roadmap">Roadmap</a>
+  <a href="#notes">Worth knowing</a>
+</nav>
+
+<!-- ===== Stat strip: 4–6 headline counts ===== -->
+<div class="stats">
+  <div class="stat"><div class="value">3</div><div class="label">Environments</div></div>
+  <div class="stat"><div class="value">2</div><div class="label">Services</div></div>
+  <div class="stat"><div class="value">9</div><div class="label">Functions</div></div>
+  <div class="stat"><div class="value">56</div><div class="label">Alarms</div></div>
+  <!-- duplicate .stat as needed -->
+</div>
+
+<!-- ===== Serving plane: edge tier → compute (inside boundary) → data tier ===== -->
+<section id="serving">
+  <h2>Serving plane</h2>
+  <p class="lede">One sentence: the request path from DNS to data, and what owns it.</p>
+  <figure class="diagram">
+    <div class="tier">
+      <!-- one .node per component; --g picks the glyph accent; monogram 2–4 letters -->
+      <!-- data-tip adds a hover tooltip for detail that doesn't fit node-meta -->
+      <div class="node" data-tip="Extra detail on hover: cert scope, WAF policy, whatever didn't fit below">
+        <span class="glyph" style="--g:var(--env-b)">DNS</span>
+        <span class="node-name">DNS</span>
+        <span class="node-meta mono">app.example.com</span>
+      </div>
+      <span class="arrow">→</span>
+      <div class="node">
+        <span class="glyph" style="--g:var(--env-b)">LB</span>
+        <span class="node-name">Load balancer</span>
+        <span class="node-meta">internet-facing · <span class="mono">:443</span></span>
+      </div>
+    </div>
+    <div class="flow">↓</div>
+    <div class="boundary">
+      <span class="boundary-label">VPC 10.0.0.0/16 — public subnets, 3 AZs</span>
+      <div class="tier">
+        <!-- one .group per environment sharing the boundary; env-a/b/c tints the label -->
+        <div class="group env-a">
+          <span class="group-label">Production</span>
+          <div class="tier">
+            <div class="node">
+              <span class="glyph" style="--g:var(--env-a)">SVC</span>
+              <span class="node-name">app-service</span>
+              <span class="node-meta"><span class="mono">1 vCPU / 2 GB</span> · autoscale <span class="mono">1→15</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="group env-b">
+          <span class="group-label">Secondary env</span>
+          <div class="tier">
+            <div class="node">
+              <span class="glyph" style="--g:var(--env-b)">SVC</span>
+              <span class="node-name">app-service</span>
+              <span class="node-meta"><span class="mono">1 vCPU / 2 GB</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow">↓</div>
+    <div class="tier">
+      <div class="node">
+        <span class="glyph" style="--g:var(--ok)">DB</span>
+        <span class="node-name">Database</span>
+        <span class="node-meta">PostgreSQL NN · NNN migrations</span>
+      </div>
+      <div class="node">
+        <span class="glyph" style="--g:var(--ok)">OBJ</span>
+        <span class="node-name">Object storage</span>
+        <span class="node-meta">backups · logs</span>
+      </div>
+    </div>
+    <!-- external SaaS row: smaller commitment, no arrows -->
+    <div class="diagram-aside">
+      <h3 style="margin-top:0">External services</h3>
+      <div class="tier" style="justify-content:flex-start">
+        <div class="node">
+          <span class="glyph">ERR</span>
+          <span class="node-name">Error tracking</span>
+        </div>
+        <div class="node">
+          <span class="glyph">LLM</span>
+          <span class="node-name">LLM provider</span>
+        </div>
+        <!-- duplicate per external service -->
+      </div>
+    </div>
+  </figure>
+</section>
+
+<!-- ===== Batch plane: cards grouping workers/crons by purpose ===== -->
+<section id="batch">
+  <h2>Batch plane</h2>
+  <p class="lede">Workers, queues, schedulers — everything that runs without a request.</p>
+  <div class="card-grid">
+    <div class="card">
+      <h4><span class="glyph" style="--g:var(--env-a)">JOB</span> Job processing</h4>
+      <div class="row-list">
+        <!-- one .row per function: mono name, size/timeout meta, trigger tag -->
+        <div class="row">
+          <span class="name">WorkerName</span>
+          <span class="meta">2 GB / 15 min</span>
+          <span class="tag warn" data-tip="Who calls it and with what auth">HTTP webhook</span>
+        </div>
+        <div class="row">
+          <span class="name">SweepName</span>
+          <span class="meta">512 MB / 15 min</span>
+          <span class="tag">rate(5m)</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h4><span class="glyph" style="--g:var(--env-b)">MED</span> Media processing</h4>
+      <div class="row-list">
+        <div class="row">
+          <span class="name">FnName</span>
+          <span class="meta">2 GB / 15 min</span>
+          <span class="tag">event</span>
+        </div>
+      </div>
+    </div>
+    <!-- last card: runtime facts as a .kv list -->
+    <div class="card">
+      <h4><span class="glyph">RT</span> Runtime</h4>
+      <div class="kv" style="grid-template-columns:1fr">
+        <span><b>Node.js NN</b> on arm64</span>
+        <span><b>Deploy:</b> tool-name</span>
+        <span><b>Logs:</b> <span class="mono">/path/{stage}/{name}</span> · 180 d</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Environments: shared baseline in the lede, ONLY diffs in the table ===== -->
+<section id="envs">
+  <h2>Environment differences</h2>
+  <p class="lede">Shared baseline: (list what is identical everywhere — compute size, autoscaling, deploy strategy, alert path). Only differences below; changed cells highlighted.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th><span class="badge env-a">Production</span></th>
+          <th><span class="badge env-b">Secondary</span></th>
+          <th><span class="badge env-c">Preview</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Domain</td>
+          <td class="mono">app.example.com</td>
+          <td class="diff mono">alt.example.com</td>
+          <td class="diff mono">preview.example.com</td>
+        </tr>
+        <tr>
+          <td>Deploy trigger</td>
+          <td>Release / manual</td>
+          <td class="diff">Manual only</td>
+          <td class="diff">Auto on push to main</td>
+        </tr>
+        <!-- duplicate rows; class="diff" only on cells that differ from production -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== CI/CD: one .track per flow; .hot=prod-touching, .alt=preview, .off=disabled ===== -->
+<section id="cicd">
+  <h2>CI/CD pipeline</h2>
+  <div class="pipeline">
+    <div>
+      <div class="pipeline-title">Continuous delivery — push to main</div>
+      <div class="track">
+        <span class="step">Push to main</span><span class="sep">→</span>
+        <span class="step">Lint + compile</span><span class="sep">→</span>
+        <span class="step">Unit tests</span><span class="sep">→</span>
+        <span class="step alt">Deploy preview</span>
+      </div>
+    </div>
+    <div>
+      <div class="pipeline-title">Production release — tagged release</div>
+      <div class="track">
+        <span class="step">Create release</span><span class="sep">→</span>
+        <span class="step off">E2E gate</span><span class="sep">→</span>
+        <span class="step">DB migrate</span><span class="sep">→</span>
+        <span class="step">Build image</span><span class="sep">→</span>
+        <span class="step hot">Deploy service</span><span class="sep">→</span>
+        <span class="step hot">Deploy functions</span><span class="sep">→</span>
+        <span class="step">Notify</span>
+      </div>
+    </div>
+    <div class="kv">
+      <span><b>Runners:</b> runner details</span>
+      <span><b>Concurrency:</b> limits</span>
+      <span><b>Deploy tools:</b> tool names</span>
+      <span><b>Rollback:</b> mechanism</span>
+    </div>
+  </div>
+  <div class="callout"><b>Caveat title.</b> One or two sentences on the disabled gate / risk, with the date it changed and the compensating control.</div>
+</section>
+
+<!-- ===== Scheduled work: platform schedulers visible; long secondary lists
+     (CI crons etc.) inside a .disclosure so the page stays scannable ===== -->
+<section id="schedule">
+  <h2>Scheduled work</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Schedule</th><th>System</th><th>Name</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">rate(5 min)</td><td>Scheduler</td><td class="mono">JobName</td><td>What it does</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <details class="disclosure">
+    <summary>CI cron jobs <span class="count">NN workflows</span></summary>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Schedule</th><th>Name</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">Daily 03:00</td><td class="mono">workflow-name</td><td>What it does</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<!-- ===== Secrets: NAMES ONLY, never values; note the delivery path below ===== -->
+<section id="secrets">
+  <h2>Identity &amp; secrets <span class="badge warn" style="vertical-align:2px">names only</span></h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Category</th><th>Secret names</th><th>Scope</th></tr></thead>
+      <tbody>
+        <tr><td>Database</td><td class="mono">SERVICE_KEY, DB_PASSWORD</td><td>All envs</td></tr>
+        <tr><td>Payments</td><td class="mono">PAY_SECRET_KEY</td><td><span class="badge env-b">Secondary</span> only</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lede" style="margin-top:10px">Delivery: how secrets reach runtime (CI vars → task def, parameter store, etc.). Note what is <em>not</em> used.</p>
+</section>
+
+<!-- ===== Monitoring: coverage table + gaps callout (gaps are findings) ===== -->
+<section id="monitoring">
+  <h2>Monitoring &amp; alerting</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Tool</th><th>Coverage</th><th>Alert path</th></tr></thead>
+      <tbody>
+        <tr><td>Application</td><td>Tool</td><td>What is covered, with thresholds in <span class="mono">mono</span></td><td>Where alerts land</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout danger"><b>Gaps.</b> Alarms with no action, missing uptime checks, single-channel alerting — absences are findings.</div>
+</section>
+
+<!-- ===== Roadmap: chips link to the tracker; three h3 buckets ===== -->
+<section id="roadmap">
+  <h2>Roadmap</h2>
+  <h3>Shipped (recent)</h3>
+  <div class="chips">
+    <a class="chip" href="https://tracker.example/1234"><span class="id">#1234</span> Short description</a>
+  </div>
+  <h3>In flight</h3>
+  <div class="chips">
+    <a class="chip" href="https://tracker.example/1240"><span class="id">#1240</span> Short description</a>
+  </div>
+  <h3>Planned</h3>
+  <div class="chips">
+    <a class="chip" href="https://tracker.example/1250"><span class="id">#1250</span> Short description</a>
+  </div>
+</section>
+
+<!-- ===== Worth knowing: surprises a newcomer would trip on ===== -->
+<section id="notes">
+  <h2>Worth knowing</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:200px">Topic</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>Surprising fact</td><td>Why it matters and where it bites.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== Footer: dated sources + provenance ===== -->
+<footer>
+  <b>Sources:</b> cloud APIs queried (list) via <code>profile-name</code> · IaC files · CI workflow files · tracker.<br>
+  <b>Provenance:</b> which facts are live-verified vs declared-in-IaC vs inferred. State what was <em>not</em> accessed.
+</footer>
+
+</div>
+
+<!-- Keep this script intact: scroll reveal, TOC scrollspy, stat count-up.
+     All motion is skipped under prefers-reduced-motion. -->
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Reveal below-fold sections as they enter the viewport
+  if (!reduce && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }, { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('section').forEach(el => {
+      if (el.getBoundingClientRect().top < innerHeight * 0.9) return; // already visible: no reveal
+      el.classList.add('reveal'); io.observe(el);
+    });
+  }
+
+  // Scrollspy: highlight the TOC link of the section in view
+  const links = new Map([...document.querySelectorAll('.toc a')].map(a => [a.hash.slice(1), a]));
+  if (links.size && 'IntersectionObserver' in window) {
+    const spy = new IntersectionObserver(entries => {
+      for (const e of entries) if (e.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        links.get(e.target.id)?.classList.add('active');
+      }
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    document.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+  }
+
+  // Count-up on stat values (numeric only; restores exact original text at the end)
+  if (!reduce) {
+    document.querySelectorAll('.stat .value').forEach(el => {
+      const original = el.textContent.trim();
+      const target = Number(original.replace(/,/g, ''));
+      if (!Number.isFinite(target)) return;
+      const t0 = performance.now(), dur = 650;
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / dur);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick); else el.textContent = original;
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+})();
+</script>

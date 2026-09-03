@@ -1,6 +1,5 @@
 bundler
 pry
-solargraph
 rubocop
 rubocop-rspec
 rubocop-rake

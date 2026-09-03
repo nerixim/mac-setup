@@ -13,10 +13,6 @@ cp "${BASEDIR}/mise-config.toml" ~/.config/mise/config.toml
 # .default-gems / .default-npm-packages / .default-python-packages are symlinked
 # from stow/home/ by scripts/stow.sh (run `make stow`).
 
-# set default rubocop config
-ghq get nerixim/ruby-code-style
-cp ~/ghq/github.com/nerixim/ruby-code-style/.base.rubocop.yml ~/.rubocop.yml
-
 # for shell completion
 mise use -g usage
 

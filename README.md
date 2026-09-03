@@ -49,8 +49,10 @@ so re-running any target reconciles state rather than duplicating lines.
   shows installed-but-untracked packages (minus `scripts/.brew-ignore`) to promote.
 - **Secrets** (tokens, keys) go in `~/.secrets` (chmod 600), sourced from
   `~/.zsh_profile`. Never commit them; keep them out of `~/.zshrc`.
-- **Runtime versions** are pinned in `scripts/mise-config.toml`, installed to the
-  single global mise config at `~/.config/mise/config.toml`.
+- **Runtime versions** are pinned in `scripts/mise-config.toml` (one version per
+  tool, major/minor prefix so `mise install` picks the newest patch), installed to
+  the single global mise config at `~/.config/mise/config.toml`. Add extra
+  versions per machine with `mise use -g node@22`; they stay out of the repo.
 - **iTerm2** ships as a Dynamic Profile (`config/iterm-profile.json` ->
   `~/Library/Application Support/iTerm2/DynamicProfiles/nerzie.json`), auto-loaded
   by iTerm — no manual Preferences import.

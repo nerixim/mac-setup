@@ -23,21 +23,26 @@ sudo nvram SystemAudioVolume=" "
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 
 # Trackpad: tap-to-click, and map the bottom-right CORNER to secondary (right) click.
-# Multitouch prefs are read only from the per-user -currentHost (ByHost) domain and
-# must be written as the user (not sudo). Changes apply after logout/restart.
+# System Settings writes the trackpad keys to BOTH the per-user global domain and
+# the -currentHost (ByHost) domain (verified on a machine configured via the UI:
+# TrackpadCornerSecondaryClick=2 / TrackpadRightClick=0 in both). Writing only
+# ByHost leaves the driver reading the old global value, so write both. Must run
+# as the user (not sudo). Changes apply after logout/restart.
 defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
-# Built-in trackpad
-defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadRightClick -bool false
-defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadCornerSecondaryClick -int 2
-# Magic / Bluetooth trackpad
-defaults -currentHost write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool false
-defaults -currentHost write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadCornerSecondaryClick -int 2
-# Global secondary-click enable + corner behavior
+for domain in com.apple.AppleMultitouchTrackpad com.apple.driver.AppleBluetoothMultitouch.trackpad; do
+  for host in "" "-currentHost"; do
+    defaults ${host} write "${domain}" TrackpadRightClick -bool false
+    defaults ${host} write "${domain}" TrackpadCornerSecondaryClick -int 2
+  done
+done
+# Global secondary-click enable + corner behavior (ByHost only, as the UI writes it)
 defaults -currentHost write NSGlobalDomain com.apple.trackpad.enableSecondaryClick -bool true
 defaults -currentHost write NSGlobalDomain com.apple.trackpad.trackpadCornerClickBehavior -int 1
+# Ask the preference daemon to re-read without a logout; harmless if it does nothing.
+/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u 2>/dev/null || true
 
 ###############################################################################
 # Screen #

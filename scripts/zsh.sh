@@ -6,13 +6,6 @@ BASEDIR="$(cd "$(dirname "$0")" && pwd)"
 
 brew install zsh zsh-completions
 
-# Use Homebrew zsh as login shell (Apple Silicon: /opt/homebrew).
-BREW_ZSH="${HOMEBREW_PREFIX}/bin/zsh"
-if ! grep -qxF "${BREW_ZSH}" /etc/shells; then
-  echo "${BREW_ZSH}" | sudo tee -a /etc/shells
-fi
-[ "$SHELL" = "${BREW_ZSH}" ] || chsh -s "${BREW_ZSH}"
-
 # oh-my-zsh
 if [ ! -d "${HOME}/.oh-my-zsh" ]; then
   sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" "" --unattended
@@ -72,9 +65,23 @@ unsetopt nomatch  # let next.js-style globs with [] pass through
 [ -f ~/.secrets ] && source ~/.secrets
 EOF
 
+# ---- login shell: Homebrew zsh (Apple Silicon: /opt/homebrew) ----
+# Done last so a failure here can't skip the rc/theme wiring above. `sudo chsh`
+# changes the shell without the interactive password prompt of plain `chsh`,
+# which is what aborted this script under `make` before.
+BREW_ZSH="${HOMEBREW_PREFIX}/bin/zsh"
+if ! grep -qxF "${BREW_ZSH}" /etc/shells; then
+  echo "${BREW_ZSH}" | sudo tee -a /etc/shells
+fi
+current_shell="$(dscl . -read "${HOME}" UserShell | awk '{print $2}')"
+if [ "$(readlink -f "${current_shell}")" != "$(readlink -f "${BREW_ZSH}")" ]; then
+  sudo chsh -s "${BREW_ZSH}" "${USER}"
+  dscl . -read "${HOME}" UserShell | grep -qF "${BREW_ZSH}" || { echo "login shell NOT changed — run: chsh -s ${BREW_ZSH}"; exit 1; }
+fi
+
 cat <<'EOF'
 *************
-ZSH_THEME, plugins, and ~/.p10k.zsh are configured automatically.
+ZSH_THEME, plugins, ~/.p10k.zsh, and the login shell are configured automatically.
 
 One manual step remains — Homebrew completions must be on FPATH BEFORE
 `source $ZSH/oh-my-zsh.sh` (so oh-my-zsh's compinit picks them up). Add near the

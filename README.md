@@ -27,9 +27,19 @@ so re-running any target reconciles state rather than duplicating lines.
 
 - **Dotfiles** under `stow/home/` are symlinked into `$HOME` with GNU stow
   (`make stow`) — the repo file *is* the live file, so there's no copy/write-back
-  drift. Covers `.default-*` package lists, `.p10k.zsh`, `.terraformrc`, and
-  zellij config. Files that are appended/generated (`.zshrc`, `.aliases`,
-  gitconfig, iTerm, lazygit) stay script-managed instead.
+  drift. Covers `.default-*` package lists, `.p10k.zsh`, `.terraformrc`, zellij
+  config, and the coding-agent config below. Files that are appended/generated
+  (`.zshrc`, `.aliases`, gitconfig, iTerm, lazygit) stay script-managed instead.
+- **Coding-agent config** lives in `stow/home/.claude/` (`CLAUDE.md`,
+  `settings.json`, `statusline.sh`, `agents/`, `commands/`, `docs/`, own `skills/`)
+  and is stowed file-by-file into `~/.claude/`, next to Claude Code's untracked
+  runtime state. `~/.codex/AGENTS.md` and `~/.config/opencode/AGENTS.md` are
+  symlinks to the same `CLAUDE.md`, so every agent reads one file. Edits made on
+  any machine (including Claude Code writing to `settings.json`) land in the repo:
+  commit + push here, `git pull && make stow` elsewhere. Third-party skills under
+  `~/.agents/skills` are not tracked; reinstall them with their installer.
+  The repo is public, so keep client names, tokens, and internal URLs out of these
+  files — `~/.secrets` and per-project `.claude/` dirs are the place for those.
 - **Terraform** uses a shared provider plugin cache (`~/.terraformrc` ->
   `~/.terraform.d/plugin-cache`, dir created by `make terraform`). Without it
   each module's `.terraform/` carries its own provider binaries — that was 76 GB

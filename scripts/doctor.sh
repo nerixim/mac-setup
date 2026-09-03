@@ -28,7 +28,8 @@ grep -q 'source ~/.aliases' ~/.zshrc 2>/dev/null && ok "~/.aliases sourced" || n
 grep -q 'powerlevel10k/powerlevel10k' ~/.zshrc 2>/dev/null && ok "p10k theme set" || no "ZSH_THEME not powerlevel10k" "make zsh"
 
 section "Dotfiles (stow symlinks)"
-for df in .p10k.zsh .default-npm-packages .terraformrc .config/zellij/config.kdl; do
+for df in .p10k.zsh .default-npm-packages .terraformrc .config/zellij/config.kdl \
+          .claude/CLAUDE.md .claude/settings.json .claude/statusline.sh .codex/AGENTS.md .config/opencode/AGENTS.md; do
   if [ -L ~/"$df" ] && [ -e ~/"$df" ]; then ok "~/$df -> repo"
   elif [ -e ~/"$df" ]; then no "~/$df is a real file, not a stow symlink" "make stow (back up ~/$df first)"
   else no "~/$df missing" "make stow"; fi

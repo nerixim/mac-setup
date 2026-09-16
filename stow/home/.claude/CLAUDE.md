@@ -11,11 +11,18 @@
 ## Outbound Messages (Slack / Backlog / PR)
 
 - **Draft, don't send.** I review and edit before it goes out.
+- **Re-fetch before drafting.** Pull the live thread, PR, issue, and code state immediately before writing any reply or status line. Briefings, dumps, memory, and earlier turns are snapshots: someone may have already answered, merged, resolved the thread, or changed the ask. Name what was re-read in one clause of the report, and if the state moved, say so before the draft.
 - **Chat replies: as short as the facts allow** — a few lines per topic. State what was done or what will be done. Cut the "why it was stuck", the root-cause narrative, and the options I didn't pick.
 - **Detail belongs in the ticket, not the chat message.** Ticket trees, tables, status matrices, evidence → Backlog/PR comment. The chat reply just names the ticket.
 - **Own a miss in one clause** ("私の /finish 漏れです。すみません。") then move on. No extended apology, no self-analysis.
 - **Mention people with a real mention** (Backlog `@name` + `--notify <id>`), never a plain-text name.
 - **Routine tracker operations are not questions.** Status moves, child issues per an already-agreed design, the summary comment: execute, then report what changed. Don't ask item by item.
+- **Chat reply shape: 3 lines.** Line 1 is the outcome in my voice (「確認しました！」「承知しました！」 — です/ます with 「！」; DMs open with 「お疲れ様です！」, no @ in a DM). Line 2 is what happens next or the one ask. Line 3 is the link. No reasons, no bracketed asides, no forecast of steps after the next one.
+- **Confirmation is a PR, not a comment.** If my verification agrees with the issue author's analysis and proposed fix, don't post a comment restating it. Open the PR that implements the proposal; the PR body carries what was verified. Comment on the issue only when the verification changes the plan, and then with one decision to make.
+- **Don't forward a decision list.** When a predecessor or reviewer routes N items to one decision-maker, don't relay them as N questions in chat — it reads as handing the work back. Convert each into the artifact that carries the decision (the PR, the 手順書, the operational thread where it is live) and ask in chat only for the item that needs their words now, in its own thread. Ack the original thread in 3 lines.
+- **Questions go to Slack, never into an issue/PR body.** Nobody reads a 相談 buried in a body or a comment; it dies there. Bodies are write-once: reviewers read them once and nobody replies to them, so a body carries facts and recorded decisions, never a conversation. Anything that needs a human answer (a design choice, "is this the intent", "A or B", scope I'm unsure of) is a Slack message in the relevant thread or channel, with a real mention, one question, and a link to the ticket. The ticket records the decision after it is made, not the question. A draft PR is for "not ready to merge", not for "waiting on an answer" — if I'm waiting on an answer, the Slack message is the deliverable and the ticket says 「Slackで相談中」 with the permalink.
+- **Issue/PR comment shape: match the thread's author.** Two headings at most (確認結果 / 相談 or 対応). Evidence is 3–4 bullets with the source inline (「根拠は〜」), not a sources table. Options go in one small table, recommendation first. Close with the one question (「Aで進めてよいでしょうか」). Points I'm not pursuing get one 別件 line. Aim for the same length as the author's own comments, never 2–3×. The same for a new issue body: match the repo's existing issues (headings or none, list style, length) — read two before writing, and don't import my PR-body template (`## 変更 / ## 確認したこと / ## 検証`) into an issue.
+- **One comment per issue, edited in place.** While I am the only one who has posted since my last comment, new findings go into that comment (edit it), not a second one. A reader should get the whole current state from one place. Post a new comment only after someone else has replied, or when the content is a reply to them.
 
 ## Writing (Japanese)
 
@@ -60,10 +67,27 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
   - 箇条書きの各項目を太字で始める型は、項目が3つを超えたら見出しに切るか素の文に戻す
 - **日本語の文に英語語幹を裸で挿さない**（ルー大柴化）。この規則はregisterを問わず効く — 開発者向けだから英語語幹を裸で置いてよい、ではない。バッククォートでの隔離が許されるのは識別子・型名・コマンド・フィールド名だけで、概念語と動詞は開発者向けでも日本語にする。実際のフィールドを指すなら`warnings`、警告という概念なら「警告」。動詞は日本語にする（❌「warningに丸めず再throwする」→ ⭕️「警告に丸めず、そのまま投げ直す」）。非開発者向けでは識別子自体を書かない（上表が優先）。用語は投稿前に`~/.claude/docs/ja-tech-glossary.md`を一度当たる。
 - **実機で確認したUI・検証結果は、チケットに証跡ごと残す**: スクリーンショットはBacklogの添付にアップロードし、`![image][ファイル名]`で**本文・コメントにインライン埋め込みする**（添付は課題に紐づくので本文とコメントの両方から同じファイル名で参照できる）。テスト結果・実測値は表にしてコメントで投稿する。**これは完了のブロッカーにはしない** — 証跡が撮れていなければ「未実施」と明示して先に進む。文字だけの「確認しました」は読み手が追検証できない。
+- **CLIで確認した事実は、コマンドと出力を一緒に載せる**: 「`describe-security-groups`で確認した」だけでは追検証できない。実行したコマンド（アカウント・リージョン・実行時刻を添える）と、その出力を`<details><summary>実行したコマンドと出力</summary>`に畳んで置く。出力は無関係な部分を削ってよいが、値は編集しない（畳んだ・削った旨を1行添える）。秘密情報・個人情報は入れない。
+- **クラウドのリソースはコンソールURLでリンクする**: SG・ALB・SSMパラメータ・TFCワークスペースなどIDを書く箇所は、その画面へのURLを付ける（`https://<region>.console.aws.amazon.com/ec2/home?region=<region>#SecurityGroup:groupId=sg-…`）。IDだけでは読み手が同じものを開けない。
 - **手順はコマンドで書く**: 画面の遷移は言葉で追えず、UIが変わると腐り、コピーして流せない。`gh workflow run <file> --ref main -f key=value`のように書き、確認手順もコマンドにする（「実行履歴を確認」ではなく`gh run list --workflow=<file> -L 1`）。画面が要るならURLを直に貼り、なぜCLIでできないかを1行添える。
 - **出典はたどれるリンクで示す**: Slackはメッセージのpermalink、NotionはページURL、GitHubは`#123`。「Slackの`#channel`に記載あり」では読み手が同じ根拠へ到達できない。リンクの見出しは日付+場所（`[2026-08-27 #channel-name](URL)`）。出典が見つからない事実は書かないか、「未確認」と明示する。
 - **系をまたぐ参照はフルURLで書く**: `PROJ-123`はBacklog内、`#123`はGitHub内でしか自動リンクされない。**BacklogコメントからGitHub PRを指すとき、GitHub PR/IssueからBacklogチケットを指すときは、キーだけでなくURLを書く**（`[#1133](https://github.com/example-org/example-repo/pull/1133)` / `[PROJ-1419](https://example.backlog.jp/view/PROJ-1419)`）。同一系内は自動リンクに任せてキーだけで書く — 冗長化を避ける。
 - **絶対日付**（2026-09-02）。「昨日」「先週」は書かない。docsの末尾は`最終更新日: YYYY-MM-DD`。
+
+### AI臭を消す（文の組み立て。registerを問わず）
+
+語のリストは用語集の「AI臭い常套句」「翻訳調の構文」節。機械検査は`~/.claude/skills/factcheck/bin/lint-draft`のW17〜W20と、同じ下書きをHaikuに読ませる`bin/ja-review`。
+
+- **結論を最初の一文に置き、前置き・予告・数の宣言を書かない**。「本稿では〜」「理由は3つあります」「いよいよ本題」「見ていきましょう」は削る。`TL;DR`のような英語見出しも使わない（要点・結論）。
+- 「効く」「有効」だけで済ませない。何がどう変わるかを同じ文に書く（「applyが3分→1分になる」）。効果を書けないなら、まだ測っていない。
+- 「AではなくB」は読み手が本当にAだと誤解しているときだけ。言い換えならBを肯定形で書く。
+- 原因を先に、結果を後に。「Aが起きます。Bのためです」は「BのためAが起きます」。
+- 一文は60字を目安に、節をつなぐ読点は3つまで。同じ文末（〜ます。〜ます。〜ます。）を3文続けない。読点だけで主張を継がない。
+- 英語の構文を持ち込まない。無生物主語＋他動詞（「この結果は〜を示している」→「この結果から〜と分かる」）、「〜することができる」→「〜できる」、「〜することによって」→「〜すると」、「〜という観点から」→「〜で見ると」、「それは〜だ。なぜなら〜」→理由を先に1文で。
+- 確信度は語尾でぼかさず、ラベルで書き分ける: 断定 / 【推定】 / 【要確認】。「〜と思われます」「〜と考えられます」「〜の可能性があります」は使わない。
+- 用語は機能を説明してから名前を渡す。抽象語（不可欠・多角的・包括的・鍵となる）は具体の根拠に置き換える。くだけた語（いじる・ちょっと）と造語（メリデメ）は書き言葉に、硬い漢語（帰結）は平易に。
+- lintに引っかかったら語を差し替えず、その文を丸ごと書き直す。補足・注記を足して逃げない。本文は元と同じ長さか短く。
+- 書いた本人は自分の直訳を見つけられない。送る前に`lint-draft`と`ja-review`（Haiku、Slackの3行でも10秒）を両方通す。
 
 ## Commits, PRs, Reviews
 
@@ -83,6 +107,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - An integration is not done until the real API/SDK has been called once. Mocked tests are not evidence.
 - Never mock pure functions (date utilities, formatters, helpers) in tests. Mock only I/O boundaries — a test over mocked pure logic verifies nothing.
 - In any report, separate observation from inference; label speculation as speculation.
+- A "TBD" or "waiting on X" in an issue is a lookup before it is a question: read the channel where X would have posted (history for the window, not keyword search) and only then ask the author for what is still open. Procedure in `~/.claude/docs/issue-discipline.md` §1(d).
 - **Citing evidence never overrides the reader's register.** These rules push for traceable sources (file:line, config, logs) — that applies to your work log, developer-facing tickets and reports to me, **not** to a decision request aimed at a non-engineer. There, keep the conclusion and drop the mechanics; the backing lives in the developer-facing ticket you link to. See Writing (Japanese) → 「まず register を選ぶ」.
 
 ### Shift left
@@ -112,6 +137,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - When requirements are ambiguous, present the options with a recommendation — not an open question.
 - My explicit instruction overrides any convention; follow it and flag the conflict in the same message.
 - If verification wasn't possible, say exactly what was and wasn't verified. Never round up to "done".
+- **Any sign of a shared checkout → worktree, immediately.** Branch switched under me, untracked files I didn't create, a stash I didn't make, a peer session listed as busy in the same repo, a dirty tree at start: stop touching that tree and do the rest of the work in a `git worktree` (`EnterWorktree` or `git worktree add`). Never `checkout`/`branch` in a tree I haven't just verified is mine and clean. Say in the report that a worktree was used and why.
 
 ## Greenfield Stack Defaults
 

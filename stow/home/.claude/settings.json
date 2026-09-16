@@ -49,13 +49,8 @@
       "mcp__github__update_pull_request",
       "mcp__notion__notion_retrieve_page",
       "mcp__notion__notion_search",
-      "mcp__slack__slack_search_messages",
-      "mcp__slack__slack_search_channels",
-      "mcp__slack__slack_get_channel_history",
       "mcp__notion__notion_retrieve_block_children",
-      "mcp__slack__slack_get_thread_replies",
       "mcp__notion__notion_query_database",
-      "mcp__slack__slack_list_channels",
       "Bash(supabase status:*)",
       "mcp__chrome-devtools__navigate_page",
       "mcp__chrome-devtools__take_snapshot",
@@ -80,7 +75,45 @@
       "mcp__plugin_playwright_playwright__browser_close",
       "Skill(agent-browser)",
       "Read(//Users/nk/.claude/skills/agent-browser/**)",
-      "Read(//Users/nk/.agents/skills/agent-browser/**)"
+      "Read(//Users/nk/.agents/skills/agent-browser/**)",
+      "mcp__slack__users_search",
+      "mcp__slack__conversations_search_messages",
+      "mcp__slack__conversations_replies",
+      "mcp__slack__conversations_history",
+      "mcp__slack__channels_list",
+      "mcp__plugin_datadog_mcp__search_datadog_events",
+      "mcp__plugin_datadog_mcp__search_datadog_monitors",
+      "mcp__plugin_datadog_mcp__get_datadog_metric",
+      "mcp__plugin_datadog_mcp__search_datadog_metrics",
+      "mcp__plugin_datadog_mcp__aggregate_events",
+      "mcp__plugin_datadog_mcp__load_datadog_skill",
+      "mcp__claude_ai_Gmail__search_threads",
+      "Bash(git fetch *)",
+      "Bash(aws sts get-caller-identity *)",
+      "Bash(bq ls *)",
+      "Bash(aws ecs describe-services *)",
+      "Bash(aws ecs list-services *)",
+      "Bash(aws ecs list-clusters *)",
+      "Bash(aws ecs list-tasks *)",
+      "Bash(aws elbv2 describe-load-balancers *)",
+      "Bash(aws events list-rules *)",
+      "Bash(aws health describe-events *)",
+      "Bash(aws ec2 describe-instances *)",
+      "Bash(aws ec2 describe-security-groups *)",
+      "Bash(aws cloudwatch describe-alarm-history *)",
+      "Bash(aws rds describe-db-instances *)",
+      "Bash(aws cloudtrail lookup-events *)",
+      "Bash(aws codepipeline list-pipelines *)",
+      "Bash(gcloud auth list *)",
+      "Bash(gcloud logging read *)",
+      "Bash(terraform validate *)",
+      "Bash(terraform version *)",
+      "Bash(uv tool run *)",
+      "Bash(mise exec *)",
+      "Bash(mise run *)",
+      "Bash(docker run *)",
+      "Bash(terraform init *)",
+      "Bash(terraform fmt *)"
     ],
     "deny": [
       "mcp__plugin_serena_serena__replace_content"
@@ -171,7 +204,8 @@
     "ruby-lsp@claude-plugins-official": false,
     "codex@openai-codex": false,
     "cc-gemini-plugin@cc-gemini-plugin": false,
-    "vercel@claude-plugins-official": true
+    "vercel@claude-plugins-official": true,
+    "datadog@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "sentry-mcp": {
@@ -234,5 +268,21 @@
   },
   "feedbackSurveyState": {
     "lastShownTime": 1754091988379
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(gh *)",
+            "command": "python3 ~/.claude/skills/factcheck/bin/gh-post-gate",
+            "timeout": 20,
+            "statusMessage": "gh 投稿の日本語を lint 中"
+          }
+        ]
+      }
+    ]
   }
 }

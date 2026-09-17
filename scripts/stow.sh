@@ -4,7 +4,7 @@ set -eux
 # Symlink the dotfiles under stow/home/ into $HOME via GNU stow, so the repo file
 # IS the live file (edit once, no copy/write-back drift). Covers: .default-gems,
 # .default-npm-packages, .default-python-packages, .p10k.zsh, .terraformrc,
-# .config/zellij/, and the shared coding-agent config: .claude/ (CLAUDE.md,
+# .config/zellij/, ~/.tmux.conf, and the shared coding-agent config: .claude/ (CLAUDE.md,
 # settings.json, agents/, commands/, docs/, skills/, statusline.sh) plus
 # .codex/AGENTS.md and .config/opencode/AGENTS.md, which are symlinks to
 # .claude/CLAUDE.md inside the repo so every agent reads one file.

@@ -70,6 +70,7 @@ brew 'atuin' # searchable shell history
 brew 'yazi' # terminal file manager
 brew 'difftastic' # syntax-aware structural diff
 brew 'zellij' # terminal multiplexer
+brew 'tmux' # Claude-from-iPad session (make tmux)
 brew 'restic' # encrypted deduplicated backups (meta: bun scripts/backup.mjs)
 
 # docker

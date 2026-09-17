@@ -15,7 +15,7 @@ Individual targets also work: `make zsh`, `make osx-preferences`, etc.
 
 ```shell
 make doctor      # read-only: checks actual machine state, prints OK/FIX + the fix
-make mise-bump   # show outdated runtimes, then `mise upgrade`
+make mise-bump   # show outdated runtimes, then `mise upgrade` + npm refresh
 make secrets     # scaffold ~/.secrets (chmod 600) for tokens kept out of git
 ```
 
@@ -28,8 +28,8 @@ so re-running any target reconciles state rather than duplicating lines.
 - **Dotfiles** under `stow/home/` are symlinked into `$HOME` with GNU stow
   (`make stow`) — the repo file *is* the live file, so there's no copy/write-back
   drift. Covers `.default-*` package lists, `.p10k.zsh`, `.terraformrc`, zellij
-  config, and the coding-agent config below. Files that are appended/generated
-  (`.zshrc`, `.aliases`, gitconfig, iTerm, lazygit) stay script-managed instead.
+  config, `.tmux.conf`, and the coding-agent config below. Files that are appended/generated
+  (`.zshrc`, `.aliases`, gitconfig, `.npmrc`, iTerm, lazygit) stay script-managed instead.
 - **Coding-agent config** lives in `stow/home/.claude/` (`CLAUDE.md`,
   `settings.json`, `statusline.sh`, `agents/`, `commands/`, `docs/`, own `skills/`)
   and is stowed file-by-file into `~/.claude/`, next to Claude Code's untracked
@@ -53,6 +53,10 @@ so re-running any target reconciles state rather than duplicating lines.
   tool, major/minor prefix so `mise install` picks the newest patch), installed to
   the single global mise config at `~/.config/mise/config.toml`. Add extra
   versions per machine with `mise use -g node@22`; they stay out of the repo.
+  `make mise` / `make mise-bump` also installs a current npm into each supported
+  mise Node (skip EOL majors; Node 20 LTS ended 2026-04) so `min-release-age`
+  works. That key lives in `config/npmrc` and is appended to `~/.npmrc` — the
+  file is not stowed, because it also holds registry tokens.
 - **iTerm2** ships as a Dynamic Profile (`config/iterm-profile.json` ->
   `~/Library/Application Support/iTerm2/DynamicProfiles/nerzie.json`), auto-loaded
   by iTerm — no manual Preferences import.
@@ -68,3 +72,6 @@ so re-running any target reconciles state rather than duplicating lines.
 - Optional global key bindings (every profile): Settings -> Keys -> Key Bindings
   -> Presets -> Import -> `config/nerzie.itermkeymap`.
 - oh-my-zsh completions / theme lines: see the notes printed by `make zsh`.
+- Claude from iPad: `make tmux`, then `ta` + `claude` in iTerm. Enable Remote
+  Login (Sharing → Remote Login), start Tailscale on Mac and iPad when away,
+  SSH from Termius, run `ta`. Do not use `tmux -CC` with Claude fullscreen.

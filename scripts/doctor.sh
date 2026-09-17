@@ -29,7 +29,7 @@ grep -q 'source ~/.aliases' ~/.zshrc 2>/dev/null && ok "~/.aliases sourced" || n
 grep -q 'powerlevel10k/powerlevel10k' ~/.zshrc 2>/dev/null && ok "p10k theme set" || no "ZSH_THEME not powerlevel10k" "make zsh"
 
 section "Dotfiles (stow symlinks)"
-for df in .p10k.zsh .default-npm-packages .terraformrc .config/zellij/config.kdl \
+for df in .p10k.zsh .default-npm-packages .terraformrc .config/zellij/config.kdl .tmux.conf \
           .claude/CLAUDE.md .claude/settings.json .claude/statusline.sh .codex/AGENTS.md .config/opencode/AGENTS.md; do
   if [ -L ~/"$df" ] && [ -e ~/"$df" ]; then ok "~/$df -> repo"
   elif [ -e ~/"$df" ]; then no "~/$df is a real file, not a stow symlink" "make stow (back up ~/$df first)"
@@ -52,9 +52,34 @@ for host in "" "-currentHost"; do
 done
 
 section "Runtimes (mise)"
+if grep -qE '^min-release-age=' ~/.npmrc 2>/dev/null; then
+  ok "~/.npmrc has min-release-age"
+else
+  no "~/.npmrc missing min-release-age" "make mise  # or: ./scripts/mise.sh --refresh-npm"
+fi
+npm_ver=$(npm --version 2>/dev/null || true)
+if [ -n "$npm_ver" ] && [ "$(printf '%s\n%s\n' "$npm_ver" 11.10.0 | sort -V | head -1)" = 11.10.0 ]; then
+  ok "npm $npm_ver (>= 11.10, min-release-age)"
+elif [ -n "$npm_ver" ]; then
+  no "npm $npm_ver is older than 11.10" "./scripts/mise.sh --refresh-npm"
+else
+  no "npm missing" "make mise && mise install"
+fi
 if command -v mise >/dev/null; then
   ok "mise installed"
   mise current 2>/dev/null | sed 's/^/     /' || true
+  pnpm_bin=$(mise which pnpm 2>/dev/null || true)
+  pnpm_ver=$(pnpm --version 2>/dev/null || true)
+  case "$pnpm_bin" in
+    */installs/pnpm/*)
+      case "$pnpm_ver" in
+        12.*) ok "pnpm $pnpm_ver (mise)" ;;
+        *) no "pnpm $pnpm_ver, want 12.x" "make mise && mise install pnpm" ;;
+      esac
+      ;;
+    *) no "pnpm is ${pnpm_ver:-missing} at ${pnpm_bin:-none} (not mise)" \
+         "npm uninstall -g pnpm; make mise && mise install pnpm" ;;
+  esac
 else no "mise not installed" "make mise"; fi
 
 section "iTerm2 profile"
@@ -69,6 +94,22 @@ if [ "$def" = nerzie-dynamic-profile ]; then ok "Cmd+Left/Right tab switch via n
 elif [ "${glob:-0}" -gt 0 ]; then ok "Cmd+Left/Right tab switch via global keymap preset"
 else no "Cmd+Left/Right tab switch not configured" \
        "make iterm with iTerm closed (sets nerzie default), or import config/nerzie.itermkeymap"; fi
+
+section "tmux (Claude from iPad)"
+if command -v tmux >/dev/null; then
+  ok "tmux $(tmux -V | awk '{print $2}')"
+else
+  no "tmux missing" "make tmux"
+fi
+if [ -f ~/.tmux.conf ] && grep -q 'allow-passthrough on' ~/.tmux.conf 2>/dev/null; then
+  ok "~/.tmux.conf has Claude passthrough + extended-keys"
+else
+  no "~/.tmux.conf missing Claude lines" "make tmux"
+fi
+if grep -q "alias ta=" ~/.aliases 2>/dev/null; then ok "alias ta (attach-or-create main)"
+else no "alias ta missing" "make tmux"; fi
+if lsof -nP -iTCP:22 -sTCP:LISTEN >/dev/null 2>&1; then ok "Remote Login listening on :22"
+else no "Remote Login off (Termius cannot SSH in)" "System Settings → General → Sharing → Remote Login"; fi
 
 section "Core CLI tools"
 for t in rg fd eza bat delta tig lazygit lazydocker gh ghq fzf zoxide atuin yazi difft jq yq direnv; do

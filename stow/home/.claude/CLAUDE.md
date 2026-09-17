@@ -115,7 +115,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 
 ## Skills
 
-- どのスキル・道具をどの場面とrepoで使うかは `~/.claude/docs/skills-register.md` を引く。自作9本と、skills.sh由来のうち実際に呼ぶものだけ載せてある。
+- どのスキル・道具をどの場面とrepoで使うかは `~/.claude/docs/skills-register.md` を引く。自作のものと、skills.sh由来のうち実際に呼ぶものだけ載せてある。機ごとに本数が違うので、登録簿の表を正とする。
 
 ## Working Principles
 

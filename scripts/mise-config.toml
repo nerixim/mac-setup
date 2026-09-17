@@ -15,6 +15,7 @@ terraform = "1.16"
 # Prefix, not `latest`: pnpm backports 11.x after 12, so GitHub's Latest tag
 # (and asdf's sticky `latest` symlink) stay on 11. Aqua + semver pick 12.x.
 pnpm = { version = "12", version_order = "semver" }
+bun = "1" # runs the mdfmt skill (stow/home/.claude/skills/mdfmt) and its tests
 
 [settings]
 legacy_version_file = true # honor project-level .tool-versions/.nvmrc/.ruby-version

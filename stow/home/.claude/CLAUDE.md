@@ -11,11 +11,12 @@
 ## Outbound Messages (Slack / Backlog / PR)
 
 - **Draft, don't send.** I review and edit before it goes out.
+- **Write as the sender, not as an assistant.** The message goes out under my name, from a peer engineer to a colleague. No offers of service (「必要なら〜します」「ご希望であれば」「お手伝いします」), no volunteering work nobody asked for, no closing that hands the next move to the reader. State the fact, state what I will do only if I have already decided to do it, and stop. A follow-up that needs their input is one question, not an offer.
 - **Re-fetch before drafting.** Pull the live thread, PR, issue, and code state immediately before writing any reply or status line. Briefings, dumps, memory, and earlier turns are snapshots: someone may have already answered, merged, resolved the thread, or changed the ask. Name what was re-read in one clause of the report, and if the state moved, say so before the draft.
 - **Chat replies: as short as the facts allow** — a few lines per topic. State what was done or what will be done. Cut the "why it was stuck", the root-cause narrative, and the options I didn't pick.
 - **Detail belongs in the ticket, not the chat message.** Ticket trees, tables, status matrices, evidence → Backlog/PR comment. The chat reply just names the ticket.
 - **Own a miss in one clause** ("私の /finish 漏れです。すみません。") then move on. No extended apology, no self-analysis.
-- **Mention people with a real mention** (Backlog `@name` + `--notify <id>`), never a plain-text name.
+- **Mention people with a real mention**, never a bare name in the sentence. Slack drafts write `@今川さん` / `#tbx-team-sre` (names, not `<@U…>` IDs — pasting does not convert IDs, I pick the mention from autocomplete when posting). Backlog: `@name` + `--notify <id>`. GitHub: `@login`.
 - **Routine tracker operations are not questions.** Status moves, child issues per an already-agreed design, the summary comment: execute, then report what changed. Don't ask item by item.
 - **Chat reply shape: 3 lines.** Line 1 is the outcome in my voice (「確認しました！」「承知しました！」 — です/ます with 「！」; DMs open with 「お疲れ様です！」, no @ in a DM). Line 2 is what happens next or the one ask. Line 3 is the link. No reasons, no bracketed asides, no forecast of steps after the next one.
 - **Confirmation is a PR, not a comment.** If my verification agrees with the issue author's analysis and proposed fix, don't post a comment restating it. Open the PR that implements the proposal; the PR body carries what was verified. Comment on the issue only when the verification changes the plan, and then with one decision to make.
@@ -40,7 +41,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 | 判断依頼のとき | 論点を列挙してよい | **相手が答えるべき問いを1つに絞る** |
 | 技術的な裏取り | 本文に置く | **自分の作業ログか開発者向けチケットに置き、本文に持ち込まない** |
 
-**この選択が「日本語の文に英語語幹を裸で挿さない」より優先する。** 非開発者向けでは、隔離すべき識別子がそもそも本文に存在しないのが正しい状態。
+**この選択が「日本語の文に英語語幹をそのまま挿さない」より優先する。** 非開発者向けでは、隔離すべき識別子がそもそも本文に存在しないのが正しい状態。
 
 **読み手が開発者かどうかは、そのプロジェクトの名簿で引く。** 名簿は開発者・非開発者の**両側**を持つこと — 片側しか書いていないと、名簿を引けなかったときに既定が誤った方へ倒れる。
 
@@ -59,13 +60,13 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - **結論から。曖昧に逃げない**: 「困難です」「厳密には〜ない」ではなく「〜できません」。条件を付けるなら、どの条件かを添える。
 - **日本語と英数字の間にスペースを入れない**: `Slack通知を追加`（❌ `Slack 通知を追加`）。唯一の例外はGitHubの`#123`で、前後に半角スペースが無いと自動リンクされない（`関連 #123 を確認`）。
 - **強調の閉じ記号は句点の外**: `**強調。**続き`はCommonMarkが閉じ`**`と認識せず、太字にならずに`**`がそのまま出る。`**強調**。続き`と書く。日本語は文が句点で終わるので必ず踏む。
-- **太字を使いすぎない。見出し配下で1箇所、多くて2箇所**。それ以上打つと、地の文と太字の区別が消えて全部が地の文になる。日本語は分かち書きをしないので英文より太字が滲みやすく、CJKの太字は環境によって合成（擬似ボールド）になって字画が潰れる。効き方が英文と違う前提で減らす。
+- **太字を使いすぎない。見出し配下で1箇所、多くて2箇所**。それ以上打つと、本文と太字の区別が消えて全部が本文になる。日本語は分かち書きをしないので英文より太字が滲みやすく、CJKの太字は環境によって合成（擬似ボールド）になって字画が潰れる。効き方が英文と違う前提で減らす。
   - 太字にするのは、読み手が見落とすと判断を誤る一句だけ。文全体を包まない（句を包む）
   - 「重要そうだから」で打たない。節の中で最も重要な1点を選べないなら、その節は論点が多すぎる
   - 識別子・パスは既にバッククォートで目立つので太字を重ねない。見出し・表のセルの中でも重ねない
   - **日本語に斜体は使わない**。日本語フォントは正body体しか持たないことが多く、機械的に傾けた字形になって可読性が落ちる。強調したいなら太字か言い換えで足す
   - 箇条書きの各項目を太字で始める型は、項目が3つを超えたら見出しに切るか素の文に戻す
-- **日本語の文に英語語幹を裸で挿さない**（ルー大柴化）。この規則はregisterを問わず効く — 開発者向けだから英語語幹を裸で置いてよい、ではない。バッククォートでの隔離が許されるのは識別子・型名・コマンド・フィールド名だけで、概念語と動詞は開発者向けでも日本語にする。実際のフィールドを指すなら`warnings`、警告という概念なら「警告」。動詞は日本語にする（❌「warningに丸めず再throwする」→ ⭕️「警告に丸めず、そのまま投げ直す」）。非開発者向けでは識別子自体を書かない（上表が優先）。用語は投稿前に`~/.claude/docs/ja-tech-glossary.md`を一度当たる。
+- **日本語の文に英語語幹をそのまま挿さない**（ルー大柴化）。この規則はregisterを問わず効く — 開発者向けだから英語語幹をそのまま置いてよい、ではない。バッククォートでの隔離が許されるのは識別子・型名・コマンド・フィールド名だけで、概念語と動詞は開発者向けでも日本語にする。実際のフィールドを指すなら`warnings`、警告という概念なら「警告」。動詞は日本語にする（❌「warningに丸めず再throwする」→ ⭕️「警告に丸めず、そのまま投げ直す」）。非開発者向けでは識別子自体を書かない（上表が優先）。用語は投稿前に`~/.claude/docs/ja-tech-glossary.md`を一度当たる。
 - **実機で確認したUI・検証結果は、チケットに証跡ごと残す**: スクリーンショットはBacklogの添付にアップロードし、`![image][ファイル名]`で**本文・コメントにインライン埋め込みする**（添付は課題に紐づくので本文とコメントの両方から同じファイル名で参照できる）。テスト結果・実測値は表にしてコメントで投稿する。**これは完了のブロッカーにはしない** — 証跡が撮れていなければ「未実施」と明示して先に進む。文字だけの「確認しました」は読み手が追検証できない。
 - **CLIで確認した事実は、コマンドと出力を一緒に載せる**: 「`describe-security-groups`で確認した」だけでは追検証できない。実行したコマンド（アカウント・リージョン・実行時刻を添える）と、その出力を`<details><summary>実行したコマンドと出力</summary>`に畳んで置く。出力は無関係な部分を削ってよいが、値は編集しない（畳んだ・削った旨を1行添える）。秘密情報・個人情報は入れない。
 - **クラウドのリソースはコンソールURLでリンクする**: SG・ALB・SSMパラメータ・TFCワークスペースなどIDを書く箇所は、その画面へのURLを付ける（`https://<region>.console.aws.amazon.com/ec2/home?region=<region>#SecurityGroup:groupId=sg-…`）。IDだけでは読み手が同じものを開けない。
@@ -105,6 +106,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 
 - Claims about system state come from the system, not from reading code: check the deployed version/tag, the actual config, the actual logs before diagnosing.
 - Absence of evidence is not evidence — a missing log line does not mean a variable is unset; query the config directly.
+- **A PR's or issue's state comes from `gh` at report time.** A Slack thread that links a PR, a memory note, or yesterday's dump says what it was, not what it is. Before writing 「レビュー待ち」「未マージ」「open」 in any report or reply, run `gh pr view` / `gh issue view` for that number in the same turn; if the state moved, say so first (2026-09-16: reported #89 as レビュー待ち a day after it was merged).
 - An integration is not done until the real API/SDK has been called once. Mocked tests are not evidence.
 - Never mock pure functions (date utilities, formatters, helpers) in tests. Mock only I/O boundaries — a test over mocked pure logic verifies nothing.
 - In any report, separate observation from inference; label speculation as speculation.

@@ -1,0 +1,3 @@
+# Appended to ~/.npmrc by scripts/mise.sh. Not stowed: that file also holds
+# registry tokens that must stay out of git. npm >= 11.10.
+min-release-age=3

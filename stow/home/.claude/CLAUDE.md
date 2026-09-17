@@ -128,6 +128,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - Never mock pure functions (date utilities, formatters, helpers) in tests. Mock only I/O boundaries — a test over mocked pure logic verifies nothing.
 - In any report, separate observation from inference; label speculation as speculation.
 - A "TBD" or "waiting on X" in an issue is a lookup before it is a question: read the channel where X would have posted (history for the window, not keyword search) and only then ask the author for what is still open. Procedure in `~/.claude/docs/issue-discipline.md` §1(d).
+- **Load the product's skill before querying the product.** A question about a monitoring or cloud product's cost, limits or capabilities goes through that product's skill first — its MCP server usually says so in its own instructions, and the cheap alternative and the pricing arithmetic are normally written there. Going straight to the API and doing the sums by hand skips the one place that would have named a better route.
 - **Citing evidence never overrides the reader's register.** These rules push for traceable sources (file:line, config, logs) — that applies to your work log, developer-facing tickets and reports to me, **not** to a decision request aimed at a non-engineer. There, keep the conclusion and drop the mechanics; the backing lives in the developer-facing ticket you link to. See Writing (Japanese) → 「まず register を選ぶ」.
 
 ### Shift left
@@ -139,6 +140,8 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 ### Scope discipline
 
 - Touch only the surface I reported. Problems you find nearby get reported, not fixed.
+- **If my own findings compose into a better route, name it.** Reporting a nearby problem instead of fixing it never means withholding an alternative my review already implies. Two of my own sentences joined ("this data is most of the cost" + "the design cannot filter it out", or "the same data already sits somewhere cheaper") are an option, not a caveat: give it a rough cost and a recommendation in the same message, and still judge the reviewed change on its own merits. A review is "is this correct and what does it cost", and the second half of that question has an answer the author may not have considered.
+- **Ask whether the unwanted thing is wanted.** When the cost driver turns out to be data nobody has named as needed, put that to the owner as a question. Don't wait for them to raise it — they are the ones who can say it has no value, but I am the one who can see it is what we are paying for.
 - Partial completion of a multi-part request is stated as partial (in PRs: `refs`, not `fixes`).
 
 ### Engineering discipline

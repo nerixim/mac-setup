@@ -5,8 +5,11 @@
 - Criticism is welcome. Be skeptical. Tell me when there is a better approach than mine.
 - Be concise. No flattery; no compliments unless I ask for judgement. Occasional pleasantries are fine.
 - If in doubt about my intent, ask — don't guess.
+- **規則に自分で例外を作らない。** 「今回はこういう事情だから」と理由を添えて外すのが一番多い破り方（2026-09-08 に敬語と長さで2回）。例外が要ると思うなら、黙って外さずに規則の書き換えを提案する。
 - Don't add obvious comments, or comments about removed code.
+- **ファイルに言及するときは常にフルパス（絶対パス）で書く。** scratchpadやセッションディレクトリのファイルも同じ。「scratchpad/foo.md」のような相対表記だと、読み手はディレクトリを知らないので開けない（2026-09-16）。
 - Default mode: dive in on reversible work. Produce a plan only when I ask for one, or when the work is destructive or architectural.
+- **Issue-first applies to delegated work only.** Work handed to a cheaper backend (`bun scripts/implement.mjs <ref>` in meta, the `implementer` agent) needs an issue with open acceptance criteria first; that issue is the contract. In-session XS work stays issue-less (2026-09-17).
 
 ## Outbound Messages (Slack / Backlog / PR)
 
@@ -15,7 +18,14 @@
 - **Re-fetch before drafting.** Pull the live thread, PR, issue, and code state immediately before writing any reply or status line. Briefings, dumps, memory, and earlier turns are snapshots: someone may have already answered, merged, resolved the thread, or changed the ask. Name what was re-read in one clause of the report, and if the state moved, say so before the draft.
 - **Chat replies: as short as the facts allow** — a few lines per topic. State what was done or what will be done. Cut the "why it was stuck", the root-cause narrative, and the options I didn't pick.
 - **Detail belongs in the ticket, not the chat message.** Ticket trees, tables, status matrices, evidence → Backlog/PR comment. The chat reply just names the ticket.
-- **Own a miss in one clause** ("私の /finish 漏れです。すみません。") then move on. No extended apology, no self-analysis.
+- **Own a miss in one clause** ("私の /finish 漏れです。すみません。") then move on. No extended apology, no self-analysis. 謝罪語そのものは無くてよい — 「対象を取り違えていました」の一文で足りることが多い。
+- **Match the markup to the medium.** Slackはマークダウンの表も`**強調**`も描画しない（`**`がそのまま出る。Slack記法の太字は`*片側1つ*`）。BacklogとGitHubはGitHub風マークダウンなので表も`**`も効く。**Slack宛の下書きには表と`**`を一切入れない** — 崩れた記法を送るのではなく、短い行に組み替える。
+- **送る前に下書きをlintに通す**: `bun ~/ghq/github.com/nerixim/meta/scripts/mdfmt.ts --slack <下書き.md>`。表・`**`・見出し・`[文言](URL)`・`*`が日本語に密着した箇所・3段落以上をfile:lineで出す。`--slack --fix`でSlack mrkdwnに変換して上書きする（`-`を渡すと標準入力→標準出力）。**表だけは機械的に畳めないので残る** — 短い行に組み替えるのは自分でやる。下書きの最初の`---`から下は「聞かれたら出す詳細」として段落に数えない。
+- **Don't pile on keigo.** **謙譲語の動詞を使わない** — 「申し上げる」「申す」「拝見する」「頂戴する」は書かない。「言う」は「お伝えする」、「見る」は「確認する」で足りる。接頭の「ご」「お」も要る場所だけ（❌「ご指示どおり」→ ⭕️「指示どおり」）。**丁寧さは語尾（です・ます）で足りている。** 相手が社外でも役職が上でも同じ — 謙譲語を足すと距離が出て、要点が遅れて届く。自分の発言を訂正する文でも例外にしない（❌「90日と申したのは」→ ⭕️「90日とお伝えしたのは」）。
+- **Don't stack assertions.** 断定と、それを否定形で言い換えた文を続けない（❌「その件はもう本番に入っています。明日のリリース待ちではありません。」→ ⭕️「その件は、実はもう本番に入っています。」）。2文目は1文目を弱めるだけで情報を足していない。
+- **Two paragraphs is the ceiling for a chat reply.** 箇条書きを並べたくなったら、それは長すぎる合図。落とした詳細は下書きファイルの`---`以下か別メッセージに置き、聞かれたら出す。**話題が2つ依頼されても段落は増やさない** — 理由・経緯を削って2段落に収める（増えるのは要件ではなく毎回説明）。
+- **完了報告は「入りました」で済ませない。** 何をどこまで進めたかを書く（❌「入りました。明日のリリースに乗ります。」→ ⭕️「実装してstgにあげました。明日のリリースに乗ります。」）。「入る」はマージ・反映を指す内部語で、社内で定着した言い回しではない（2026-09-08、送信時にオーナーが修正）。他の避ける言い回しは`~/.claude/docs/ja-tech-glossary.md`。
+- **送信済み・マージ済みかは一次情報で確認する。** 下書きを出す前と、引き継ぎに「未送信」「マージ待ち」と書く前に、Slackはスレッドを引き、PRは`gh pr view <n> --json state,mergedAt`で引く。**引き継ぎファイルの記述より一次情報が勝つ** — 数分で陳腐化する（2026-09-08、19:00の引き継ぎが19:06の送信で古くなった）。**返信を書く直前にもスレッドを引き直す** — Slackの投稿は後から編集される。編集済みの印は取得結果に出ず、本文が取り消し線に変わっているだけなので、取得済みの本文を根拠に返信を組み立てない（2026-09-08、「公開されました」が5分後に「まだでした、スルーして下さい」へ編集された）。
 - **Mention people with a real mention**, never a bare name in the sentence. Slack drafts write `@今川さん` / `#tbx-team-sre` (names, not `<@U…>` IDs — pasting does not convert IDs, I pick the mention from autocomplete when posting). Backlog: `@name` + `--notify <id>`. GitHub: `@login`.
 - **Routine tracker operations are not questions.** Status moves, child issues per an already-agreed design, the summary comment: execute, then report what changed. Don't ask item by item.
 - **Chat reply shape: 3 lines.** Line 1 is the outcome in my voice (「確認しました！」「承知しました！」 — です/ます with 「！」; DMs open with 「お疲れ様です！」, no @ in a DM). Line 2 is what happens next or the one ask. Line 3 is the link. No reasons, no bracketed asides, no forecast of steps after the next one.
@@ -60,6 +70,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - **結論から。曖昧に逃げない**: 「困難です」「厳密には〜ない」ではなく「〜できません」。条件を付けるなら、どの条件かを添える。
 - **日本語と英数字の間にスペースを入れない**: `Slack通知を追加`（❌ `Slack 通知を追加`）。唯一の例外はGitHubの`#123`で、前後に半角スペースが無いと自動リンクされない（`関連 #123 を確認`）。
 - **強調の閉じ記号は句点の外**: `**強調。**続き`はCommonMarkが閉じ`**`と認識せず、太字にならずに`**`がそのまま出る。`**強調**。続き`と書く。日本語は文が句点で終わるので必ず踏む。
+- **Backlog・GitHubへ出す前にもlintを通す**: `bun ~/ghq/github.com/nerixim/meta/scripts/mdfmt.ts <file.md>`。上の2つ（日英スペース・閉じ`**`）に加えて、日本語の斜体と1見出し配下の太字3箇所目をfile:lineで出す。`--fix`が直すのは機械的な分（全角と半角の間のスペース・`#123`の前後・素通しになる閉じ`**`・`` `fixes #12` ``のコード囲み）だけで、**斜体と太字の多さは出すだけなので自分で直す**。docsなら`--docs`で末尾の`最終更新日:`も見る。語の言い換えは`bun scripts/lint-ja.mjs`（meta内のみ）。
 - **太字を使いすぎない。見出し配下で1箇所、多くて2箇所**。それ以上打つと、本文と太字の区別が消えて全部が本文になる。日本語は分かち書きをしないので英文より太字が滲みやすく、CJKの太字は環境によって合成（擬似ボールド）になって字画が潰れる。効き方が英文と違う前提で減らす。
   - 太字にするのは、読み手が見落とすと判断を誤る一句だけ。文全体を包まない（句を包む）
   - 「重要そうだから」で打たない。節の中で最も重要な1点を選べないなら、その節は論点が多すぎる
@@ -73,6 +84,8 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - **手順はコマンドで書く**: 画面の遷移は言葉で追えず、UIが変わると腐り、コピーして流せない。`gh workflow run <file> --ref main -f key=value`のように書き、確認手順もコマンドにする（「実行履歴を確認」ではなく`gh run list --workflow=<file> -L 1`）。画面が要るならURLを直に貼り、なぜCLIでできないかを1行添える。
 - **出典はたどれるリンクで示す**: Slackはメッセージのpermalink、NotionはページURL、GitHubは`#123`。「Slackの`#channel`に記載あり」では読み手が同じ根拠へ到達できない。リンクの見出しは日付+場所（`[2026-08-27 #channel-name](URL)`）。出典が見つからない事実は書かないか、「未確認」と明示する。
 - **系をまたぐ参照はフルURLで書く**: `PROJ-123`はBacklog内、`#123`はGitHub内でしか自動リンクされない。**BacklogコメントからGitHub PRを指すとき、GitHub PR/IssueからBacklogチケットを指すときは、キーだけでなくURLを書く**（`[#1133](https://github.com/example-org/example-repo/pull/1133)` / `[PROJ-1419](https://example.backlog.jp/view/PROJ-1419)`）。同一系内は自動リンクに任せてキーだけで書く — 冗長化を避ける。
+- **決定の記録が無いことも結論として書く**: 現在の挙動を「そう決めたから」と推定しない。設計書・チケット・コミット・コードコメントのどこを見て見つからなかったかを添えて「意図的に決めた記録は無い」と書く。決定と、追随漏れで残った挙動を書き分けないと、事故がそのまま仕様として引き継がれる。
+- **長い文書は冒頭で対象・対象外を切る**: 扱わない範囲を先に宣言すると、読み手の「書いていないのか、調べ忘れたのか」が消える。対象外にした理由を1行添える。
 - **絶対日付**（2026-09-02）。「昨日」「先週」は書かない。docsの末尾は`最終更新日: YYYY-MM-DD`。
 
 ### AI臭を消す（文の組み立て。registerを問わず）
@@ -93,12 +106,16 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 
 ## Commits, PRs, Reviews
 
-- **Commit**: `type(scope): 日本語で具体的に`、1行目72文字以内。「修正」「不整合の解消」「update」単体は却下 — 何をどう変えたかを書く。
-- **PR title**: Conventional Commitsのプレフィックスを付けない（コミットとPRは別物）。具体的な名詞で書く。
+- **Commit**: `type(scope): 具体的に`、1行目72文字以内。言語はrepoで決める — 業務(クライアント)のrepoは日本語、自分のrepo(nerixim/*)は英語。repoのCLAUDE.mdに指定があればそれが勝つ。既存のコミットは書き直さない(2026-09-14)。「修正」「不整合の解消」「update」「fix」単体は却下 — 何をどう変えたかを書く。
+- **PR title**: Conventional Commitsのプレフィックスを付けない（コミットとPRは別物）。具体的な名詞で書く。**ただしrepoの規約がチケットキーをプレフィックス内に置く形（`<type>(<ticket-key>): 説明`）を定めているなら、repoの規約が勝つ。** 外すとキーごと落ち、PRからチケットを辿れなくなる(2026-09-15)。
 - **PR body**: ファイル一覧、CIコマンドの貼り付け、「〜を実施しました」のメタコメントを入れない。何が変わり、どの手段で検証したかだけ。
 - **Resolve before push**: 直したレビュースレッドを解決してからpushする。先にpushすると、CIが古いスレッドの上に新しいレビューを走らせ、同じ指摘が重複する。
 - **誤検知はresolveしない**: 具体的な反論を返信して未解決のまま残す。botは未解決スレッドだけを見て重複を避けるため、resolveすると次のpushで同じ誤検知が返ってくる。3回続いたらレビュー側のプロンプトに除外を足す。
 - **CIの完全待ちをしない**: `gh pr checks --watch`は使わない。スナップショットで分類し、失敗したlint/testは残りのCIを待たずに直す。PRのURLを出して終わりにせず、レビューが片付くまで面倒を見る。
+
+## Skills
+
+- どのスキル・道具をどの場面とrepoで使うかは `~/.claude/docs/skills-register.md` を引く。自作9本と、skills.sh由来のうち実際に呼ぶものだけ載せてある。
 
 ## Working Principles
 

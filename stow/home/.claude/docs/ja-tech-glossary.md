@@ -23,6 +23,14 @@ Issue・PR・コミット・ops文面・コードコメント向け。プロダ�
 | Slackメールintegration | Slackのメール連携 | integrationは連携で足りる |
 | **In:** / **Out:** | **対象:** / **対象外:** | 英語セクション見出しを使わない |
 | per-run上限 | 1回あたりの上限 / 実行あたりの上限 | |
+| 里程標 | マイルストーン / 節目 / 期限つきの行動 | 「里程標」は中国語・文語の語感で、日本のビジネス文書ではマイルストーンが定着(2026-09-05、オーナー指摘) |
+| 頁(単独・「一次頁」) | ページ / 一次資料 | 学術書以外では古風。「primary page」の直訳は一次資料(2026-09-05) |
+| 稀少 | 希少 | 現代表記 |
+| 較正(閾値・ゲート) | 調整 | 較正は計測器の校正の語。閾値を変えるなら調整 |
+| 現金源 / 非時間制 | 収入源 / 月額制 | 造語。読み手が知らない |
+| 記録表 | ログ / 進捗表 | 「週次記録表」→「週次ログ」 |
+| 〜化(実額化・満額化・可観測化・機能化) | 実額試算 / 満額拠出 / 可観測性の確保 / 機能にする | 名詞に「化」を付けて動詞にしない |
+| 和文中の裸の repo / doc / waitlist / push / deploy | リポジトリ / 文書 / 事前登録 / プッシュ / デプロイ | 識別子・コマンドはバッククォート、概念語は日本語(2026-09-05、Codex監査) |
 | multi-step | 多段 | |
 | 取込配管 | 取込経路 | 配管は比喩として通じるが、初出は経路が明確 |
 | 天井を測る（精度） | 上限精度を測る / 到達しうる精度を測る | |
@@ -52,6 +60,14 @@ Issue・PR・コミット・ops文面・コードコメント向け。プロダ�
 | 帰結 / 作用する | その結果 / 働く | 硬い漢語より平易な語 |
 | いじる / ちょっと（文書） | 変更する / 1箇所 | くだけた語。開発者向けSlackでは可 |
 | 手元の端末（手元マシン） | 手元 | デバイスでもTTYでもないときは手元で足りる |
+| 資産（JS/CSS等のasset・resource） | リソース / ビルド成果物 | 「資産」は財産の語。`/assets/`配下を指すならリソース、ビルド出力全体なら成果物(2026-09-11、オーナー指摘) |
+| 救済する（自動リトライ・自動リロード） | 復帰させる / 解消する / 回避する | 「救済」は法務・福祉の語感。何が起きるかを書く |
+| 語彙キー（i18nのvocabulary key） | 翻訳キー | i18nで引くのは翻訳キー。「語彙」は直訳で通じにくい |
+| 引き当てが壊れる（lookup失敗） | 引けなくなる / 対応が取れなくなる | 「引き当て」は会計（引当金）・在庫の語感 |
+| 助言DB（advisory database） | 脆弱性データベース / 脆弱性DB | `bundle audit`・`ruby-advisory-db`の文脈 |
+| 動線（処理の流れ） | 流れ / 経路 | 動線は店舗・建築の語 |
+| フラグを落とす | フラグを消す / フラグをクリアする | 「落とす」はfalseにするのか消すのか曖昧 |
+| 入りました（マージ・反映の意） | 実装してstgにあげました / develop に入れました | 「入る」はマージ・反映を指す内部語で、社内で定着した言い回しではない。完了報告は何をどこまで進めたかを書く(2026-09-08、オーナーが送信時に修正) |
 
 | 板（GitHub Projects） | ボード | 板は掲示板スラング。2026-09-15 の棚卸しで MEMORY.md に1件 |
 | PRを出して、マージ後にTFCでapplyします | PRを出して、マージ後にTFCでapplyしたいです | 野田さん宛の提案DMで本人が意向形に直した（2026-09-16）。承認を仰ぐ段階では断定形「〜します」ではなく「〜したいです」 |
@@ -194,6 +210,27 @@ LLMが好む言い回し。単体では誤りでないが、積むと「生成�
 | flapする / フラップ | 発報と復旧を短時間で繰り返す | 監視の状態遷移。EN語幹を動詞にしない |
 
 ---
+
+## 語学アプリのUI文言(2026-09-13、出典つき)
+
+英単語アプリ・単語帳の画面に出す語。英語のSRS用語(due / new / known / done)をそのまま訳さず、日本で使われているアプリの実物に合わせる。原文は`verify-claim`で当てた生テキスト(2026-09-13)。
+
+| 英語の概念 | 使う語 | 出典の原文 |
+|---|---|---|
+| known / unknown(ボタン) | わかる / わからない | [ターゲットの友 FAQ](https://www.obunsha.co.jp/pr/tg30/matome2015/faq.html)「答えがわかっても1秒以内に思い浮かばなければ「わからない」を押す」、[Quizlet 筆記モード](https://help.quizlet.com/hc/ja/articles/360030990531)「分からないを選択すると正解を見ることが出来ます」 |
+| not yet / still learning / mastered(状態) | 未着手 / 学習中 / 習得済み | [Quizlet 進捗状況](https://help.quizlet.com/hc/ja/articles/360048803491)「未着手、学習中、または習得済みを選択します」。同じ意味で[単語カード](https://help.quizlet.com/hc/ja/articles/360030988091)は「まだ学習中と知っているのグループに振り分けます」 |
+| due today(今日出す分) | 今日の復習 / 今日の5問 | [ターゲットの友](https://www.obunsha.co.jp/pr/tg30/1900.html)「毎日朝夜「今日の5問」でミニテスト」、[Quizlet 星](https://help.quizlet.com/hc/ja/articles/360031172312)「ツールを使って復習をするを選択します」 |
+| missed / wrong(落とした語) | 間違えた単語 | [ターゲットの友](https://www.obunsha.co.jp/pr/tg30/1900.html)「間違えた単語の意味を表示」、Quizlet 筆記モード「間違えた用語を記録していきます」 |
+| weak(苦手な語) | 苦手な単語 | ターゲットの友「未出題や苦手な単語だけに絞ったリスニング」 |
+| reveal(答えを見る) | 意味を表示 | ターゲットの友「間違えた単語の意味を表示」 |
+| played / checked(済み・チェック) | 再生済み / チェックの入った見出し語 | [英語の友 使い方](https://eigonotomo.com/4skills/apuri_tsukaikata)「チェックの入った見出し語、再生済みのチェックの入っていない見出し語、未再生の見出し語」 |
+| headword(見出し語) | 見出し語 / 単語 / 熟語 | 英語の友(上)、パス単 書き覚えノート(欄名は「単語」「熟語」「意味」「学習日」「1回目 2回目 3回目」。`meta-nami/inputs/eiken/pasutan/`の写真) |
+
+| Anki の同じ概念(新規 / 学習中 / 復習 / 期限) | 新規 / 学習中 / 復習 / 期限 | Anki本体の日本語UI [core/ja/decks.ftl](https://raw.githubusercontent.com/ankitects/anki-core-i18n/main/core/ja/decks.ftl)「decks-learn-header = 学習中」「decks-review-header = 復習」「decks-order-due = 期限順」、[statistics.ftl](https://raw.githubusercontent.com/ankitects/anki-core-i18n/main/core/ja/statistics.ftl)「statistics-due-for-new-card = 新規」「statistics-due-date = 期限」、[custom-study.ftl](https://raw.githubusercontent.com/ankitects/anki-core-i18n/main/core/ja/custom-study.ftl)「期限を迎えたカードのみ」「忘れたカードを復習する」、[scheduling.ftl](https://raw.githubusercontent.com/ankitects/anki-core-i18n/main/core/ja/scheduling.ftl)「今日の復習上限に達しましたが、復習待ちのカードがまだあります」。AnkiDroid [values-ja/02-strings.xml](https://raw.githubusercontent.com/ankidroid/Anki-Android/main/AnkiDroid/src/main/res/values-ja/02-strings.xml)「新規（未学習）」 |
+| Again / Hard / Good / Easy(4段階の解答) | もう一度 / 難しい / 正解(AnkiDroid)・普通(Anki) / 簡単 | AnkiDroid [values-ja/01-core.xml](https://raw.githubusercontent.com/ankidroid/Anki-Android/main/AnkiDroid/src/main/res/values-ja/01-core.xml)「解答を表示 解答を非表示 もう一度 難しい 正解 簡単」、Anki decks.ftl「[もう一度] と解答したカードの再出題間隔」、scheduling.ftl「[簡単] のボーナス」「[難しい] の間隔」 |
+| all done today(今日の分が終わった) | 今日の課題をすべて達成しました | AnkiDroid 01-core.xml「おめでとうございます！ このデッキの今日の課題をすべて達成しました！」、Anki statistics.ftl「今日はまだカードを学習していません。」 |
+
+避ける: 「知ってる/知らなかった」(口語すぎる。実物は「わかる/わからない」)、「済み」単体(何が済んだか無い。「習得済み」「再生済み」)、「新しい語」(new の直訳。「未着手」「未出題」)、「今日の分」(「今日の復習」「今日の5問」)、「落とした」(「間違えた」)、「正解の語」「箱 N」(保存側の構造の名前。画面には出さない)。Ankiの日本語は翻訳リポジトリ(`ankitects/anki-core-i18n`の`core/ja/*.ftl`、AnkiDroidは`Anki-Android`の`res/values-ja/*.xml`)が正本。マニュアル(docs.ankiweb.net、docs.ankidroid.org)は英語だけで、`/ja/`は無い(2026-09-13に取得して0文字)。mikanはApp Storeの取得が失敗し、公式サイトにUIの文言が無いので未確認。
 
 ## 書き方の目安
 

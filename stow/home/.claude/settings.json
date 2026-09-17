@@ -80,14 +80,15 @@
       "mcp__plugin_playwright_playwright__browser_close",
       "Skill(agent-browser)",
       "Read(//Users/nk/.claude/skills/agent-browser/**)",
-      "Read(//Users/nk/.agents/skills/agent-browser/**)"
+      "Read(//Users/nk/.agents/skills/agent-browser/**)",
+      "mcp__pencil"
     ],
     "deny": [
       "mcp__plugin_serena_serena__replace_content"
     ],
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5-1[1m]",
+  "model": "opus[1m]",
   "skillOverrides": {
     "agent-md-refactor": "off",
     "ai-sdk": "off",
@@ -209,13 +210,13 @@
       "### Org-wide",
       "**Organization**: None configured",
       "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: private (nerixim/korean-reader-ios, via gh)",
+      "**Repository visibility**: private (nerixim/kanyomi, via gh)",
       "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
       "**Secrets management**: None configured",
-      "**Default / protected branches**: main (default); no protected branches or rulesets listed via gh for nerixim/korean-reader-ios",
+      "**Default / protected branches**: main (default); no protected branches or rulesets listed via gh for nerixim/kanyomi",
       "**CI/CD deploy targets**: None configured",
       "**Network posture**: None configured",
-      "**Source control**: The trusted repo (nerixim/korean-reader-ios) and its remote(s) only (no additional orgs configured)",
+      "**Source control**: The trusted repo (nerixim/kanyomi) and its remote(s) only (no additional orgs configured)",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: None configured",
@@ -227,9 +228,9 @@
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
       "**Primary use of Claude Code**: software development (iOS/SwiftUI app development, plus social-post drafting via /post-draft skill — never publishes)",
-      "**Trusted repo**: /Users/nk/ghq/github.com/nerixim/language-learning/korean-reader-ios and its remote origin (https://github.com/nerixim/korean-reader-ios), private — confidential material OK to commit there; content ported from outside this repo/session is not its own work",
+      "**Trusted repo**: /Users/nk/ghq/github.com/nerixim/kanyomi and its remote origin (https://github.com/nerixim/kanyomi), private — confidential material OK to commit there; content ported from outside this repo/session is not its own work",
       "**Org-specific CLIs**: None configured",
-      "routine under nerixim/ prefix: applies to this repo (nerixim/korean-reader-ios) only — other nerixim/* repos found on disk (pc-setup, magoch-redash, simon, mac-setup) are unvetted candidates, not adopted into scope"
+      "routine under nerixim/ prefix: applies to this repo (nerixim/kanyomi (旧 korean-reader-ios、2026-09-07 に storyling-lp・storyling-content-pipeline を統合)) only — other nerixim/* repos found on disk (pc-setup, magoch-redash, simon, mac-setup) are unvetted candidates, not adopted into scope"
     ]
   },
   "feedbackSurveyState": {

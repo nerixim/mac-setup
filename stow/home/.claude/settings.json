@@ -278,7 +278,7 @@
           {
             "type": "command",
             "if": "Bash(gh *)",
-            "command": "python3 ~/.claude/skills/factcheck/bin/gh-post-gate",
+            "command": "sh -c 'f=\"$HOME/.claude/skills/factcheck/bin/gh-post-gate\"; [ -f \"$f\" ] || exit 0; exec python3 \"$f\"'",
             "timeout": 20,
             "statusMessage": "gh 投稿の日本語を lint 中"
           }

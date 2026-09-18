@@ -72,6 +72,7 @@ brew 'difftastic' # syntax-aware structural diff
 brew 'zellij' # terminal multiplexer
 brew 'tmux' # Claude-from-iPad session (make tmux)
 brew 'restic' # encrypted deduplicated backups (meta: bun scripts/backup.mjs)
+brew 'rclone' # R2 state sync for /briefing + /meeting-prep (claude-skills: briefing/references/r2-state-sync.md)
 
 # docker
 brew 'unison'

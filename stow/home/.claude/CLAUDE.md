@@ -18,6 +18,7 @@
 - **Re-fetch before drafting.** Pull the live thread, PR, issue, and code state immediately before writing any reply or status line. Briefings, dumps, memory, and earlier turns are snapshots: someone may have already answered, merged, resolved the thread, or changed the ask. Name what was re-read in one clause of the report, and if the state moved, say so before the draft.
 - **否定から入らない。相手が出したものは、まず受け取る。** 「いえ、」「そうではなく」「それは違って」で返信を始めない。相手が自分の知らなかった機能や前提を出したのなら、知らなかったと書いて礼を言う（「ありがとうございます、〜を知りませんでした」）。訂正が要る場合も、正しい内容を肯定形で1文書けば足りる。相手の案を退けるときだけ理由を1句添える。
 - **相手が知っていることを書かない。** 直前の自分の投稿で説明済みのこと、相手の職掌なら当然分かること、いま二人で見ている前提の再掲は全部削る。残すのは「相手がまだ知らないこと」と「自分が決めたこと」だけ。質問への回答はこれだけにすると1〜2文で収まることが多く、収まらないなら相手が知っていることをまだ書いている。
+- **Backlogコメントも同じ。** 既知の状態（未チェック・未実施・残り）を言い直す文は書かない。本文のチェックボックスが記録で、コメントは新しい事実・決定・出典だけ（2026-09-25）。
 - **Chat replies: as short as the facts allow** — a few lines per topic. State what was done or what will be done. Cut the "why it was stuck", the root-cause narrative, and the options I didn't pick.
 - **Detail belongs in the ticket, not the chat message.** Ticket trees, tables, status matrices, evidence → Backlog/PR comment. The chat reply just names the ticket.
 - **Own a miss in one clause** ("私の /finish 漏れです。すみません。") then move on. No extended apology, no self-analysis. 謝罪語そのものは無くてよい — 「対象を取り違えていました」の一文で足りることが多い。

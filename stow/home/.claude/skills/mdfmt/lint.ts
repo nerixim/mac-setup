@@ -2,7 +2,14 @@
 // レビューでしか守られていなかった規則を落とす。判断が要る規則(register・敬語・長さ)はここでは見ない。
 import { mapOutsideFences, padCommonMarkEmphasisClosers, withProtectedCodeSpans } from "./emphasis.ts"
 
-export type Rule = "ja-en-space" | "emphasis-boundary" | "ja-italic" | "bold-density" | "last-updated"
+export type Rule =
+  | "ja-en-space"
+  | "emphasis-boundary"
+  | "ja-italic"
+  | "bold-density"
+  | "last-updated"
+  | "repo-ref"
+  | "bare-sha"
 
 export type Violation = { line: number; rule: Rule; text: string; hint: string }
 
@@ -13,6 +20,8 @@ const JA_EN_SPACE = new RegExp(JA_EN_SPACE_SOURCE)
 const JA_EN_SPACE_ALL = new RegExp(JA_EN_SPACE_SOURCE, "g")
 
 const CJK = new RegExp(`[${FULL}]`)
+const JA_QUOTED = /「[^」]*」|『[^』]*』/g
+const LATIN_WORD = /[A-Za-z]+/g
 const LAST_UPDATED = /^最終更新日:\s*\d{4}-\d{2}-\d{2}$/
 
 const WHITESPACE = /\s/
@@ -83,6 +92,31 @@ const LIST_ITEM = /^\s*(?:[-*+]|\d+\.)\s+/
 const TABLE_ROW = /^\s*\|/
 const HEADING = /^#{1,6}\s/
 
+// 日英スペースの規則は日本語の文だけに効く。英文が日本語の語を引くとき(`a mark for 文法`)は空白が正で、
+// 詰めると `lifetime伊検applicants` になる(2026-09-27、meta #214)。
+// 判定(「」『』の中は除く): 日本語の連なりが段の端に届けば日本語の文。ただし端の連なりにひらがなが無く
+// 英単語が3つ以上ある段(`... note.com 学習ジャーナル`)は、名詞を引いた英文と見る。
+// 連なりがどれも英字・空白・約物に挟まれた「島」なら英文
+const CJK_RUN = new RegExp(`[${FULL}]+`, "g")
+const HIRAGANA = /[\u3041-\u309f]/
+export const isJapaneseProse = (segment: string): boolean => {
+  const text = segment.replace(JA_QUOTED, " ").trim()
+  const latinWords = (text.match(LATIN_WORD) ?? []).length
+  if (latinWords === 0) {
+    return true
+  }
+  return [...text.matchAll(CJK_RUN)].some((run) => {
+    const touchesEdge = run.index === 0 || run.index + run[0].length === text.length
+    return touchesEdge && (HIRAGANA.test(run[0]) || latinWords < 3)
+  })
+}
+
+/** 表の行はセルごと、それ以外は行ごとに文の言語を見る */
+const segments = (line: string): string[] => (TABLE_ROW.test(line) ? line.split("|") : [line])
+
+const hasJaEnSpace = (masked: string): boolean =>
+  segments(masked).some((seg) => isJapaneseProse(seg) && JA_EN_SPACE.test(seg))
+
 /** 太字の数え方から外す行・箇所を落とす(表のセル・見出し・箇条書きの先頭に置いた太字) */
 const boldCountable = (masked: string): string => {
   if (TABLE_ROW.test(masked) || HEADING.test(masked)) {
@@ -96,19 +130,62 @@ const boldCountable = (masked: string): string => {
 const hasJaItalic = (masked: string): boolean =>
   [...masked.matchAll(JA_ITALIC)].some((match) => CJK.test(match[1] ?? match[2] ?? ""))
 
+// GitHubは `#12` と `owner/repo#12` を自動リンクするが、`repo#12` はしない(2026-09-25、meta #172 の `kanyomi#160`)
+const SHORT_REPO_REF = /(?<![\w./#-])[A-Za-z][\w.-]*#\d+\b/
+
+/** `repo#12` のようにオーナーを欠いた他リポジトリ参照があるか。コード・URL・リンク先は見ない */
+export const hasShortRepoRef = (line: string): boolean =>
+  SHORT_REPO_REF.test(
+    line
+      .replace(/`[^`]*`/g, " ")
+      .replace(/\]\([^)]*\)/g, " ")
+      .replace(/https?:\/\/\S+/g, " ")
+      .replace(/[\w-]+\/[\w.-]+#\d+/g, " "),
+  )
+
+// GitHub が素の SHA を自動リンクするのは Issue・PR・コメントの中だけ。Backlog・Slack・リポジトリの docs では
+// ただの文字列で、読み手はどのリポジトリのコミットかも分からない。数字だけ・英字だけの並びは数値や単語なので見ない
+const HEX_TOKEN = /(?<![\w#/.-])[0-9a-f]{7,40}(?![\w-])/g
+const SHA_CODE_SPAN = /`\s*([0-9a-f]{7,40})\s*`/g
+const isShaLike = (token: string): boolean => /\d/.test(token) && /[a-f]/.test(token)
+export const BARE_SHA_HINT = "a bare commit SHA is not linked here; write [`<sha>`](https://github.com/<owner>/<repo>/commit/<sha>)"
+
+/** リンクになっていないコミット SHA があるか。リンク文言・URL・`<…>` の中と、SHA 以外も含むコードは見ない */
+export const hasBareSha = (line: string): boolean => {
+  const unlinked = line
+    .replace(/\[[^\]\n]*\]\([^)\n]*\)/g, " ")
+    .replace(/<[^>\n]*>/g, " ")
+    .replace(/https?:\/\/\S+/g, " ")
+  if ([...unlinked.matchAll(SHA_CODE_SPAN)].some((m) => isShaLike(m[1] ?? ""))) {
+    return true
+  }
+  const prose = unlinked.replace(/`[^`\n]*`/g, " ")
+  return [...prose.matchAll(HEX_TOKEN)].some((m) => isShaLike(m[0]))
+}
+
 /** 1行ぶんの、前後の行に依らない規則 */
-const lineViolations = (line: string, masked: string): Omit<Violation, "line">[] => {
+const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<Violation, "line">[] => {
   const text = line.trim()
   const hits: Omit<Violation, "line">[] = []
-  if (JA_EN_SPACE.test(masked)) {
+  if (hasJaEnSpace(masked)) {
     hits.push({
       rule: "ja-en-space",
       text,
-      hint: "no space between fullwidth and halfwidth; `#123` is the only exception",
+      hint: "no space between fullwidth and halfwidth in Japanese prose; `#123` is the only exception",
     })
   }
   if (hasUnclosedEmphasis(masked)) {
     hits.push({ rule: "emphasis-boundary", text, hint: "move the punctuation outside the emphasis: `**太字**。続き`" })
+  }
+  if (hasShortRepoRef(line)) {
+    hits.push({
+      rule: "repo-ref",
+      text,
+      hint: "`repo#12` is not autolinked; write https://github.com/<owner>/<repo>/issues/12",
+    })
+  }
+  if ((opts.docs || opts.backlog) && hasBareSha(line)) {
+    hits.push({ rule: "bare-sha", text, hint: BARE_SHA_HINT })
   }
   if (hasJaItalic(masked)) {
     hits.push({ rule: "ja-italic", text, hint: "no italics in Japanese; use bold or rephrase" })
@@ -116,8 +193,11 @@ const lineViolations = (line: string, masked: string): Omit<Violation, "line">[]
   return hits
 }
 
+/** docs: リポジトリに置く文書。backlog: Backlog に出す本文。どちらも GitHub の自動リンクが効かない */
+export type LintOptions = { docs?: boolean; backlog?: boolean }
+
 /** 1ファイル分の行単位チェック。コードフェンス内(mermaid含む)は対象外 */
-export const checkLines = (content: string): Violation[] => {
+export const checkLines = (content: string, opts: LintOptions = {}): Violation[] => {
   const hits: Violation[] = []
   let inFence = false
   let boldInSection = 0
@@ -136,7 +216,7 @@ export const checkLines = (content: string): Violation[] => {
     }
 
     const masked = maskInline(line)
-    for (const hit of lineViolations(line, masked)) {
+    for (const hit of lineViolations(line, masked, opts)) {
       hits.push({ line: index + 1, ...hit })
     }
 
@@ -167,8 +247,8 @@ export const hasLastUpdated = (content: string): boolean => {
   return last !== undefined && LAST_UPDATED.test(last)
 }
 
-export const lint = (content: string, opts: { docs?: boolean } = {}): Violation[] => {
-  const hits = checkLines(content)
+export const lint = (content: string, opts: LintOptions = {}): Violation[] => {
+  const hits = checkLines(content, opts)
   if (opts.docs && !hasLastUpdated(content)) {
     hits.push({
       line: content.split("\n").length,
@@ -200,16 +280,22 @@ const dropJaEnSpace = (prose: string): string =>
     .map((seg, i) => (i % 2 === 1 ? seg : seg.replace(JA_EN_SPACE_ALL, "$1$3$2$4")))
     .join("")
 
+// 日本語の文(表ならセル)だけ詰める。英文のセルは触らない
+const dropJaEnSpaceInJapanese = (line: string): string =>
+  segments(line)
+    .map((seg) => (isJapaneseProse(maskInline(seg)) ? withProtectedCodeSpans(seg, dropJaEnSpace) : seg))
+    .join("|")
+
 const fixLine = (line: string): string =>
   padCommonMarkEmphasisClosers(
-    withProtectedCodeSpans(line.replace(CLOSING_KEYWORD_INLINE_CODE, "$1 $2"), (prose) =>
-      addReferenceSpacing(dropJaEnSpace(prose)),
+    withProtectedCodeSpans(dropJaEnSpaceInJapanese(line).replace(CLOSING_KEYWORD_INLINE_CODE, "$1 $2"), (prose) =>
+      addReferenceSpacing(prose),
     ),
   )
 
 /**
  * 機械的に直せる分だけ直す。判断が要る違反(ja-italic・bold-density)は lint が出すだけで触らない。
- * - 全角と半角の間のスペースを詰める
+ * - 日本語の文(表はセル単位)で、全角と半角の間のスペースを詰める。英文は触らない
  * - `#123` を自動リンク可能な空白区切りにする
  * - `` `fixes #123` `` のコード囲みを外す
  * - 素通しになる閉じ強調の後ろにスペースを入れる

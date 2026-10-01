@@ -72,3 +72,10 @@ describe("toSlackMrkdwn", () => {
     expect(toSlackMrkdwn("| 列 | 値 |")).toBe("| 列 | 値 |")
   })
 })
+
+describe("bare-sha (Slack)", () => {
+  it("Slack は SHA を自動リンクしないので出し、<url|文言> は通す", () => {
+    expect(rules("48670cfb で直しました")).toEqual(["bare-sha"])
+    expect(rules("<https://github.com/o/r/commit/48670cfb|48670cfb> で直しました")).toEqual([])
+  })
+})

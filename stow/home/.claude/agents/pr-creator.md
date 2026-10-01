@@ -76,6 +76,8 @@ Your PR description should follow this structure:
 Closes #[issue-number]
 ```
 
+For `nerixim/*` repos the 関連Issue line is generated, not written: run `bun scripts/tasks.mjs prlink <issue> --met all|1,3` in `~/ghq/github.com/nerixim/meta` (`--met` = the acceptance items this PR covers) and paste its one line as is. It says `Closes <url>` only when every acceptance item is covered, otherwise `refs <url> (items … met; … remain)`, which the tracker reads back after the merge. Keep it as plain text: backticks around `Closes #12` stop GitHub from linking or closing.
+
 ## Edge Cases and Error Handling
 
 - If no changes are committed: Inform user and suggest committing changes first

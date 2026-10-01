@@ -9,6 +9,7 @@ import {
   SLACK_EMPHASIS_MARKERS,
   slackPairPattern,
 } from "./emphasis.ts"
+import { BARE_SHA_HINT, hasBareSha } from "./lint.ts"
 
 export type SlackRule =
   | "slack-table"
@@ -18,6 +19,7 @@ export type SlackRule =
   | "slack-strike"
   | "slack-boundary"
   | "slack-length"
+  | "bare-sha"
 
 export type SlackViolation = { line: number; rule: SlackRule; text: string; hint: string }
 
@@ -116,6 +118,9 @@ export const lintSlack = (content: string): SlackViolation[] => {
       hits.push(
         at("slack-boundary", "`*` or `` ` `` touching Japanese is left unformatted; pad it with a halfwidth space"),
       )
+    }
+    if (hasBareSha(line)) {
+      hits.push(at("bare-sha", BARE_SHA_HINT))
     }
   }
 

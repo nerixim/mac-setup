@@ -5,11 +5,12 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { fixGithubMarkdown, lint } from "./lint.ts"
 import { lintSlack, toSlackMrkdwn } from "./slack.ts"
 
-const USAGE = `Usage: bun ~/.claude/skills/mdfmt/mdfmt.ts [--slack] [--fix] [--docs] <file.md>... | -
+const USAGE = `Usage: bun ~/.claude/skills/mdfmt/mdfmt.ts [--slack] [--fix] [--docs|--backlog] <file.md>... | -
 
   <file.md>...             GitHub/Backlog の表記をlint(違反があれば exit 1)
   --fix <file.md>...       機械的に直せる分だけ上書き(全角/半角の空白・#123・閉じ強調)
-  --docs <file.md>...      上に加えて末尾の「最終更新日: YYYY-MM-DD」も見る
+  --backlog <file.md>...   Backlog の本文として、リンクにしていないコミットSHAも見る
+  --docs <file.md>...      リポジトリの文書として、リンクにしていないコミットSHAと末尾の「最終更新日: YYYY-MM-DD」も見る
   --slack <file.md>...     Slack の下書きとしてlint(表・**・見出し・[](URL)・2段落)
   --slack --fix <file>...  Slack mrkdwn に変換して上書き(表は畳めないので残す)
   -                        標準入力を読み、--fix の結果を標準出力へ出す
@@ -24,7 +25,7 @@ if (argv.includes("--help") || argv.includes("-h")) {
   process.exit(0)
 }
 
-const KNOWN = new Set(["--slack", "--fix", "--docs"])
+const KNOWN = new Set(["--slack", "--fix", "--docs", "--backlog"])
 const unknown = argv.filter((arg) => arg.startsWith("--") && !KNOWN.has(arg))
 if (unknown.length > 0) {
   console.error(`error: ${unknown.join(" ")} は無い引数`)
@@ -41,10 +42,17 @@ if (files.length === 0) {
 const slack = argv.includes("--slack")
 const fix = argv.includes("--fix")
 const docs = argv.includes("--docs")
+const backlog = argv.includes("--backlog")
+
+// process.stderr.write, not console.error: Bun colors console.error red even when piped, and the
+// factcheck bridge (lint-draft W01-W04) matches these lines by regex
+const stderr = (line: string): void => {
+  process.stderr.write(`${line}\n`)
+}
 
 const read = (file: string): string => (file === "-" ? readFileSync(0, "utf8") : readFileSync(file, "utf8"))
 const label = (file: string): string => (file === "-" ? "(stdin)" : file)
-const check = (content: string): Omit<Finding, "file">[] => (slack ? lintSlack(content) : lint(content, { docs }))
+const check = (content: string): Omit<Finding, "file">[] => (slack ? lintSlack(content) : lint(content, { docs, backlog }))
 
 const findings: Finding[] = []
 for (const file of files) {
@@ -59,13 +67,13 @@ for (const file of files) {
 }
 
 if (findings.length === 0) {
-  console.error(`${slack ? "slack" : "markdown"}: clean (${files.length} file(s)${fix ? ", fixed" : ""})`)
+  stderr(`${slack ? "slack" : "markdown"}: clean (${files.length} file(s)${fix ? ", fixed" : ""})`)
   process.exit(0)
 }
 
-console.error(`${findings.length} finding(s)${fix ? " left after --fix" : ""}:`)
+stderr(`${findings.length} finding(s)${fix ? " left after --fix" : ""}:`)
 for (const finding of findings) {
-  console.error(`  ${finding.file}:${finding.line} [${finding.rule}] ${finding.text}`)
-  console.error(`    -> ${finding.hint}`)
+  stderr(`  ${finding.file}:${finding.line} [${finding.rule}] ${finding.text}`)
+  stderr(`    -> ${finding.hint}`)
 }
 process.exit(1)

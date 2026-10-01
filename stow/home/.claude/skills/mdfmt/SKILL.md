@@ -17,8 +17,8 @@ cat draft.md | bun ~/.claude/skills/mdfmt/mdfmt.ts --slack --fix -
 
 Finds: markdown tables and headings (Slack renders neither), `**bold**` (Slack is
 `*one star*`), `[text](url)` (Slack is `<url|text>`), `~~strike~~`, `*` or a code
-span pressed against Japanese so Slack leaves the marker visible, and more than
-two paragraphs.
+span pressed against Japanese so Slack leaves the marker visible, a commit SHA
+that is not a link, and more than two paragraphs.
 
 `--fix` converts headings to a bold line, bullets to `•`, links to `<url|text>`,
 and pads the markers. Tables are left alone on purpose: rebuilding one as short
@@ -32,11 +32,17 @@ not part of the message, and is not counted toward the two-paragraph ceiling.
 ```bash
 bun ~/.claude/skills/mdfmt/mdfmt.ts <file.md>          # lint
 bun ~/.claude/skills/mdfmt/mdfmt.ts --fix <file.md>    # mechanical fixes in place
-bun ~/.claude/skills/mdfmt/mdfmt.ts --docs <file.md>   # also require a trailing 最終更新日:
+bun ~/.claude/skills/mdfmt/mdfmt.ts --backlog <file.md>  # Backlog body: also flag unlinked commit SHAs
+bun ~/.claude/skills/mdfmt/mdfmt.ts --docs <file.md>   # repo docs: unlinked SHAs and a trailing 最終更新日:
 ```
 
-Finds: a space between fullwidth and halfwidth characters (`#123` excepted, where
-the spaces are required for the autolink), a closing `**` that CommonMark will not
+A bare SHA is flagged only with `--backlog`, `--docs` and `--slack`. GitHub links a
+same-repo SHA by itself inside issues, PRs and comments, so the default (GitHub)
+mode leaves it alone. Only SHAs mixing digits and `a-f` count; an all-digit SHA
+prefix reads as a number and is missed on purpose.
+
+Finds: a space between fullwidth and halfwidth characters inside Japanese prose (`#123` excepted, where
+the spaces are required for the autolink; English sentences quoting a Japanese word keep their spaces, judged per table cell), a closing `**` that CommonMark will not
 accept because the content ends in punctuation and a character follows, italics
 around Japanese, and the third bold span under one heading.
 

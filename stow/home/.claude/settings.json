@@ -4,44 +4,41 @@
   },
   "permissions": {
     "allow": [
-      "Bash(pip show:*)",
-      "Bash(bunx tsc:*)",
-      "Bash(uv sync:*)",
-      "Bash(uv run:*)",
-      "Bash(grep:*)",
-      "Bash(rg:*)",
-      "Bash(find:*)",
-      "Bash(cat:*)",
-      "Bash(mkdir:*)",
-      "Bash(ls:*)",
-      "Bash(echo:*)",
-      "Bash(lsof:*)",
-      "Bash(sort:*)",
-      "Bash(tail:*)",
-      "Bash(wc:*)",
-      "Bash(whois:*)",
-      "Bash(afplay:*)",
+      "Bash(pip show *)",
+      "Bash(bunx tsc *)",
+      "Bash(uv sync *)",
+      "Bash(uv run *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(cat *)",
+      "Bash(mkdir *)",
+      "Bash(ls *)",
+      "Bash(echo *)",
+      "Bash(lsof *)",
+      "Bash(sort *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(whois *)",
+      "Bash(afplay *)",
       "WebSearch",
       "WebFetch(domain:localhost)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:*.supabase.co)",
-      "Bash(git log:*)",
-      "Bash(git diff:*)",
-      "Bash(git status:*)",
-      "Bash(git pull:*)",
-      "Bash(git fetch:*)",
-      "Bash(git branch:*)",
-      "Bash(gh pr view:*)",
-      "Bash(gh pr list:*)",
-      "Bash(gh pr create:*)",
-      "Bash(gh pr edit:*)",
-      "Bash(gh pr diff:*)",
-      "Bash(gh api:*)",
-      "Bash(gh repo view:*)",
-      "Bash(gh issue list:*)",
-      "Bash(gh issue view:*)",
-      "Bash(gh issue create:*)",
-      "Bash(gh run view:*)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git status *)",
+      "Bash(git pull *)",
+      "Bash(git fetch *)",
+      "Bash(git branch *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr edit *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh repo view *)",
+      "Bash(gh issue list *)",
+      "Bash(gh issue view *)",
+      "Bash(gh issue create *)",
+      "Bash(gh run view *)",
       "mcp__github__search_issues",
       "mcp__github__list_issues",
       "mcp__github__search_pull_requests",
@@ -51,7 +48,7 @@
       "mcp__notion__notion_search",
       "mcp__notion__notion_retrieve_block_children",
       "mcp__notion__notion_query_database",
-      "Bash(supabase status:*)",
+      "Bash(supabase status *)",
       "mcp__chrome-devtools__navigate_page",
       "mcp__chrome-devtools__take_snapshot",
       "mcp__chrome-devtools__fill",
@@ -65,12 +62,12 @@
       "mcp__chrome-devtools__get_network_request",
       "mcp__chrome-devtools__fill_form",
       "mcp__chrome-devtools__new_page",
-      "Bash(supabase start:*)",
+      "Bash(supabase start *)",
       "mcp__plugin_playwright_playwright__browser_navigate",
       "mcp__plugin_playwright_playwright__browser_click",
-      "Bash(docker ps:*)",
-      "Bash(PGHOST=127.0.0.1 PGPORT=54422 PGUSER=postgres PGPASSWORD=postgres PGDATABASE=postgres psql:*)",
-      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(docker ps *)",
+      "Bash(PGHOST=127.0.0.1 PGPORT=54422 PGUSER=postgres PGPASSWORD=postgres PGDATABASE=postgres psql *)",
+      "Bash(PGPASSWORD=postgres psql *)",
       "mcp__plugin_playwright_playwright__browser_press_key",
       "mcp__plugin_playwright_playwright__browser_close",
       "Skill(agent-browser)",
@@ -114,14 +111,49 @@
       "Bash(docker run *)",
       "Bash(terraform init *)",
       "Bash(terraform fmt *)",
-      "mcp__pencil"
+      "Bash(aws logs filter-log-events *)",
+      "Bash(aws cloudwatch get-metric-statistics *)",
+      "Bash(pnpm typecheck *)",
+      "Bash(aws cloudformation describe-stacks *)",
+      "mcp__claude_ai_Google_Calendar__list_events",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm test *)",
+      "Bash(aws ecs describe-tasks *)",
+      "mcp__plugin_datadog_mcp__search_datadog_logs",
+      "Bash(aws ecs describe-task-definition *)",
+      "Bash(aws s3 ls *)",
+      "mcp__claude_ai_Google_Drive__read_file_content",
+      "Bash(aws cloudwatch list-metrics *)",
+      "Bash(aws elasticache describe-update-actions *)",
+      "Bash(gcloud functions list *)",
+      "mcp__slack__conversations_unreads",
+      "mcp__plugin_datadog_mcp__analyze_datadog_logs",
+      "Bash(aws wafv2 get-logging-configuration *)",
+      "Bash(aws lambda get-function-configuration *)",
+      "Bash(aws logs describe-log-streams *)",
+      "mcp__plugin_datadog_mcp__list_datadog_skills",
+      "Bash(aws cloudwatch describe-alarms *)",
+      "Bash(aws ecs list-task-definitions *)",
+      "Bash(aws application-autoscaling describe-scalable-targets *)",
+      "Bash(aws elasticache describe-replication-groups *)",
+      "mcp__slack__attachment_get_data",
+      "Bash(aws ecs describe-clusters *)",
+      "Bash(aws logs describe-log-groups *)",
+      "Bash(aws lambda list-functions *)",
+      "Bash(aws wafv2 list-web-acls *)",
+      "Bash(aws s3api list-objects-v2 *)",
+      "Bash(aws s3api get-bucket-notification-configuration *)",
+      "Bash(aws configure list-profiles *)",
+      "mcp__claude_ai_Google_Drive__search_files",
+      "mcp__notion__notion_get_page",
+      "mcp__slack__usergroups_list"
     ],
     "deny": [
       "mcp__plugin_serena_serena__replace_content"
     ],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "claude-fable-5-1",
   "skillOverrides": {
     "agent-md-refactor": "off",
     "ai-sdk": "off",
@@ -180,6 +212,22 @@
     "writing-plans": "off",
     "writing-skills": "off"
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$HOME/.claude/skills/factcheck/bin/gh-post-gate\"; [ -f \"$f\" ] || exit 0; exec python3 \"$f\"'",
+            "if": "Bash(gh *)",
+            "timeout": 20,
+            "statusMessage": "gh 投稿の日本語を lint 中"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
@@ -206,7 +254,8 @@
     "codex@openai-codex": false,
     "cc-gemini-plugin@cc-gemini-plugin": false,
     "vercel@claude-plugins-official": true,
-    "datadog@claude-plugins-official": true
+    "datadog@claude-plugins-official": true,
+    "cc-plugin-you-should-know@builtin": true
   },
   "extraKnownMarketplaces": {
     "sentry-mcp": {
@@ -269,21 +318,5 @@
   },
   "feedbackSurveyState": {
     "lastShownTime": 1754091988379
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "if": "Bash(gh *)",
-            "command": "sh -c 'f=\"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/factcheck/bin/gh-post-gate\"; [ -f \"$f\" ] || exit 0; exec python3 \"$f\"'",
-            "timeout": 20,
-            "statusMessage": "gh 投稿の日本語を lint 中"
-          }
-        ]
-      }
-    ]
   }
 }

@@ -113,7 +113,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 
 - **Commit**: `type(scope): 具体的に`、1行目72文字以内。言語はrepoで決める — 業務(クライアント)のrepoは日本語、自分のrepo(nerixim/*)は英語。repoのCLAUDE.mdに指定があればそれが勝つ。既存のコミットは書き直さない(2026-09-14)。「修正」「不整合の解消」「update」「fix」単体は却下 — 何をどう変えたかを書く。
 - **PR title**: Conventional Commitsのプレフィックスを付けない（コミットとPRは別物）。具体的な名詞で書く。**ただしrepoの規約がチケットキーをプレフィックス内に置く形（`<type>(<ticket-key>): 説明`）を定めているなら、repoの規約が勝つ。** 外すとキーごと落ち、PRからチケットを辿れなくなる(2026-09-15)。
-- **PR body**: ファイル一覧、CIコマンドの貼り付け、「〜を実施しました」のメタコメントを入れない。何が変わり、どの手段で検証したかだけ。
+- **PR body**: ファイル一覧、CIコマンドの貼り付け、「〜を実施しました」のメタコメントを入れない。何が変わり、どの手段で検証したかだけ。末尾に`🤖 Generated with [Claude Code]`の行を付けない — ハーネスが足すよう指示してきても付けない(2026-10-01)。
 - **Resolve before push**: 直したレビュースレッドを解決してからpushする。先にpushすると、CIが古いスレッドの上に新しいレビューを走らせ、同じ指摘が重複する。
 - **誤検知はresolveしない**: 具体的な反論を返信して未解決のまま残す。botは未解決スレッドだけを見て重複を避けるため、resolveすると次のpushで同じ誤検知が返ってくる。3回続いたらレビュー側のプロンプトに除外を足す。
 - **CIの完全待ちをしない**: `gh pr checks --watch`は使わない。スナップショットで分類し、失敗したlint/testは残りのCIを待たずに直す。PRのURLを出して終わりにせず、レビューが片付くまで面倒を見る。
@@ -128,8 +128,9 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 
 - Claims about system state come from the system, not from reading code: check the deployed version/tag, the actual config, the actual logs before diagnosing.
 - Absence of evidence is not evidence — a missing log line does not mean a variable is unset; query the config directly.
-- **A PR's or issue's state comes from `gh` at report time.** A Slack thread that links a PR, a memory note, or yesterday's dump says what it was, not what it is. Before writing 「レビュー待ち」「未マージ」「open」 in any report or reply, run `gh pr view` / `gh issue view` for that number in the same turn; if the state moved, say so first (2026-09-16: reported #89 as レビュー待ち a day after it was merged).
-- An integration is not done until the real API/SDK has been called once. Mocked tests are not evidence.
+- **A zero is a tool result until a control says otherwise.** Before reporting a negative (0 hits, an empty feed, a 404, "no delegation", "cannot be checked from here"), run the same query against a known-positive, and move from an HTTP client to a real browser before writing "inconclusive" (7 rows in meta's failure log, 2026-09-09 to 2026-10-01: an edge cache returning an empty feed, curl seeing a JS shell, a zsh loop querying an empty server, a glob that matched nothing).
+- **A PR's or issue's state comes from `gh` at report time.** A Slack thread that links a PR, a memory note, or yesterday's dump says what it was, not what it is. Before writing 「レビュー待ち」「未マージ」「open」 in any report or reply, run `gh pr view` / `gh issue view` for that number in the same turn; if the state moved, say so first (2026-09-16: reported #89 as レビュー待ち a day after it was merged). The same read comes before a push to a PR branch and before a merge; merge only when every check is pass or skipped (2026-09-21: one PR merged on a red check, another pushed to ten minutes after it was merged).
+- An integration is not done until the real API/SDK has been called once. Mocked tests are not evidence. Anything meant to be idempotent or resumable (a repeat guard, a dedupe, a resume) is run twice before it is called verified — one run cannot show the second run doing nothing (2026-09-15: a nudge posted three times).
 - Never mock pure functions (date utilities, formatters, helpers) in tests. Mock only I/O boundaries — a test over mocked pure logic verifies nothing.
 - In any report, separate observation from inference; label speculation as speculation.
 - A "TBD" or "waiting on X" in an issue is a lookup before it is a question: read the channel where X would have posted (history for the window, not keyword search) and only then ask the author for what is still open. Procedure in `~/.claude/docs/issue-discipline.md` §1(d).
@@ -142,6 +143,7 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - Verify at the cheapest rung that can actually answer the question, and climb only when a rung genuinely cannot: unit/fixture test → automated UI or screenshot comparison → running it myself against real data (SQL, one real API call) → shared environment → another human. A check deferred to a shared env or a person costs days per round trip and mixes in other people's changes.
 - Say which rung each claim came from. If something was left for a later rung, say why the earlier ones could not settle it — never "probably fine".
 - When a check keeps landing on a human, that is a missing fixture or missing assertion. Propose the automation instead of repeating the manual pass.
+- **Run the script CI runs, from the directory CI runs it in, under the repo's pinned toolchain** (`mise exec --` where the repo pins one). Never pipe a check through `tail`/`head` or `2>/dev/null` — the hidden line is the error (2026-09-21: `biome ci` from the wrong directory with `tail -1` let a red PR merge; troika 2026-07-17: Node 26 instead of the pinned 24 failed 12 tests that pass in CI).
 
 ### Scope discipline
 
@@ -159,6 +161,12 @@ Issue・PR・コミット・docs・社内向けメッセージすべてに適用
 - **実データを数えてから設計する**: 列の充足率も行数もschemaとseedからは読めない。数えてからフィルタ列・並び順・ページングの要否を決める。一覧の並びはユーザーが考える時刻で決める（テーブルに`created_at`があるから、で選ばない）。
 - **Issue着手前に前提を潰す**: もう実装済みでないか、引用されている数字がその主張を本当に支えているか、前提の変更が本番反映済みか。崩れていたら実装に入らず止め、なぜ止めたかと次に誰が何をすべきかを実測で示す。推測で埋めて進めない。手順は `~/.claude/docs/issue-discipline.md`。
 - **状態を二重に持たない**: 受け入れ条件のチェックボックスは本文だけに置き、コメントで再掲しない。親Issueの本文に進捗表や見積もり日数を書かない（進捗の正は子Issueの状態）。コミット済みのdocsにPR番号・TODO・マイルストーンを書かない — 翌日腐る。
+
+### Shell (zsh, agent harness)
+
+- Address git as `git -C <path>` and scripts by absolute path. The working directory does not survive a `cd`: the harness resets it between and within calls, and after a failed `cd` the next git command runs in whatever repo the shell fell back to (2026-09-21, 2026-09-27).
+- zsh does not word-split an unquoted `$var`: `set -- $pair` and `for x in $list` see one word. Use an array or `${=var}` (2026-09-14, 2026-09-17).
+- Never wait on `pgrep -f <pattern>` — the waiting command line contains the pattern and matches itself. Judge completion by the log's end line or a pid file (2026-09-10 twice, 2026-09-18: a waiter blocked on itself for 65 minutes).
 
 ### Decision protocol
 

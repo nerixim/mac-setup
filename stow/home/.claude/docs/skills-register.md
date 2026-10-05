@@ -25,9 +25,11 @@
 | `briefing` | 「何か来ているか」「何を見落としたか」。Slack・GitHub・Notion・Googleを1回で読み、要対応/待ち/情報のみの3つに分ける | 共通＋オーバーレイ | `local/config.json`と`local/people.json`。SlackとGoogleはMCP経由なので、出た呼び出しを打って結果を保存する |
 | `meeting-prep` | 定例の前に読み上げるメモを作る。会議のあとは`notes`で決定事項を記録する | 共通＋オーバーレイ | `local/meetings.md`（プロファイル・議題・人・ブロックの材料）。`briefing`を先に回す |
 | `factcheck` | 送る前に下書きを正本に当てる。GitHub・Slack・Notion・クラウドの主張を再取得して照合し、文体とregisterもlintする。**送信はしない** | 共通＋オーバーレイ | `local/sources.json`。記法のW01〜W04・W22・W23は`mdfmt`に委ねるので`bun`が要る |
+| `writing` | 送る文を、同僚が実際に書いた文の分布に合わせて書く。場面を選び、実測の型と実物を読んでから書き、書いたあと外れを出す。**送信はしない** | 共通＋オーバーレイ | `local/config.json`（ダンプの置き場と名簿）。コーパスは`~/.local/state/claude-writing/`に置き、リポジトリには入れない |
 | `ja-lesson` | 自分の日本語を直されたその場で用語集に登録する | 共通 | `factcheck/bin`を呼ぶ |
 | `grill` | 実装前・受け入れ基準を書く前に、案やチケットを質問で詰める | 共通＋オーバーレイ | `local/ticket-source.md`。無ければ引数を自由記述として扱う |
 | `quiz` | 製品の挙動を自分が答えられるか試す。マージ済みPRから事実を収穫し、間隔をあけて出題する | 共通＋オーバーレイ | リポジトリごとの`$Q/config.md`。`local/config.<repo>.md`が種 |
+| `work-report` | 月末の作業報告書（xlsm）を埋める。カレンダー・自分のSlack投稿・GitHub・git・Claude Codeのセッションから日ごとの作業を起こし、休日と欠勤は勤怠チャンネルから取る。手で呼ぶときだけ（`/work-report 2026-09`） | 共通＋オーバーレイ | `local/config.json`（勤怠チャンネル・定例名・リポジトリ・テンプレートの配置・文言規則）。`uv`と`openpyxl` |
 | `mdfmt` | Markdownの記法を機械で見る。Slack宛と、GitHub・Backlog宛で規則が違う | dotfiles | `bun`。`bun test`が31件 |
 | `commit` | 日本語の説明でConventional Commitsのコミットを作る。compile・lint・testも回す | dotfiles | — |
 | `create-pr` | 日本語のタイトルと本文でPRを出す | dotfiles | `gh` |
@@ -49,6 +51,15 @@
 | `security-reviewer` | 脆弱性の棚卸しと監査報告 |
 | `tdd` / `codebase-design` / `domain-modeling` / `improve-codebase-architecture` | 設計と作り方を決めるとき |
 | `handoff` / `triage` | 引き継ぎ文書、Issueの仕分け |
+| `retro` / `diagnosing-superpowers` | セッションのあとの振り返り。`/retro`は環境（ナビゲーション・自動チェック・道具の経済・CLAUDE.mdの肥大）の改善候補を出す。`diagnosing-superpowers`はトランスクリプトから失敗・手戻りを`path:line`付きで出す。どちらも過去セッションのJSONLのパスを渡せば`claude -p`でも回る（2026-10-01に実セッションで確認、1本0.3〜0.4 USD） |
+| `retrospective-codify` | 試行錯誤のあとに教訓をlint規則・スキル・CLAUDE.mdのどれに落とすか決める。明示的に呼んだときだけ |
+| `verification-before-completion` | 完了・修正済みと言う前に検証コマンドを回して出力を読む |
+| `gh-fix-ci` | PRのCIが赤いとき。`gh`でログを引いて修正案を出し、承認後に直す |
+| `writing-for-agents` | スキル・CLAUDE.mdを書き直すとき。`retro`が最初に呼ぶ |
+| `bigquery-troubleshooting` / `bigquery-optimization` / `cloud-monitoring-metric-selection` / `cloud-logging-query-generation` | GCP側（BigQuery・Cloud Monitoring・Cloud Logging）を触るとき。内部知識で答えず先に読む |
+| `aws-github-oidc-scoped-role` | GitHub ActionsからAWSへのOIDC信頼を書く・レビューするとき。`job_workflow_ref`で絞る型（2026-10-01の盲検評価でTerraformの基準を8点上回り、OIDCの`sub`ワイルドカードとcircuit breaker無しを両方当てた唯一の候補） |
+
+2026-10-01の盲検評価で見送ったもの: mattpocock `diagnosing-bugs`・`code-review`、sanyuan0704 `code-review-expert`、obra `systematic-debugging`、hashicorp `refactor-module`、mizchi `aws-ecs-codedeploy-blue-green`。KotlinのPRレビューでもTerraformでも基準（スキル無し）と同等以下だった。mattpocockの`code-review`は組み込みの`/code-review`と名前が衝突するので、入れるとしても別名が要る。
 
 更新は月曜09:30のlaunchd（`com.nikita.skills-update`）が`~/.local/bin/skills-update`を回す。触るのはこの層だけで、自作スキルは動かさない。
 
@@ -71,4 +82,4 @@
 3. どの機でも同じで設定を持たないか → `~/mac-setup`。ただし公開リポジトリなので客先の名前を入れない
 4. 第三者のものをそのまま使うか → skills.shで入れる。手で直さない（月曜の更新で消える）
 
-最終更新日: 2026-09-17
+最終更新日: 2026-10-01

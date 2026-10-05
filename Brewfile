@@ -19,7 +19,7 @@ brew 'libtool'
 brew 'libyaml'
 brew 'unixodbc'
 brew 'gnupg'
-brew 'lbzip2'
+# brew 'lbzip2'
 brew 'libxslt'
 brew 'llvm'
 brew 'lzlib'
@@ -38,15 +38,10 @@ brew 'ghq'
 brew 'git'
 brew 'jq'
 brew 'yq'
-brew 'mysql-client' # client libs only, no server
-brew 'libpq' # postgres client libs only, no server
 brew 'tig'
 brew 'lazygit' # git TUI (configured in config/lazygit.yml)
 brew 'zsh'
 brew 'zsh-completions'
-brew 'kayac/tap/ecspresso'
-cask 'ngrok'
-brew 'gitmoji' # emoji for commit messages
 brew 'lazydocker' # docker TUI
 brew 'stow' # symlink-farm manager for dotfiles
 brew 'tree' # for tree command
@@ -75,33 +70,15 @@ brew 'restic' # encrypted deduplicated backups (meta: bun scripts/backup.mjs)
 brew 'rclone' # R2 state sync for /briefing + /meeting-prep (skills/briefing/references/r2-state-sync.md)
 
 # docker
-brew 'unison'
-brew 'eugenmayer/dockersync/unox'
 
 ## Desktop apps
 cask 'visual-studio-code', args: { appdir: '~/Applications' }
 cask 'docker'
-cask 'google-japanese-ime'
 cask 'iterm2', args: { appdir: '~/Applications' }
-cask 'google-drive'
-cask 'alfred', args: { appdir: '~/Applications' }
 cask 'figma', args: { appdir: '~/Applications' }
-cask 'postman', args: { appdir: '~/Applications' }
-cask 'zoom', args: { appdir: '~/Applications' }
-cask 'discord', args: { appdir: '~/Applications' }
 cask 'notion', args: { appdir: '~/Applications' }
 
 # Browsers
-cask 'google-chrome', args: { appdir: '~/Applications' }
-cask 'chromium', args: { appdir: '~/Applications' }
-cask 'firefox', args: { appdir: '~/Applications' }
-cask 'brave-browser', args: { appdir: '~/Applications' }
 
-cask 'flux', args: { appdir: '~/Applications' }
+# cask 'flux', args: { appdir: '~/Applications' }
 
-mas 'Slack', id: 803453959
-mas 'Spark', id: 1176895641
-mas 'CopyClip', id: 595191960
-mas 'Telegram', id: 747648890
-mas 'LINE', id: 539883307
-mas 'Prime Video', id: 545519333 # Amazon Music

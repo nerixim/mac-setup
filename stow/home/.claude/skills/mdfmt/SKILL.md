@@ -34,6 +34,7 @@ bun ~/.claude/skills/mdfmt/mdfmt.ts <file.md>          # lint
 bun ~/.claude/skills/mdfmt/mdfmt.ts --fix <file.md>    # mechanical fixes in place
 bun ~/.claude/skills/mdfmt/mdfmt.ts --backlog <file.md>  # Backlog body: also flag unlinked commit SHAs
 bun ~/.claude/skills/mdfmt/mdfmt.ts --docs <file.md>   # repo docs: unlinked SHAs and a trailing 最終更新日:
+bun ~/.claude/skills/mdfmt/mdfmt.ts --en <file.md>     # also check English prose for packing
 ```
 
 A bare SHA is flagged only with `--backlog`, `--docs` and `--slack`. GitHub links a
@@ -42,20 +43,28 @@ mode leaves it alone. Only SHAs mixing digits and `a-f` count; an all-digit SHA
 prefix reads as a number and is missed on purpose.
 
 Finds: a space between fullwidth and halfwidth characters inside Japanese prose (`#123` excepted, where
-the spaces are required for the autolink; English sentences quoting a Japanese word keep their spaces, judged per table cell), a closing `**` that CommonMark will not
-accept because the content ends in punctuation and a character follows, italics
+the spaces are required for the autolink; English sentences quoting a Japanese word keep their spaces, judged per table cell), a `**` that GitHub leaves literal because
+its inner side is punctuation, a bracket, a code span or a link and its outer side
+is a letter (`**強調。**続き`, `これは**「語」**です`, ``設定は**`foo`**に``), italics
 around Japanese, and the third bold span under one heading.
 
-`--fix` only touches the mechanical part: the spacing, the `#123` padding, the
-closing `**`, and `` `fixes #12` `` unwrapped so GitHub links it. Italics and bold
+`--fix` only touches the mechanical part: the spacing, the `#123` padding, a
+space on the letter side of a literal `**`, and `` `fixes #12` `` unwrapped so GitHub
+links it. A `**` around a link is reported but not padded. Italics and bold
 density are reported, never rewritten.
+
+`--en` adds two checks on English prose only (a paragraph, a list item or a table
+cell with at least five English words): a sentence over 30 words
+(`en-long-sentence`) and two or more semicolons in one block
+(`en-semicolon-chain`). It is opt-in, so `lint-draft` and the `gh` post gate do
+not run it. Nothing is rewritten.
 
 ## Scope
 
 Code spans, fenced blocks, link destinations and URLs are masked everywhere, so a
 command or an identifier inside backticks is never flagged or rewritten.
 
-Word choice is a separate concern; this does not touch it.
+Word choice is a separate concern; this does not touch it. `--en` counts words and semicolons, not which words.
 
 ## Tests
 

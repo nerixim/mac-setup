@@ -1,6 +1,7 @@
 // GitHub/Backlog に出す Markdown の機械的な表記チェックと、機械的に直せる分の修正。
 // レビューでしか守られていなかった規則を落とす。判断が要る規則(register・敬語・長さ)はここでは見ない。
 import { mapOutsideFences, padCommonMarkEmphasisClosers, withProtectedCodeSpans } from "./emphasis.ts"
+import { checkEnglish } from "./english.ts"
 
 export type Rule =
   | "ja-en-space"
@@ -10,6 +11,8 @@ export type Rule =
   | "last-updated"
   | "repo-ref"
   | "bare-sha"
+  | "en-long-sentence"
+  | "en-semicolon-chain"
 
 export type Violation = { line: number; rule: Rule; text: string; hint: string }
 
@@ -31,29 +34,26 @@ const PUNCTUATION = /[\p{P}\p{S}]/u
 const isWhitespace = (char: string | undefined): boolean => char === undefined || WHITESPACE.test(char)
 const isPunctuation = (char: string | undefined): boolean => char !== undefined && PUNCTUATION.test(char)
 
-// 閉じられない `**` が行内にあるか。
-// CommonMark の right-flanking は「直前が空白でない」かつ「直前が約物でない、または直後が空白か約物」。
-// `**太字。**続き` は直前`。`・直後`続`で両方を外すため閉じ記号にならず、`**` がそのまま出る。
-// 開き・閉じを交互に追うので、`**A**と**B**` のような連続した強調を誤検知しない。
+// 開けない・閉じられない `**` が行内にあるか。GitHub は `**` をそのまま表示する(2026-10-05 に API で確認)。
+// CommonMark の left-flanking は「直後が空白でない」かつ「直後が約物でない、または直前が空白か約物」。
+// right-flanking はその鏡像。`**太字。**続き` は閉じが、`これは**「語」**です` は開きも閉じも外れる。
+// 判定は `*` の連なり(run)の外側の文字で行うので、`これは***強調***です` を誤検知しない。
+// 開き・閉じを交互に追うので、`**A**と**B**` のような連続した強調も誤検知しない。
 export const hasUnclosedEmphasis = (line: string): boolean => {
   let open = false
 
-  for (let i = 0; i < line.length - 1; i += 1) {
-    if (line[i] !== "*" || line[i + 1] !== "*") {
-      continue
-    }
-    const prev = line[i - 1]
-    const next = line[i + 2]
+  for (const run of line.matchAll(/\*{2,}/g)) {
+    const prev = line[run.index - 1]
+    const next = line[run.index + run[0].length]
 
     if (!open) {
-      // left-flanking: 直後が空白でなく、(直後が約物でない、または直前が空白か約物)
       if (isWhitespace(next)) {
         continue
       }
-      if (!isPunctuation(next) || isWhitespace(prev) || isPunctuation(prev)) {
-        open = true
-        i += 1
+      if (isPunctuation(next) && !isWhitespace(prev) && !isPunctuation(prev)) {
+        return true
       }
+      open = true
       continue
     }
 
@@ -62,13 +62,22 @@ export const hasUnclosedEmphasis = (line: string): boolean => {
     }
     if (!isPunctuation(prev) || isWhitespace(next) || isPunctuation(next)) {
       open = false
-      i += 1
       continue
     }
     return true
   }
 
   return false
+}
+
+/** 強調の判定用。コードスパンとリンク先は GitHub が約物として扱うので、空白ではなく約物で埋める */
+export const maskForEmphasis = (line: string): string => {
+  const blank = (match: string): string => " ".repeat(match.length)
+  return line
+    .replace(/`[^`]*`/g, (match) => "`".repeat(match.length))
+    .replace(/\]\([^)]*\)/g, (match) => ")".repeat(match.length))
+    .replace(/https?:\/\/\S+/g, blank)
+    .replace(/<[^>]*>/g, blank)
 }
 
 /** 行内のコード・リンク先・URL・GitHub参照・HTMLタグを潰す。桁位置は保つ */
@@ -174,8 +183,12 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
       hint: "no space between fullwidth and halfwidth in Japanese prose; `#123` is the only exception",
     })
   }
-  if (hasUnclosedEmphasis(masked)) {
-    hits.push({ rule: "emphasis-boundary", text, hint: "move the punctuation outside the emphasis: `**太字**。続き`" })
+  if (hasUnclosedEmphasis(maskForEmphasis(line))) {
+    hits.push({
+      rule: "emphasis-boundary",
+      text,
+      hint: "this `**` touches punctuation, a bracket, code or a link, so it stays literal; move it inside or outside (`**太字**。続き`, `「**語**」`) or put a space on the letter side",
+    })
   }
   if (hasShortRepoRef(line)) {
     hits.push({
@@ -193,8 +206,8 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
   return hits
 }
 
-/** docs: リポジトリに置く文書。backlog: Backlog に出す本文。どちらも GitHub の自動リンクが効かない */
-export type LintOptions = { docs?: boolean; backlog?: boolean }
+/** docs: リポジトリに置く文書。backlog: Backlog に出す本文。どちらも GitHub の自動リンクが効かない。en: 英語の文の長さと `;` の列も見る */
+export type LintOptions = { docs?: boolean; backlog?: boolean; en?: boolean }
 
 /** 1ファイル分の行単位チェック。コードフェンス内(mermaid含む)は対象外 */
 export const checkLines = (content: string, opts: LintOptions = {}): Violation[] => {
@@ -249,6 +262,9 @@ export const hasLastUpdated = (content: string): boolean => {
 
 export const lint = (content: string, opts: LintOptions = {}): Violation[] => {
   const hits = checkLines(content, opts)
+  if (opts.en) {
+    hits.push(...checkEnglish(content))
+  }
   if (opts.docs && !hasLastUpdated(content)) {
     hits.push({
       line: content.split("\n").length,

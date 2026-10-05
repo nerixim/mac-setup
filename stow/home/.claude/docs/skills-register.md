@@ -24,8 +24,8 @@
 |---|---|---|---|
 | `briefing` | 「何か来ているか」「何を見落としたか」。Slack・GitHub・Notion・Googleを1回で読み、要対応/待ち/情報のみの3つに分ける | 共通＋オーバーレイ | `local/config.json`と`local/people.json`。SlackとGoogleはMCP経由なので、出た呼び出しを打って結果を保存する |
 | `meeting-prep` | 定例の前に読み上げるメモを作る。会議のあとは`notes`で決定事項を記録する | 共通＋オーバーレイ | `local/meetings.md`（プロファイル・議題・人・ブロックの材料）。`briefing`を先に回す |
-| `factcheck` | 送る前に下書きを正本に当てる。GitHub・Slack・Notion・クラウドの主張を再取得して照合し、文体とregisterもlintする。**送信はしない** | 共通＋オーバーレイ | `local/sources.json`。記法のW01〜W04・W22・W23は`mdfmt`に委ねるので`bun`が要る |
-| `writing` | 送る文を、同僚が実際に書いた文の分布に合わせて書く。場面を選び、実測の型と実物を読んでから書き、書いたあと外れを出す。**送信はしない** | 共通＋オーバーレイ | `local/config.json`（ダンプの置き場と名簿）。コーパスは`~/.local/state/claude-writing/`に置き、リポジトリには入れない |
+| `factcheck` | 送る前に下書きを一次情報に当てる。GitHub・Slack・Notion・クラウドの主張を再取得して照合し、文体とregisterもlintする。**送信はしない** | 共通＋オーバーレイ | `local/sources.json`。記法のW01〜W04・W22・W23は`mdfmt`に委ねるので`bun`が要る |
+| `writing` | 送る文を、同僚が実際に書いた文の分布に合わせて書く。場面を選び、実測した傾向と実物を読んでから書き、書いたあと外れを出す。**送信はしない** | 共通＋オーバーレイ | `local/config.json`（ダンプの置き場と名簿）。コーパスは`~/.local/state/claude-writing/`に置き、リポジトリには入れない |
 | `ja-lesson` | 自分の日本語を直されたその場で用語集に登録する | 共通 | `factcheck/bin`を呼ぶ |
 | `grill` | 実装前・受け入れ基準を書く前に、案やチケットを質問で詰める | 共通＋オーバーレイ | `local/ticket-source.md`。無ければ引数を自由記述として扱う |
 | `quiz` | 製品の挙動を自分が答えられるか試す。マージ済みPRから事実を収穫し、間隔をあけて出題する | 共通＋オーバーレイ | リポジトリごとの`$Q/config.md`。`local/config.<repo>.md`が種 |

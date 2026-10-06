@@ -226,6 +226,27 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$HOME/.claude/skills/writing/bin/draft-gate\"; [ -f \"$f\" ] || exit 0; exec python3 \"$f\"'",
+            "timeout": 10,
+            "statusMessage": "下書きの規則を注入中"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$HOME/.claude/hooks/pohuy-reminder.sh\"; [ -f \"$f\" ] || exit 0; exec sh \"$f\"'",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

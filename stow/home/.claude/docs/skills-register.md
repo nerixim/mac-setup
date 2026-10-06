@@ -33,6 +33,7 @@
 | `start-work` | 作業単位（PRになるもの・apply・文書・調査結果）に着手する前にissueを1本切り、自分に割り当てて、チームのGitHub Projectに列付きで載せる。本文はリポジトリの流儀で書く（issue作成エージェントを持つリポジトリはそれに委ねる）。PRは`refs`/`Closes`でissueを指し、`pr`・`status`で列を動かす。`backfill`がissueの無い自分のPRと板に無いissueを並べる。返信・DM・人に関するメモはissueにしない（`briefing`の板に置く） | 共通＋オーバーレイ | `local/config.json`（org・Project番号・列名）と`local/issue-style.md`。`gh`に`project` scope。本文は`mdfmt`と`factcheck/bin/lint-draft`を通る |
 | `mdfmt` | Markdownの記法を機械で見る。Slack宛と、GitHub・Backlog宛で規則が違う | dotfiles | `bun`。`bun test`が31件 |
 | `commit` | 日本語の説明でConventional Commitsのコミットを作る。compile・lint・testも回す | dotfiles | — |
+| `greenfield` | 新規プロジェクトのスタック既定（Node LTS・Biome・Zod v4・Next.js+Hono・Supabase・Tailwind v4・vitest+Playwright）。既存repoには当てない | dotfiles | — |
 | `create-pr` | 日本語のタイトルと本文でPRを出す | dotfiles | `gh` |
 | `creating-infra-overviews` | 「どこで何が動いているか」の俯瞰図を作る | dotfiles | — |
 | `premortem` | 決定・計画が失敗した前提で原因を洗う | dotfiles | — |

@@ -61,6 +61,12 @@ Make decisions on which comments to address based on:
 - Reference the original comment in commit messages
 - Post a response with the commit hash in the reviewer's language
 
+Thread handling rules (moved from the global CLAUDE.md, 2026-10-05):
+
+- Resolve the threads you fixed before pushing; pushing first makes the bot re-review on top of stale threads and duplicate findings
+- False positives: reply with a concrete rebuttal and leave the thread unresolved (bots dedupe on open threads). After three repeats, add an exclusion to the reviewer's prompt
+- Never `gh pr checks --watch`; classify from a snapshot and fix failing lint/tests first
+
 **Comments Not to Address:**
 
 - Provide clear reasoning for why we're not implementing the suggestion

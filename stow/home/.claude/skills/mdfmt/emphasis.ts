@@ -33,35 +33,35 @@ export const withProtectedCodeSpans = (text: string, transform: (prose: string) 
   return transformed.replace(/@@CODESPAN(\d+)@@/g, (_match, index: string) => spans[Number(index)] ?? "")
 }
 
-const padCommonMarkCloser = (text: string, marker: string): string => {
+const padCommonMarkPair = (text: string, marker: string): string => {
   const escaped = "\\*".repeat(marker.length)
   const pattern = new RegExp(`(?<!\\*)${escaped}(?!\\*)([\\s\\S]*?)(?<!\\*)${escaped}(?!\\*)`, "g")
+  const isLetter = (char: string | undefined): boolean =>
+    char !== undefined && !isCommonMarkWhitespace(char) && !isCommonMarkPunctuation(char)
 
   return text.replace(pattern, (match, content: string, offset: number, source: string) => {
-    if (content.length === 0) {
-      return match
-    }
+    const first = content.at(0)
     const last = content.at(-1)
-    const after = source.at(offset + match.length)
-    if (
-      last === undefined ||
-      after === undefined ||
-      !isCommonMarkPunctuation(last) ||
-      isCommonMarkWhitespace(after) ||
-      isCommonMarkPunctuation(after)
-    ) {
+    if (first === undefined || last === undefined) {
       return match
     }
-    return `${marker}${content}${marker} `
+    const before = offset === 0 ? undefined : source.at(offset - 1)
+    const after = source.at(offset + match.length)
+    const padBefore = isCommonMarkPunctuation(first) && isLetter(before)
+    const padAfter = isCommonMarkPunctuation(last) && isLetter(after)
+    return `${padBefore ? " " : ""}${match}${padAfter ? " " : ""}`
   })
 }
 
-/** 閉じ `*`/`**`/`***` が約物終わり+非約物続きで素通しになるとき、閉じの後に半角スペースを入れる。 */
+/**
+ * `*`/`**`/`***` の内側が約物(かっこ・句点・コードスパン)で外側が文字だと素通しになるので、文字の側に半角スペースを入れる。
+ * コードスパンは退避後のトークンが `@` で始まり終わるので、約物として同じ規則に乗る。
+ */
 export const padCommonMarkEmphasisClosers = (text: string): string =>
   withProtectedCodeSpans(text, (prose) => {
     let result = prose
     for (const marker of EMPHASIS_MARKERS) {
-      result = padCommonMarkCloser(result, marker)
+      result = padCommonMarkPair(result, marker)
     }
     return result
   })

@@ -37,8 +37,9 @@
 
 - Claims about system state come from the system, not from reading code: the deployed version, the actual config, the actual logs.
 - Absence of evidence is not evidence. Before writing 「無い」「記録なし」「できない」, check the live system, history and `.env` names, and name the places checked. A count, date or cost with no measured source is omitted or marked 【推定】.
-- A PR's or issue's state comes from `gh` in the same turn as the report. If it moved, say so first.
-- An integration is not done until the real API/SDK has been called once. Mocked tests are not evidence. Never mock pure functions; mock only I/O boundaries.
+- A zero is a tool result until a control says otherwise. Before reporting a negative (0 hits, an empty feed, a 404, 「できない」), run the same query against a known positive, and move from an HTTP client to a real browser before writing 「inconclusive」.
+- A PR's or issue's state comes from `gh` in the same turn as the report. If it moved, say so first. The same read comes before a push to a PR branch and before a merge; merge only when every check is pass or skipped.
+- An integration is not done until the real API/SDK has been called once. Mocked tests are not evidence. Anything idempotent or resumable (a repeat guard, a dedupe, a resume) is run twice before it is called verified. Never mock pure functions; mock only I/O boundaries.
 - Separate observation from inference; label speculation.
 - A "TBD" or "waiting on X" is a lookup (channel history for the window, `gh` comments, Notion mirror, local files) before it is a question; ask only for what is still open. A file that looks unreadable is a one-line request to me. Procedure: `~/.claude/docs/issue-discipline.md`.
 - A vendor's payload, schema or semantics come from the vendor's docs (AWS and others serve `llms.txt` and a `.md` twin per page), not from memory: read and copy the documented shape before the first attempt, not after the second failure.
@@ -49,6 +50,7 @@
 
 - Verify at the cheapest rung that can answer: unit/fixture test → automated UI or screenshot diff → running it myself against real data → shared environment → another human. Say which rung each claim came from, and why earlier rungs could not settle it. Never "probably fine".
 - A check that keeps landing on a human is a missing fixture or assertion. Propose the automation.
+- Run the script CI runs, from the directory CI runs it in, under the repo's pinned toolchain (`mise exec --` where the repo pins one). Never pipe a check through `tail`/`head` or `2>/dev/null`; the hidden line is the error.
 
 ### Scope discipline
 
@@ -59,7 +61,7 @@
 
 ### Engineering discipline
 
-- 産出側を直す: 呼び出し側のlint・flag・grepで止める前に、ヘルパーや型で出せなくできないかを見る。正当化できるのは、APIを変えられない・正しい使い方が文脈依存・独立した2つの正本の同期、の3つだけ。
+- 産出側を直す: 呼び出し側のlint・flag・grepで止める前に、ヘルパーや型で出せなくできないかを見る。正当化できるのは、APIを変えられない・正しい使い方が文脈依存・独立した2つの元データの同期、の3つだけ。
 - 互換シムを残さない: 置換したら旧経路は同じPRで消す。例外は外部システムとの本物のフォーマットアダプタ。
 - 計装には消費者が要る: 読む先（定例・アラート・ダッシュボード）ができるまで未完了。
 - 1分以上回るスクリプトは進捗を出す（N件目/全件を10〜100件ごとか30秒ごと、失敗はその場で1行）。
@@ -68,6 +70,7 @@
 - 数値を根拠にするPRは、その数値を同じセッションで本番から測り直す。Issueの数値も引き継ぎの数値も再計測の対象で、JVMの自己申告（`jvm.non_heap_memory`）ではなくコンテナ側の実測（RSS − committed heap）で見る。資源の上限を変えるときは、同じモジュールのオートスケール・アラート設定を読んでから値を決める（2026-10-05 にレビューで指摘された）。
 - 状態を二重に持たない: 受け入れ条件は本文だけ、親Issueの本文に進捗表や見積もり日数を書かない（進捗の正は子Issueの状態）、docsにPR番号・TODO・マイルストーンを書かない。
 - Tool hygiene: multi-line code goes to a scratchpad file via heredoc, never `python -c` with escaped quotes; waits use `run_in_background` or Monitor. Commands I run are one line or `! bash <absolute path>`, with `git -C <absolute path>`. Load a deferred tool's schema before the first call. In a clone I haven't committed in, check `git log -1 --format='%an <%ae>'` and `git config user.email` first (nerixim/* and mac-setup private identity, trabox-inc company identity).
+- Shell traps (zsh, harness): the cwd does not survive a `cd`, so address git as `git -C <path>` and scripts by absolute path. zsh does not word-split an unquoted `$var`; use an array or `${=var}`. Never wait on `pgrep -f <pattern>`, which matches itself; judge completion by the log's end line or a pid file.
 - Fan-out has a ceiling: 20 concurrent subagents; on "Do not retry" or a 429, stop the batch. Permission-gated bulk work runs in the main session. Long unattended runs write per-step files and report cost as API-equivalent reference.
 
 ### Decision protocol

@@ -13,6 +13,20 @@ describe("hasUnclosedEmphasis", () => {
     expect(hasUnclosedEmphasis("**A**と**B**")).toBe(false)
     expect(hasUnclosedEmphasis("強調は無い行")).toBe(false)
   })
+  // 4行とも GitHub の Markdown API が `**` をそのまま返した(2026-10-05)
+  it("内側がかっこ・コード・リンクで外側が文字の `**` を、開き・閉じと認めない", () => {
+    expect(hasUnclosedEmphasis("これは**「正しい使い方」**です。")).toBe(true)
+    expect(hasUnclosedEmphasis("**「行頭」**です。")).toBe(true)
+    expect(rules("設定は**`foo`**に置く。")).toEqual(["emphasis-boundary"])
+    expect(rules("詳細は**[手順書](https://example.com)**にある。")).toEqual(["emphasis-boundary"])
+  })
+  it("かっこを外に出した形・スペースで切った形・`***` は誤検知しない", () => {
+    expect(hasUnclosedEmphasis("「**正しい使い方**」です。")).toBe(false)
+    expect(hasUnclosedEmphasis("これは **「正しい使い方」** です。")).toBe(false)
+    expect(hasUnclosedEmphasis("これは***強調***です")).toBe(false)
+    expect(rules("**`foo`** に置く。")).toEqual([])
+    expect(rules("| **「あ」** | **`b`** |")).toEqual([])
+  })
 })
 
 describe("lint", () => {
@@ -85,6 +99,13 @@ describe("fixGithubMarkdown", () => {
     expect(fixGithubMarkdown("**強調。**続き")).toBe("**強調。** 続き")
     expect(fixGithubMarkdown("**強調**。続き")).toBe("**強調**。続き")
   })
+  it("素通しになる開き強調の前にもスペースを入れ、直した結果は lint を通る", () => {
+    expect(fixGithubMarkdown("これは**「語」**です。")).toBe("これは **「語」** です。")
+    expect(fixGithubMarkdown("設定は**`foo`**に置く。")).toBe("設定は **`foo`** に置く。")
+    expect(fixGithubMarkdown("「**語**」です。")).toBe("「**語**」です。")
+    expect(rules(fixGithubMarkdown("これは**「語」**です。"))).toEqual([])
+    expect(rules(fixGithubMarkdown("設定は**`foo`**に置く。"))).toEqual([])
+  })
   it("closing キーワードのコード囲みを外す", () => {
     expect(fixGithubMarkdown("`fixes #12` で閉じる")).toBe("fixes #12 で閉じる")
   })
@@ -128,5 +149,33 @@ describe("bare-sha", () => {
     expect(rules("decade と defaced と facade", backlog)).not.toContain("bare-sha")
     expect(rules("id 0f8e1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b", backlog)).not.toContain("bare-sha")
     expect(rules("色は #a1b2c3d4、版は v1.2.3abcdef0", backlog)).not.toContain("bare-sha")
+  })
+})
+
+describe("--en", () => {
+  const en = { en: true }
+  const long =
+    "With the cat cover as the single allowed reference, the cat prompt came back as a near-copy of that cover in clean vector, and the hero prompt came back as the same porch with a woman on it."
+  it("30語を超える英語の文を出し、既定では見ない", () => {
+    expect(rules(long, en)).toEqual(["en-long-sentence"])
+    expect(rules(long)).toEqual([])
+    expect(rules("The cat prompt came back as a near-copy of that cover. The hero prompt came back as the same porch.", en)).toEqual([])
+  })
+  it("折り返した段落は1つの文として数え、始まりの行で出す", () => {
+    const wrapped = long.replace(", and the hero", ",\nand the hero")
+    expect(lint(`intro\n\n${wrapped}`, en).map((v) => [v.line, v.rule])).toEqual([[3, "en-long-sentence"]])
+  })
+  it("1段に `;` が2つ以上ある列を出し、1つは通す", () => {
+    expect(rules("- Google: models page ; pricing page ; terms page with the ownership clause", en)).toEqual(["en-semicolon-chain"])
+    expect(rules("| source | Utena case; JAL and Fugetsudo case; backlash roundup |", en)).toEqual(["en-semicolon-chain"])
+    expect(rules("The first run failed on billing; the second run passed after the limit was raised.", en)).toEqual([])
+  })
+  it("コード・URL・リンク先・フェンスの中の `;` と語は数えない", () => {
+    expect(rules("Run `a; b; c` from the repository root and read the last line.", en)).toEqual([])
+    expect(rules("See https://example.com/a;b;c for the three variants that the vendor lists.", en)).toEqual([])
+    expect(rules("```\nfor (;;) { run(); stop(); }\n```", en)).toEqual([])
+  })
+  it("日本語の文は見ない", () => {
+    expect(rules("確認した; 直した; 出した; これは日本語の文なので英語の規則では見ない。", en)).toEqual([])
   })
 })

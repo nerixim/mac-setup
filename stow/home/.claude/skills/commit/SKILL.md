@@ -1,11 +1,11 @@
 ---
 name: commit
-description: Create commits with Japanese descriptions using Conventional Commits format, with comprehensive quality validation (compile, lint, test). Use when the user asks to commit changes, create a commit, or save work. Supports three modes via $ARGUMENTS - current (recently modified files), staged (git staged files), or custom (user-specified files).
+description: Create commits in the repo's language (Japanese for client repos, English for nerixim/*) using Conventional Commits format, with comprehensive quality validation (compile, lint, test). Use when the user asks to commit changes, create a commit, or save work. Supports three modes via $ARGUMENTS - current (recently modified files), staged (git staged files), or custom (user-specified files).
 ---
 
 # Commit Changes with Quality Checks
 
-Create commits with Japanese descriptions following Conventional Commits format, with mandatory quality validation.
+Create commits in the repo's language following Conventional Commits format, with mandatory quality validation.
 
 ## Usage
 
@@ -65,12 +65,19 @@ git diff --cached  # For staged files
 
 ### 5. Generate Commit Message
 
-Use Conventional Commits format with Japanese description:
+Rules (moved from the global CLAUDE.md, 2026-10-05):
+
+- `type(scope): 具体的に`, first line 72 characters or less. Add `(scope)` when the change has an obvious area.
+- Language is decided by the repo: client/business repos in Japanese, my own repos (nerixim/*) in English. A repo's CLAUDE.md wins over this.
+- Never rewrite an existing commit (no amend/reword of pushed or earlier commits).
+- 「修正」「不整合の解消」「update」「fix」 alone is rejected: say what changed and how.
+
+Format:
 
 ```
-<type>: <Japanese description>
+<type>(<scope>): <description in the repo's language>
 
-<Optional longer Japanese description if needed>
+<Optional longer description if needed>
 ```
 
 **Commit types**:
@@ -85,17 +92,17 @@ Use Conventional Commits format with Japanese description:
 
 **Examples**:
 
-- `feat: ユーザー認証機能を追加する`
-- `fix: 日付入力フィールドのバリデーションエラーを修正する`
-- `refactor: データベースクエリのパフォーマンスを改善する`
-- `style: コンポーネントのスタイリングを整理する`
+- `feat(auth): ユーザー認証機能を追加する`
+- `fix(form): 日付入力フィールドのバリデーションエラーを修正する`
+- `refactor(db): データベースクエリのパフォーマンスを改善する`
+- `feat(briefing): add Gmail threads to the 要対応 bucket` (nerixim/*)
 
 **Guidelines**:
 
 - Keep it simple and clear - explain what changed
 - Focus on user impact, not technical details
 - Usually one line; use body only if necessary
-- Write in natural Japanese
+- Write in the repo's language (natural Japanese for client repos)
 
 ### 6. Execute Commit
 
@@ -138,6 +145,6 @@ Ensure these conditions before committing:
 - [ ] Not on main branch
 - [ ] All quality checks pass (compile, lint, test)
 - [ ] Appropriate commit type selected
-- [ ] Japanese description is clear and concise
+- [ ] Description is clear, concrete and in the repo's language
 - [ ] Files properly staged
 - [ ] Commit created successfully

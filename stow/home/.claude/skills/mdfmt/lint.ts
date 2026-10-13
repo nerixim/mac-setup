@@ -25,7 +25,7 @@ const JA_EN_SPACE_ALL = new RegExp(JA_EN_SPACE_SOURCE, "g")
 const CJK = new RegExp(`[${FULL}]`)
 const JA_QUOTED = /「[^」]*」|『[^』]*』/g
 const LATIN_WORD = /[A-Za-z]+/g
-const LAST_UPDATED = /^最終更新日:\s*\d{4}-\d{2}-\d{2}$/
+const LAST_UPDATED = /^(最終更新日|Last updated):\s*\d{4}-\d{2}-\d{2}$/
 
 const WHITESPACE = /\s/
 /** CommonMark の「punctuation character」(ASCII約物 + Unicode P/S) */
@@ -250,7 +250,7 @@ export const checkLines = (content: string, opts: LintOptions = {}): Violation[]
   return hits
 }
 
-/** 末尾の非空行が `最終更新日: YYYY-MM-DD` か */
+/** 末尾の非空行が `最終更新日: YYYY-MM-DD`(英語docsは `Last updated: YYYY-MM-DD`)か */
 export const hasLastUpdated = (content: string): boolean => {
   const last = content
     .split("\n")
@@ -270,7 +270,7 @@ export const lint = (content: string, opts: LintOptions = {}): Violation[] => {
       line: content.split("\n").length,
       rule: "last-updated",
       text: "(末尾)",
-      hint: "add `最終更新日: YYYY-MM-DD` as the last line",
+      hint: "add `最終更新日: YYYY-MM-DD` (or `Last updated: YYYY-MM-DD` in an English doc) as the last line",
     })
   }
   return hits.sort((a, b) => a.line - b.line)

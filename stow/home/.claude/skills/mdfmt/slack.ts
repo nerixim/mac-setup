@@ -26,7 +26,7 @@ export type SlackViolation = { line: number; rule: SlackRule; text: string; hint
 const TABLE = /^\s*\|.*\|\s*$/
 const HEADING = /^#{1,6}\s/
 const MD_BOLD = /\*\*[^*\n]+\*\*|__[^_\n]+__/
-const MD_LINK = /\[[^\]\n]+\]\([^)\n]+\)/
+const SLACK_API_LINK = /<https?:\/\/[^|>\s]+\|[^>\n]+>/
 const MD_STRIKE = /~~[^~\n]+~~/
 const CODE_SPAN = /(?<!`)`([^`\n]+)`(?!`)/g
 const SLACK_SPANS = [...SLACK_EMPHASIS_MARKERS.map(slackPairPattern), CODE_SPAN]
@@ -108,8 +108,8 @@ export const lintSlack = (content: string): SlackViolation[] => {
     if (MD_BOLD.test(line)) {
       hits.push(at("slack-bold", "Slack bold is `*one star*`; `**` is printed literally"))
     }
-    if (MD_LINK.test(line)) {
-      hits.push(at("slack-link", "`[text](url)` is not rendered; use `<url|text>`"))
+    if (SLACK_API_LINK.test(line)) {
+      hits.push(at("slack-link", "`<url|text>` is API markup and shows literally when pasted into the message box; use `[text](url)`"))
     }
     if (MD_STRIKE.test(line)) {
       hits.push(at("slack-strike", "Slack strikethrough is `~one tilde~`"))
@@ -147,7 +147,7 @@ const convertInline = (prose: string): string =>
     .replace(/(?<![\w_])__([^_\n]+?)__(?![\w_])/g, `${BOLD_TOKEN}$1${BOLD_TOKEN}`)
     .replace(/(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)/g, "_$1_")
     .replace(/~~([^~\n]+?)~~/g, "~$1~")
-    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, "<$2|$1>")
+    .replace(/<(https?:\/\/[^|>\s]+)\|([^>\n]+)>/g, "[$2]($1)")
     .replaceAll(BOLD_TOKEN, "*")
 
 const convertLine = (line: string): string => {
@@ -167,7 +167,7 @@ export const toSlackMrkdwn = (content: string): string =>
   padSlackCodeSpans(
     padSlackEmphasis(
       mapOutsideFences(content, (segment) => segment.split("\n").map(convertLine).join("\n"))
-        .split(/(```[\s\S]*?```|`[^`\n]+`|<https?:\/\/[^>\n]+>)/g)
+        .split(/(```[\s\S]*?```|`[^`\n]+`|<https?:\/\/[^>|\n]+>)/g)
         .map((part, index) => (index % 2 === 1 ? part : convertInline(part)))
         .join(""),
     ),

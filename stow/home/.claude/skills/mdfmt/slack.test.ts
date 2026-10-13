@@ -8,12 +8,12 @@ describe("lintSlack", () => {
     expect(rules("| 列 | 値 |")).toEqual(["slack-table"])
     expect(rules("## 見出し")).toEqual(["slack-heading"])
     expect(rules("**強調**の話")).toEqual(["slack-bold"])
-    expect(rules("[手順](https://example.com) を読む")).toEqual(["slack-link"])
+    expect(rules("<https://example.com|手順> を読む")).toEqual(["slack-link"])
     expect(rules("~~取り消し~~")).toEqual(["slack-strike"])
   })
   it("Slack 記法の太字とリンクは通す", () => {
     expect(rules("*強調* の話")).toEqual([])
-    expect(rules("<https://example.com|手順> を読む")).toEqual([])
+    expect(rules("[手順](https://example.com) を読む")).toEqual([])
   })
   it("`*` やコードスパンが日本語に密着していると出す", () => {
     expect(rules("これは*強調*です")).toEqual(["slack-boundary"])
@@ -54,8 +54,8 @@ describe("toSlackMrkdwn", () => {
     expect(toSlackMrkdwn("## 進捗")).toBe("*進捗*")
     expect(toSlackMrkdwn("- 一つ目\n- 二つ目")).toBe("• 一つ目\n• 二つ目")
   })
-  it("リンクを `<URL|文言>` にする", () => {
-    expect(toSlackMrkdwn("[手順](https://example.com/a) を読む")).toBe("<https://example.com/a|手順> を読む")
+  it("API の記法のリンク `<URL|文言>` を `[文言](URL)` に戻す", () => {
+    expect(toSlackMrkdwn("<https://example.com/a|手順> を読む")).toBe("[手順](https://example.com/a) を読む")
   })
   it("日本語に密着した `*` とコードスパンにスペースを入れる", () => {
     expect(toSlackMrkdwn("これは**強調**です")).toBe("これは *強調* です")
@@ -74,8 +74,8 @@ describe("toSlackMrkdwn", () => {
 })
 
 describe("bare-sha (Slack)", () => {
-  it("Slack は SHA を自動リンクしないので出し、<url|文言> は通す", () => {
+  it("Slack は SHA を自動リンクしないので出し、[文言](url) は通す", () => {
     expect(rules("48670cfb で直しました")).toEqual(["bare-sha"])
-    expect(rules("<https://github.com/o/r/commit/48670cfb|48670cfb> で直しました")).toEqual([])
+    expect(rules("[48670cfb](https://github.com/o/r/commit/48670cfb) で直しました")).toEqual([])
   })
 })

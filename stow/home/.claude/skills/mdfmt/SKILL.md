@@ -16,11 +16,11 @@ cat draft.md | bun ~/.claude/skills/mdfmt/mdfmt.ts --slack --fix -
 ```
 
 Finds: markdown tables and headings (Slack renders neither), `**bold**` (Slack is
-`*one star*`), `[text](url)` (Slack is `<url|text>`), `~~strike~~`, `*` or a code
+`*one star*`), `<url|text>` (API markup: pasted into the message box it shows literally; drafts use `[text](url)`), `~~strike~~`, `*` or a code
 span pressed against Japanese so Slack leaves the marker visible, a commit SHA
 that is not a link, and more than two paragraphs.
 
-`--fix` converts headings to a bold line, bullets to `•`, links to `<url|text>`,
+`--fix` converts headings to a bold line, bullets to `•`, links to `[text](url)`,
 and pads the markers. Tables are left alone on purpose: rebuilding one as short
 lines is a judgement call, so the lint keeps reporting it.
 

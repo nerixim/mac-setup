@@ -81,6 +81,8 @@ describe("lint", () => {
     expect(rules("本文\n")).toEqual([])
     expect(rules("本文\n", { docs: true })).toEqual(["last-updated"])
     expect(rules("本文\n\n最終更新日: 2026-09-17\n", { docs: true })).toEqual([])
+    expect(rules("Body\n\nLast updated: 2026-10-13\n", { docs: true })).toEqual([])
+    expect(rules("Body\n\nLast updated: October 2026\n", { docs: true })).toEqual(["last-updated"])
   })
 })
 

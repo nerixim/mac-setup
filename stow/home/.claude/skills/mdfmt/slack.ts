@@ -1,5 +1,7 @@
 // Slack に貼る下書きのチェックと、GitHub風 Markdown → Slack mrkdwn の変換。
 // Slack は表も見出しも `**強調**` も描画しない(`**` がそのまま出る)。崩れた記法を送る前にここで止める。
+// リンクだけは送り方で逆になる。入力欄に貼るなら `[文言](URL)`(`<URL|文言>` は文字のまま出る)、
+// API(chat.postMessage)で送るなら `<URL|文言>`(`[文言](URL)` は描画されない)。既定は入力欄に貼る方。
 // 下書きファイルの最初の `---` から下は「聞かれたら出す詳細」として長さの数え方から外す。
 import {
   isSlackTight,
@@ -23,10 +25,15 @@ export type SlackRule =
 
 export type SlackViolation = { line: number; rule: SlackRule; text: string; hint: string }
 
+/** paste: 入力欄に貼って送る(既定)。api: chat.postMessage などで送る */
+export type SlackTarget = "paste" | "api"
+export type SlackOptions = { target?: SlackTarget }
+
 const TABLE = /^\s*\|.*\|\s*$/
 const HEADING = /^#{1,6}\s/
 const MD_BOLD = /\*\*[^*\n]+\*\*|__[^_\n]+__/
 const MD_LINK = /\[[^\]\n]+\]\([^)\n]+\)/
+const API_LINK = /<https?:\/\/[^>|\n]+\|[^>\n]+>/
 const MD_STRIKE = /~~[^~\n]+~~/
 const CODE_SPAN = /(?<!`)`([^`\n]+)`(?!`)/g
 const SLACK_SPANS = [...SLACK_EMPHASIS_MARKERS.map(slackPairPattern), CODE_SPAN]
@@ -77,7 +84,7 @@ export const hasSlackBoundaryProblem = (line: string): boolean => {
   return false
 }
 
-export const lintSlack = (content: string): SlackViolation[] => {
+export const lintSlack = (content: string, { target = "paste" }: SlackOptions = {}): SlackViolation[] => {
   const body = slackBody(content)
   const hits: SlackViolation[] = []
   let inFence = false
@@ -108,8 +115,11 @@ export const lintSlack = (content: string): SlackViolation[] => {
     if (MD_BOLD.test(line)) {
       hits.push(at("slack-bold", "Slack bold is `*one star*`; `**` is printed literally"))
     }
-    if (MD_LINK.test(line)) {
-      hits.push(at("slack-link", "`[text](url)` is not rendered; use `<url|text>`"))
+    if (target === "api" && MD_LINK.test(line)) {
+      hits.push(at("slack-link", "`[text](url)` is not rendered when posted through the API; use `<url|text>`"))
+    }
+    if (target === "paste" && API_LINK.test(line)) {
+      hits.push(at("slack-link", "`<url|text>` is the API syntax and is pasted literally into the composer; use `[text](url)`"))
     }
     if (MD_STRIKE.test(line)) {
       hits.push(at("slack-strike", "Slack strikethrough is `~one tilde~`"))
@@ -140,15 +150,19 @@ export const lintSlack = (content: string): SlackViolation[] => {
 /** `**` を一旦この文字に退避してから、GFMの斜体 `*x*` を `_x_` に変える(取り違えを避ける) */
 const BOLD_TOKEN = "\u0001"
 
-const convertInline = (prose: string): string =>
+const convertInline = (prose: string, target: SlackTarget): string =>
   prose
     .replace(/\*\*\*([^*\n]+?)\*\*\*/g, `${BOLD_TOKEN}_$1_${BOLD_TOKEN}`)
     .replace(/\*\*([^*\n]+?)\*\*/g, `${BOLD_TOKEN}$1${BOLD_TOKEN}`)
     .replace(/(?<![\w_])__([^_\n]+?)__(?![\w_])/g, `${BOLD_TOKEN}$1${BOLD_TOKEN}`)
     .replace(/(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)/g, "_$1_")
     .replace(/~~([^~\n]+?)~~/g, "~$1~")
-    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, "<$2|$1>")
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, (m, text, url) => (target === "api" ? `<${url}|${text}>` : m))
     .replaceAll(BOLD_TOKEN, "*")
+
+/** 分割で守った `<URL|文言>` を、入力欄に貼る向けには `[文言](URL)` に戻す */
+const convertProtected = (part: string, target: SlackTarget): string =>
+  target === "paste" ? part.replace(/^<(https?:\/\/[^>|\n]+)\|([^>\n]+)>$/, "[$2]($1)") : part
 
 const convertLine = (line: string): string => {
   const heading = line.match(/^#{1,6}\s+(.*)$/)
@@ -163,12 +177,12 @@ const convertLine = (line: string): string => {
  * GitHub風 Markdown を Slack mrkdwn にする。表だけは機械的に畳めないのでそのまま残す
  * (lintSlack が `slack-table` で出すので、人が短い行に組み替える)。
  */
-export const toSlackMrkdwn = (content: string): string =>
+export const toSlackMrkdwn = (content: string, { target = "paste" }: SlackOptions = {}): string =>
   padSlackCodeSpans(
     padSlackEmphasis(
       mapOutsideFences(content, (segment) => segment.split("\n").map(convertLine).join("\n"))
         .split(/(```[\s\S]*?```|`[^`\n]+`|<https?:\/\/[^>\n]+>)/g)
-        .map((part, index) => (index % 2 === 1 ? part : convertInline(part)))
+        .map((part, index) => (index % 2 === 1 ? convertProtected(part, target) : convertInline(part, target)))
         .join(""),
     ),
   )

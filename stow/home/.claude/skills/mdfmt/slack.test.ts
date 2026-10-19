@@ -25,7 +25,8 @@ describe("lintSlack", () => {
   it("`*` やコードスパンが日本語に密着していると出す", () => {
     expect(rules("これは*強調*です")).toEqual(["slack-boundary"])
     expect(rules("ジョブ（`id`）を見る")).toEqual(["slack-boundary"])
-    expect(rules("ジョブ(`id`)を見る")).toEqual([])
+    expect(rules("ジョブ(`id`)を見る")).toEqual(["ja-paren"])
+    expect(rules("ジョブ (`id`) を見る")).toEqual([])
     expect(rules("これは *強調* です")).toEqual([])
   })
   it("半角英数に挟まれた `*` や `_` は触らない(Slack も整形しないので、足すと無い強調を作る)", () => {
@@ -75,6 +76,7 @@ describe("toSlackMrkdwn", () => {
   it("日本語に密着した `*` とコードスパンにスペースを入れる", () => {
     expect(toSlackMrkdwn("これは**強調**です")).toBe("これは *強調* です")
     expect(toSlackMrkdwn("ジョブ（`id`）を見る")).toBe("ジョブ（ `id` ）を見る")
+    expect(toSlackMrkdwn("ジョブ(`id`)を見る")).toBe("ジョブ（ `id` ）を見る")
     expect(toSlackMrkdwn("件は*こちら*で確認")).toBe("件は _こちら_ で確認")
   })
   it("半角英数に挟まれた `_` は触らない", () => {

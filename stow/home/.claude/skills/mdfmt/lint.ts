@@ -11,6 +11,7 @@ export type Rule =
   | "last-updated"
   | "repo-ref"
   | "bare-sha"
+  | "sha-spacing"
   | "en-long-sentence"
   | "en-semicolon-chain"
 
@@ -29,10 +30,27 @@ const LAST_UPDATED = /^最終更新日:\s*\d{4}-\d{2}-\d{2}$/
 
 const WHITESPACE = /\s/
 
-// 素のコミット SHA は `#123` と同じく前後に空白が要る(密着すると GitHub が自動リンクしない)。
+// 素のコミット SHA を GitHub が自動リンクするのは、直前が行頭・空白・`(` `[` `*` `_` のときだけ。日本語・全角約物・
+// `"` `:` などに密着すると素の文字列のまま。直後は何でもよい(2026-10-19 に markdown API で実測)。
 // 数字だけ・英字だけの7〜40文字は数値や単語なので SHA と見ない
 const SHA_TOKEN = /(?<![\w#/.[-])[0-9a-f]{7,40}(?![\w\]-])/g
 const isShaLike = (token: string): boolean => /\d/.test(token) && /[a-f]/.test(token)
+const SHA_LINKABLE_BEFORE = /[\s([*_]/
+export const SHA_SPACING_HINT =
+  "GitHub autolinks a bare SHA only after whitespace, `(`, `[`, `*` or `_`; put a space before it or link it as [`<sha>`](https://github.com/<owner>/<repo>/commit/<sha>)"
+
+/** 日本語や全角約物に直前を塞がれて自動リンクされない素の SHA があるか。リンク・URL・`<…>`・コードの中は見ない */
+export const hasTightSha = (line: string): boolean => {
+  const prose = line
+    .replace(/\[[^\]\n]*\]\([^)\n]*\)/g, (m) => " ".repeat(m.length))
+    .replace(/<[^>\n]*>/g, (m) => " ".repeat(m.length))
+    .replace(/https?:\/\/\S+/g, (m) => " ".repeat(m.length))
+    .replace(/`[^`\n]*`/g, (m) => " ".repeat(m.length))
+  return [...prose.matchAll(SHA_TOKEN)].some((m) => {
+    const previous = m.index === 0 ? undefined : prose.at(m.index - 1)
+    return isShaLike(m[0]) && previous !== undefined && !SHA_LINKABLE_BEFORE.test(previous)
+  })
+}
 /** CommonMark の「punctuation character」(ASCII約物 + Unicode P/S) */
 const PUNCTUATION = /[\p{P}\p{S}]/u
 
@@ -204,6 +222,8 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
   }
   if ((opts.docs || opts.backlog) && hasBareSha(line)) {
     hits.push({ rule: "bare-sha", text, hint: BARE_SHA_HINT })
+  } else if (hasTightSha(line)) {
+    hits.push({ rule: "sha-spacing", text, hint: SHA_SPACING_HINT })
   }
   if (hasJaItalic(masked)) {
     hits.push({ rule: "ja-italic", text, hint: "no italics in Japanese; use bold or rephrase" })
@@ -294,6 +314,10 @@ const addReferenceSpacing = (text: string): string =>
     }
     const previous = offset > 0 ? source.at(offset - 1) : undefined
     const next = source.at(offset + reference.length)
+    if (!reference.startsWith("#")) {
+      // SHA: 直前だけが効く。直後は何でもよいので触らない
+      return previous !== undefined && !SHA_LINKABLE_BEFORE.test(previous) ? ` ${reference}` : reference
+    }
     if (previous === "[" || next === "]") {
       return reference
     }

@@ -53,6 +53,10 @@ describe("lint", () => {
   it("`#123` の前後のスペースは例外として通す", () => {
     expect(rules("関連 #123 を確認する")).toEqual([])
   })
+  it("素のコミット SHA の前後のスペースも例外として通す(密着すると自動リンクされない)", () => {
+    expect(rules("関連 fe1ee990a7 を確認する")).toEqual([])
+    expect(rules("値 1234567 を見る")).toEqual(["ja-en-space"])
+  })
   it("コードスパン・リンク先・URL の中は見ない", () => {
     expect(rules("`bun run check` を通す")).toEqual([])
     expect(rules("[手順](https://example.com/a b) を読む")).toEqual([])
@@ -94,6 +98,13 @@ describe("fixGithubMarkdown", () => {
   it("`#123` の前後にはスペースを入れる(無いと自動リンクされない)", () => {
     expect(fixGithubMarkdown("関連#123を確認")).toBe("関連 #123 を確認")
     expect(fixGithubMarkdown("関連 #123 を確認")).toBe("関連 #123 を確認")
+  })
+  it("素のコミット SHA も前後にスペースを入れ、リンク文言の中とコードの中は触らない", () => {
+    expect(fixGithubMarkdown("fe1ee990a7の修正")).toBe("fe1ee990a7 の修正")
+    expect(fixGithubMarkdown("関連 fe1ee990a7 を確認")).toBe("関連 fe1ee990a7 を確認")
+    expect(fixGithubMarkdown("[fe1ee990a7](https://x/commit/fe1ee990a7) の修正")).toBe("[fe1ee990a7](https://x/commit/fe1ee990a7) の修正")
+    expect(fixGithubMarkdown("`fe1ee990a7` の修正")).toBe("`fe1ee990a7` の修正")
+    expect(fixGithubMarkdown("値 1234567 を見る")).toBe("値1234567を見る")
   })
   it("素通しになる閉じ強調の後ろにスペースを入れる", () => {
     expect(fixGithubMarkdown("**強調。**続き")).toBe("**強調。** 続き")

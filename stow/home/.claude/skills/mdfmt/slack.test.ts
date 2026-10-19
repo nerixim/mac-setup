@@ -57,9 +57,12 @@ describe("toSlackMrkdwn", () => {
     expect(toSlackMrkdwn("これは *italic* です")).toBe("これは _italic_ です")
     expect(toSlackMrkdwn("~~取り消し~~ 済み")).toBe("~取り消し~ 済み")
   })
-  it("見出しを太字の行に、箇条書きを中黒にする", () => {
+  it("見出しを太字の行にする", () => {
     expect(toSlackMrkdwn("## 進捗")).toBe("*進捗*")
-    expect(toSlackMrkdwn("- 一つ目\n- 二つ目")).toBe("• 一つ目\n• 二つ目")
+  })
+  it("箇条書きは入力欄に貼るなら `- ` のまま(貼った時点で箇条書きになる)、API なら中黒にする", () => {
+    expect(toSlackMrkdwn("- 一つ目\n- 二つ目")).toBe("- 一つ目\n- 二つ目")
+    expect(toSlackMrkdwn("- 一つ目\n- 二つ目", { target: "api" })).toBe("• 一つ目\n• 二つ目")
   })
   it("入力欄に貼る(既定)ならリンクは `[文言](URL)` のままにし、`<URL|文言>` は戻す", () => {
     expect(toSlackMrkdwn("[手順](https://example.com/a) を読む")).toBe("[手順](https://example.com/a) を読む")
@@ -78,7 +81,7 @@ describe("toSlackMrkdwn", () => {
     expect(toSlackMrkdwn("foo_bar_baz を渡す")).toBe("foo_bar_baz を渡す")
   })
   it("コードフェンスの中は変換しない", () => {
-    expect(toSlackMrkdwn("```\n- 一つ目\n**bold**\n```")).toBe("```\n- 一つ目\n**bold**\n```")
+    expect(toSlackMrkdwn("```\n- 一つ目\n**bold**\n```", { target: "api" })).toBe("```\n- 一つ目\n**bold**\n```")
   })
   it("表は畳めないので残す(lintSlack が出す)", () => {
     expect(toSlackMrkdwn("| 列 | 値 |")).toBe("| 列 | 値 |")

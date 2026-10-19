@@ -12,6 +12,7 @@ export type Rule =
   | "repo-ref"
   | "bare-sha"
   | "sha-spacing"
+  | "ja-paren"
   | "en-long-sentence"
   | "en-semicolon-chain"
 
@@ -147,6 +148,44 @@ export const isJapaneseProse = (segment: string): boolean => {
 /** 表の行はセルごと、それ以外は行ごとに文の言語を見る */
 const segments = (line: string): string[] => (TABLE_ROW.test(line) ? line.split("|") : [line])
 
+// 日本語の文の丸かっこは全角（）。半角 ( ) を日本語に密着させると幅が詰まって読みにくい(オーナー 2026-10-19)。
+// 半角を使うなら外側に半角スペース。コード・リンク先・URL の中は見ない
+const PAREN_PROTECT = /(`+[\s\S]*?`+|\]\([^)\n]*\)|https?:\/\/[^\s)]+)/g
+const FULL_CHAR = new RegExp(`[${FULL}]`)
+export const JA_PAREN_HINT = "half-width parens pressed against Japanese; use （） in Japanese prose, or put a space outside ( )"
+
+/** 半角かっこの対を見つけ、どちらかの外側が日本語・全角約物なら全角にする。対にならない括弧は触らない */
+const fullwidthParenPairs = (seg: string): string => {
+  const masked = seg.replace(PAREN_PROTECT, (m) => "\u0000".repeat(m.length))
+  const out = seg.split("")
+  const open: number[] = []
+  for (let i = 0; i < masked.length; i += 1) {
+    const ch = masked[i]
+    if (ch === "(") {
+      open.push(i)
+    } else if (ch === ")" && open.length > 0) {
+      const j = open.pop() as number
+      const before = j === 0 ? undefined : masked[j - 1]
+      const after = masked[i + 1]
+      if ((before !== undefined && FULL_CHAR.test(before)) || (after !== undefined && FULL_CHAR.test(after))) {
+        out[j] = "（"
+        out[i] = "）"
+      }
+    }
+  }
+  return out.join("")
+}
+
+/** 日本語の文(表ならセル)の中で、半角かっこが日本語・全角約物に密着しているか */
+export const hasTightAsciiParen = (line: string): boolean =>
+  segments(line).some((seg) => isJapaneseProse(maskInline(seg)) && fullwidthParenPairs(seg) !== seg)
+
+/** 日本語の文(表ならセル)だけ、日本語に密着した半角かっこの対を全角にする */
+export const fixJaParens = (line: string): string =>
+  segments(line)
+    .map((seg) => (isJapaneseProse(maskInline(seg)) ? fullwidthParenPairs(seg) : seg))
+    .join("|")
+
 const hasJaEnSpace = (masked: string): boolean =>
   segments(masked).some((seg) => isJapaneseProse(seg) && JA_EN_SPACE.test(seg))
 
@@ -227,6 +266,9 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
   }
   if (hasJaItalic(masked)) {
     hits.push({ rule: "ja-italic", text, hint: "no italics in Japanese; use bold or rephrase" })
+  }
+  if (hasTightAsciiParen(line)) {
+    hits.push({ rule: "ja-paren", text, hint: JA_PAREN_HINT })
   }
   return hits
 }
@@ -349,7 +391,7 @@ const dropJaEnSpaceInJapanese = (line: string): string =>
 
 const fixLine = (line: string): string =>
   padCommonMarkEmphasisClosers(
-    withProtectedCodeSpans(dropJaEnSpaceInJapanese(line).replace(CLOSING_KEYWORD_INLINE_CODE, "$1 $2"), (prose) =>
+    withProtectedCodeSpans(dropJaEnSpaceInJapanese(fixJaParens(line)).replace(CLOSING_KEYWORD_INLINE_CODE, "$1 $2"), (prose) =>
       addReferenceSpacing(prose),
     ),
   )
@@ -358,6 +400,7 @@ const fixLine = (line: string): string =>
  * 機械的に直せる分だけ直す。判断が要る違反(ja-italic・bold-density)は lint が出すだけで触らない。
  * - 日本語の文(表はセル単位)で、全角と半角の間のスペースを詰める。英文は触らない
  * - `#123` を自動リンク可能な空白区切りにする
+ * - 日本語に密着した半角かっこの対を全角（）にする
  * - `` `fixes #123` `` のコード囲みを外す
  * - 素通しになる閉じ強調の後ろにスペースを入れる
  */

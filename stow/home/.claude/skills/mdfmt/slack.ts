@@ -11,7 +11,7 @@ import {
   SLACK_EMPHASIS_MARKERS,
   slackPairPattern,
 } from "./emphasis.ts"
-import { BARE_SHA_HINT, hasBareSha } from "./lint.ts"
+import { BARE_SHA_HINT, fixJaParens, hasBareSha, hasTightAsciiParen, JA_PAREN_HINT } from "./lint.ts"
 
 export type SlackRule =
   | "slack-table"
@@ -22,6 +22,7 @@ export type SlackRule =
   | "slack-boundary"
   | "slack-length"
   | "bare-sha"
+  | "ja-paren"
 
 export type SlackViolation = { line: number; rule: SlackRule; text: string; hint: string }
 
@@ -132,6 +133,9 @@ export const lintSlack = (content: string, { target = "paste" }: SlackOptions = 
     if (hasBareSha(line)) {
       hits.push(at("bare-sha", BARE_SHA_HINT))
     }
+    if (hasTightAsciiParen(line)) {
+      hits.push(at("ja-paren", JA_PAREN_HINT))
+    }
   }
 
   const paragraphs = countParagraphs(body)
@@ -184,7 +188,7 @@ export const toSlackMrkdwn = (content: string, { target = "paste" }: SlackOption
       mapOutsideFences(content, (segment) =>
         segment
           .split("\n")
-          .map((line) => convertLine(line, target))
+          .map((line) => convertLine(fixJaParens(line), target))
           .join("\n"),
       )
         .split(/(```[\s\S]*?```|`[^`\n]+`|<https?:\/\/[^>\n]+>)/g)

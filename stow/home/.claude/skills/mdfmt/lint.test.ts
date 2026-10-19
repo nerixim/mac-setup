@@ -50,6 +50,14 @@ describe("lint", () => {
     expect(rules("| Slack 通知 | closed by default with a 文法 39 label |")).toEqual(["ja-en-space"])
     expect(rules("| open | closed by default with a 文法 39 label |")).toEqual([])
   })
+  it("日本語に密着した半角かっこを出し、全角か外側に空白があれば通す。英文は見ない", () => {
+    expect(rules("ジョブ(id)を見る")).toEqual(["ja-paren"])
+    expect(rules("確認した(2件)。")).toEqual(["ja-paren"])
+    expect(rules("ジョブ (id) を見る")).toEqual([])
+    expect(rules("ジョブ（id）を見る")).toEqual([])
+    expect(rules("see (id) here")).toEqual([])
+    expect(rules("手順は [こちら](https://x/y(z)) を読む")).toEqual([])
+  })
   it("`#123` の前後のスペースは例外として通す", () => {
     expect(rules("関連 #123 を確認する")).toEqual([])
   })
@@ -103,6 +111,15 @@ describe("fixGithubMarkdown", () => {
     expect(fixGithubMarkdown("通知を Slack へ")).toBe("通知をSlackへ")
     expect(fixGithubMarkdown("120,469 lifetime 伊検 applicants over 58 sessions")).toBe("120,469 lifetime 伊検 applicants over 58 sessions")
     expect(fixGithubMarkdown("| Slack 通知 | a mark for 文法 39 |")).toBe("| Slack通知 | a mark for 文法 39 |")
+  })
+  it("日本語に密着した半角かっこの対を全角にする。コード・リンク先の中と英文は触らない", () => {
+    expect(fixGithubMarkdown("ジョブ(id)を見る")).toBe("ジョブ（id）を見る")
+    expect(fixGithubMarkdown("値(`x`)を見る")).toBe("値（`x`）を見る")
+    expect(fixGithubMarkdown("手順([リンク](https://x/y))を読む")).toBe("手順（[リンク](https://x/y)）を読む")
+    expect(fixGithubMarkdown("あ(い(c)d)え")).toBe("あ（い（c）d）え")
+    expect(fixGithubMarkdown("ジョブ (id) を見る")).toBe("ジョブ (id) を見る")
+    expect(fixGithubMarkdown("see (id) here")).toBe("see (id) here")
+    expect(fixGithubMarkdown("`f(x)`を呼ぶ")).toBe("`f(x)`を呼ぶ")
   })
   it("`#123` の前後にはスペースを入れる(無いと自動リンクされない)", () => {
     expect(fixGithubMarkdown("関連#123を確認")).toBe("関連 #123 を確認")

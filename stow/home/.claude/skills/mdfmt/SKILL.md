@@ -18,8 +18,9 @@ bun ~/.claude/skills/mdfmt/mdfmt.ts --slack-api <body.md>     # same, for text p
 
 Finds: markdown tables and headings (Slack renders neither), `**bold**` (Slack is
 `*one star*`), `~~strike~~`, `*` or a code span pressed against Japanese so Slack
-leaves the marker visible, a commit SHA that is not a link, and more than two
-paragraphs.
+leaves the marker visible, half-width parens pressed against Japanese (same
+`ja-paren` rule as the GitHub mode), a commit SHA that is not a link, and more than
+two paragraphs.
 
 Links depend on how the text is sent, so there are two modes. `--slack` is for a
 draft pasted into the Slack composer: `[text](url)` becomes a link there, while
@@ -51,7 +52,9 @@ same-repo SHA by itself inside issues, PRs and comments, so the default (GitHub)
 mode leaves it alone. Only SHAs mixing digits and `a-f` count; an all-digit SHA
 prefix reads as a number and is missed on purpose.
 
-Finds: a bare commit SHA that GitHub will not autolink because the character before it is Japanese,
+Finds: half-width parens pressed against Japanese (`ja-paren`: Japanese prose uses （）, or puts a
+space outside `( )`; `--fix` turns a pair that touches Japanese on either side into （）, leaving
+code, link targets, URLs and English prose alone). Finds: a bare commit SHA that GitHub will not autolink because the character before it is Japanese,
 fullwidth punctuation, a quote or similar (`sha-spacing`; measured through the markdown API on
 2026-10-19: only whitespace, `(`, `[`, `*` and `_` before the SHA keep the link, the character after
 it does not matter). Finds: a space between fullwidth and halfwidth characters inside Japanese prose

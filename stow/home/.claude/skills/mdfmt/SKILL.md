@@ -10,19 +10,27 @@ Two registers, two rule sets. Run the one that matches where the text is going.
 ## Slack draft
 
 ```bash
-bun ~/.claude/skills/mdfmt/mdfmt.ts --slack <draft.md>        # lint
+bun ~/.claude/skills/mdfmt/mdfmt.ts --slack <draft.md>        # lint a draft you paste into the composer
 bun ~/.claude/skills/mdfmt/mdfmt.ts --slack --fix <draft.md>  # convert to mrkdwn in place
 cat draft.md | bun ~/.claude/skills/mdfmt/mdfmt.ts --slack --fix -
+bun ~/.claude/skills/mdfmt/mdfmt.ts --slack-api <body.md>     # same, for text posted through the API
 ```
 
 Finds: markdown tables and headings (Slack renders neither), `**bold**` (Slack is
-`*one star*`), `[text](url)` (Slack is `<url|text>`), `~~strike~~`, `*` or a code
-span pressed against Japanese so Slack leaves the marker visible, a commit SHA
-that is not a link, and more than two paragraphs.
+`*one star*`), `~~strike~~`, `*` or a code span pressed against Japanese so Slack
+leaves the marker visible, a commit SHA that is not a link, and more than two
+paragraphs.
 
-`--fix` converts headings to a bold line, bullets to `•`, links to `<url|text>`,
-and pads the markers. Tables are left alone on purpose: rebuilding one as short
-lines is a judgement call, so the lint keeps reporting it.
+Links depend on how the text is sent, so there are two modes. `--slack` is for a
+draft pasted into the Slack composer: `[text](url)` becomes a link there, while
+`<url|text>` is pasted literally, so the lint flags `<url|text>`. `--slack-api` is
+for text posted through `chat.postMessage`, where it is the other way round:
+`[text](url)` is not rendered and `<url|text>` is required.
+
+`--fix` converts headings to a bold line, bullets to `•`, pads the markers, and
+rewrites links for the chosen mode (`<url|text>` to `[text](url)` under `--slack`,
+the reverse under `--slack-api`). Tables are left alone on purpose: rebuilding one
+as short lines is a judgement call, so the lint keeps reporting it.
 
 Everything below the first `---` in the draft is treated as detail you keep back,
 not part of the message, and is not counted toward the two-paragraph ceiling.

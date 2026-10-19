@@ -27,9 +27,10 @@ draft pasted into the Slack composer: `[text](url)` becomes a link there, while
 for text posted through `chat.postMessage`, where it is the other way round:
 `[text](url)` is not rendered and `<url|text>` is required.
 
-`--fix` converts headings to a bold line, bullets to `•`, pads the markers, and
-rewrites links for the chosen mode (`<url|text>` to `[text](url)` under `--slack`,
-the reverse under `--slack-api`). Tables are left alone on purpose: rebuilding one
+`--fix` converts headings to a bold line, pads the markers, and rewrites links for
+the chosen mode (`<url|text>` to `[text](url)` under `--slack`, the reverse under
+`--slack-api`). `- ` bullets stay as they are under `--slack`, because the composer
+turns them into a list on paste; `--slack-api` rewrites them to `•`. Tables are left alone on purpose: rebuilding one
 as short lines is a judgement call, so the lint keeps reporting it.
 
 Everything below the first `---` in the draft is treated as detail you keep back,
@@ -50,7 +51,9 @@ same-repo SHA by itself inside issues, PRs and comments, so the default (GitHub)
 mode leaves it alone. Only SHAs mixing digits and `a-f` count; an all-digit SHA
 prefix reads as a number and is missed on purpose.
 
-Finds: a space between fullwidth and halfwidth characters inside Japanese prose (`#123` excepted, where
+Finds: a space between fullwidth and halfwidth characters inside Japanese prose (`#123` and a bare
+commit SHA excepted: GitHub autolinks either only when whitespace surrounds it, so `--fix` adds the
+spaces around them instead of removing them; `#123` excepted, where
 the spaces are required for the autolink; English sentences quoting a Japanese word keep their spaces, judged per table cell), a `**` that GitHub leaves literal because
 its inner side is punctuation, a bracket, a code span or a link and its outer side
 is a letter (`**強調。**続き`, `これは**「語」**です`, ``設定は**`foo`**に``), italics

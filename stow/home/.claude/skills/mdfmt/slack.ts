@@ -164,13 +164,14 @@ const convertInline = (prose: string, target: SlackTarget): string =>
 const convertProtected = (part: string, target: SlackTarget): string =>
   target === "paste" ? part.replace(/^<(https?:\/\/[^>|\n]+)\|([^>\n]+)>$/, "[$2]($1)") : part
 
-const convertLine = (line: string): string => {
+const convertLine = (line: string, target: SlackTarget): string => {
   const heading = line.match(/^#{1,6}\s+(.*)$/)
   if (heading) {
     // 見出しの中の `**` は落とす。太字の入れ子は Slack に無く、退避した印と衝突する
     return `${BOLD_TOKEN}${(heading[1] ?? "").replace(/\*\*|__/g, "").trim()}${BOLD_TOKEN}`
   }
-  return line.replace(/^(\s*)[-*+]\s+/, "$1• ")
+  // 入力欄は `- ` を貼った時点で箇条書きにするので残す。API 経由はただの文字なので `•` にする
+  return target === "api" ? line.replace(/^(\s*)[-*+]\s+/, "$1• ") : line
 }
 
 /**
@@ -180,7 +181,12 @@ const convertLine = (line: string): string => {
 export const toSlackMrkdwn = (content: string, { target = "paste" }: SlackOptions = {}): string =>
   padSlackCodeSpans(
     padSlackEmphasis(
-      mapOutsideFences(content, (segment) => segment.split("\n").map(convertLine).join("\n"))
+      mapOutsideFences(content, (segment) =>
+        segment
+          .split("\n")
+          .map((line) => convertLine(line, target))
+          .join("\n"),
+      )
         .split(/(```[\s\S]*?```|`[^`\n]+`|<https?:\/\/[^>\n]+>)/g)
         .map((part, index) => (index % 2 === 1 ? convertProtected(part, target) : convertInline(part, target)))
         .join(""),

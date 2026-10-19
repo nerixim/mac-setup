@@ -28,6 +28,11 @@ const LATIN_WORD = /[A-Za-z]+/g
 const LAST_UPDATED = /^最終更新日:\s*\d{4}-\d{2}-\d{2}$/
 
 const WHITESPACE = /\s/
+
+// 素のコミット SHA は `#123` と同じく前後に空白が要る(密着すると GitHub が自動リンクしない)。
+// 数字だけ・英字だけの7〜40文字は数値や単語なので SHA と見ない
+const SHA_TOKEN = /(?<![\w#/.[-])[0-9a-f]{7,40}(?![\w\]-])/g
+const isShaLike = (token: string): boolean => /\d/.test(token) && /[a-f]/.test(token)
 /** CommonMark の「punctuation character」(ASCII約物 + Unicode P/S) */
 const PUNCTUATION = /[\p{P}\p{S}]/u
 
@@ -88,8 +93,9 @@ export const maskInline = (line: string): string => {
       .replace(/`[^`]*`/g, blank)
       .replace(/\]\([^)]*\)/g, blank)
       .replace(/https?:\/\/\S+/g, blank)
-      // `#123` は前後に半角スペースを入れるのが正(でないと自動リンクされない)。JA/EN空白の例外
+      // `#123` と素の SHA は前後に半角スペースを入れるのが正(でないと自動リンクされない)。JA/EN空白の例外
       .replace(/#\d+/g, blank)
+      .replace(SHA_TOKEN, (match) => (isShaLike(match) ? blank(match) : match))
       .replace(/<[^>]*>/g, blank)
   )
 }
@@ -156,7 +162,6 @@ export const hasShortRepoRef = (line: string): boolean =>
 // ただの文字列で、読み手はどのリポジトリのコミットかも分からない。数字だけ・英字だけの並びは数値や単語なので見ない
 const HEX_TOKEN = /(?<![\w#/.-])[0-9a-f]{7,40}(?![\w-])/g
 const SHA_CODE_SPAN = /`\s*([0-9a-f]{7,40})\s*`/g
-const isShaLike = (token: string): boolean => /\d/.test(token) && /[a-f]/.test(token)
 export const BARE_SHA_HINT = "a bare commit SHA is not linked here; write [`<sha>`](https://github.com/<owner>/<repo>/commit/<sha>)"
 
 /** リンクになっていないコミット SHA があるか。リンク文言・URL・`<…>` の中と、SHA 以外も含むコードは見ない */
@@ -180,7 +185,7 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
     hits.push({
       rule: "ja-en-space",
       text,
-      hint: "no space between fullwidth and halfwidth in Japanese prose; `#123` is the only exception",
+      hint: "no space between fullwidth and halfwidth in Japanese prose; `#123` and a bare commit SHA are the exceptions",
     })
   }
   if (hasUnclosedEmphasis(maskForEmphasis(line))) {
@@ -276,25 +281,41 @@ export const lint = (content: string, opts: LintOptions = {}): Violation[] => {
   return hits.sort((a, b) => a.line - b.line)
 }
 
-const GITHUB_REFERENCE = /#\d+\b/g
+/** 自動リンクのために前後の空白を守る参照: `#123` と素の SHA(リンク文言の中は除く) */
+const PROTECTED_REFERENCE = /#\d+\b|(?<![\w#/.[-])[0-9a-f]{7,40}(?![\w\]-])/g
+const isProtectedReference = (token: string): boolean => token.startsWith("#") || isShaLike(token)
 /** インラインコード全体が closing/ref キーワードだけなら外す(コードにすると GitHub がリンクしない)。 */
 const CLOSING_KEYWORD_INLINE_CODE = /`(fixes|closes|resolves|close|fix|resolve|refs)\s*(#\d+)`/gi
 
 const addReferenceSpacing = (text: string): string =>
-  text.replace(GITHUB_REFERENCE, (reference, offset: number, source: string) => {
+  text.replace(PROTECTED_REFERENCE, (reference, offset: number, source: string) => {
+    if (!isProtectedReference(reference)) {
+      return reference
+    }
     const previous = offset > 0 ? source.at(offset - 1) : undefined
     const next = source.at(offset + reference.length)
+    if (previous === "[" || next === "]") {
+      return reference
+    }
     const prefix = previous && !/\s/.test(previous) ? " " : ""
     const suffix = next && !/\s/.test(next) ? " " : ""
     return `${prefix}${reference}${suffix}`
   })
 
-// `#123` の前後の空白は正(でないと自動リンクされない)なので、そこだけ残して詰める
-const dropJaEnSpace = (prose: string): string =>
-  prose
-    .split(/(#\d+)/g)
-    .map((seg, i) => (i % 2 === 1 ? seg : seg.replace(JA_EN_SPACE_ALL, "$1$3$2$4")))
-    .join("")
+// `#123` と素の SHA の前後の空白は正(でないと自動リンクされない)なので、そこだけ残して詰める
+const dropJaEnSpace = (prose: string): string => {
+  const drop = (seg: string): string => seg.replace(JA_EN_SPACE_ALL, "$1$3$2$4")
+  let out = ""
+  let last = 0
+  for (const match of prose.matchAll(PROTECTED_REFERENCE)) {
+    if (!isProtectedReference(match[0])) {
+      continue
+    }
+    out += drop(prose.slice(last, match.index)) + match[0]
+    last = match.index + match[0].length
+  }
+  return out + drop(prose.slice(last))
+}
 
 // 日本語の文(表ならセル)だけ詰める。英文のセルは触らない
 const dropJaEnSpaceInJapanese = (line: string): string =>

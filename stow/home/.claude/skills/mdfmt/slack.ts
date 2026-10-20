@@ -1,5 +1,7 @@
 // Slack に貼る下書きのチェックと、GitHub風 Markdown → Slack mrkdwn の変換。
 // Slack は表も見出しも `**強調**` も描画しない(`**` がそのまま出る)。崩れた記法を送る前にここで止める。
+// リンクだけは送り方で逆になる。入力欄に貼るなら `[文言](URL)`(`<URL|文言>` は文字のまま出る)、
+// API(chat.postMessage)で送るなら `<URL|文言>`(`[文言](URL)` は描画されない)。既定は入力欄に貼る方。
 // 下書きファイルの最初の `---` から下は「聞かれたら出す詳細」として長さの数え方から外す。
 import {
   isSlackTight,
@@ -9,24 +11,34 @@ import {
   SLACK_EMPHASIS_MARKERS,
   slackPairPattern,
 } from "./emphasis.ts"
-import { BARE_SHA_HINT, hasBareSha } from "./lint.ts"
+import { BARE_SHA_HINT, fixJaParens, hasBareSha, hasTightAsciiParen, JA_PAREN_HINT } from "./lint.ts"
 
 export type SlackRule =
   | "slack-table"
   | "slack-bold"
   | "slack-heading"
   | "slack-link"
+  | "slack-link-tail"
   | "slack-strike"
   | "slack-boundary"
   | "slack-length"
   | "bare-sha"
+  | "ja-paren"
 
 export type SlackViolation = { line: number; rule: SlackRule; text: string; hint: string }
+
+/** paste: 入力欄に貼って送る(既定)。api: chat.postMessage などで送る */
+export type SlackTarget = "paste" | "api"
+export type SlackOptions = { target?: SlackTarget }
 
 const TABLE = /^\s*\|.*\|\s*$/
 const HEADING = /^#{1,6}\s/
 const MD_BOLD = /\*\*[^*\n]+\*\*|__[^_\n]+__/
-const SLACK_API_LINK = /<https?:\/\/[^|>\s]+\|[^>\n]+>/
+const MD_LINK = /\[[^\]\n]+\]\([^)\n]+\)/
+const API_LINK = /<https?:\/\/[^>|\n]+\|[^>\n]+>/
+// 入力欄の「書式を適用」は URL を次の空白まで読むので、`)` の直後に文字が続くと
+// `)` から先がリンクに飲まれ、続く文が消える(2026-10-20、`[語](URL)の動作確認` で発生)
+const MD_LINK_TAIL = /\[[^\]\n]+\]\(https?:\/\/[^)\s]+\)(?=\S)/g
 const MD_STRIKE = /~~[^~\n]+~~/
 const CODE_SPAN = /(?<!`)`([^`\n]+)`(?!`)/g
 const SLACK_SPANS = [...SLACK_EMPHASIS_MARKERS.map(slackPairPattern), CODE_SPAN]
@@ -77,7 +89,7 @@ export const hasSlackBoundaryProblem = (line: string): boolean => {
   return false
 }
 
-export const lintSlack = (content: string): SlackViolation[] => {
+export const lintSlack = (content: string, { target = "paste" }: SlackOptions = {}): SlackViolation[] => {
   const body = slackBody(content)
   const hits: SlackViolation[] = []
   let inFence = false
@@ -108,8 +120,16 @@ export const lintSlack = (content: string): SlackViolation[] => {
     if (MD_BOLD.test(line)) {
       hits.push(at("slack-bold", "Slack bold is `*one star*`; `**` is printed literally"))
     }
-    if (SLACK_API_LINK.test(line)) {
-      hits.push(at("slack-link", "`<url|text>` is API markup and shows literally when pasted into the message box; use `[text](url)`"))
+    if (target === "api" && MD_LINK.test(line)) {
+      hits.push(at("slack-link", "`[text](url)` is not rendered when posted through the API; use `<url|text>`"))
+    }
+    if (target === "paste" && API_LINK.test(line)) {
+      hits.push(at("slack-link", "`<url|text>` is the API syntax and is pasted literally into the composer; use `[text](url)`"))
+    }
+    if (target === "paste" && line.search(MD_LINK_TAIL) !== -1) {
+      hits.push(
+        at("slack-link-tail", "the composer reads the URL up to the next space and swallows the text after `)`; put a halfwidth space after `)`"),
+      )
     }
     if (MD_STRIKE.test(line)) {
       hits.push(at("slack-strike", "Slack strikethrough is `~one tilde~`"))
@@ -121,6 +141,9 @@ export const lintSlack = (content: string): SlackViolation[] => {
     }
     if (hasBareSha(line)) {
       hits.push(at("bare-sha", BARE_SHA_HINT))
+    }
+    if (hasTightAsciiParen(line)) {
+      hits.push(at("ja-paren", JA_PAREN_HINT))
     }
   }
 
@@ -140,35 +163,47 @@ export const lintSlack = (content: string): SlackViolation[] => {
 /** `**` を一旦この文字に退避してから、GFMの斜体 `*x*` を `_x_` に変える(取り違えを避ける) */
 const BOLD_TOKEN = "\u0001"
 
-const convertInline = (prose: string): string =>
+const convertInline = (prose: string, target: SlackTarget): string =>
   prose
     .replace(/\*\*\*([^*\n]+?)\*\*\*/g, `${BOLD_TOKEN}_$1_${BOLD_TOKEN}`)
     .replace(/\*\*([^*\n]+?)\*\*/g, `${BOLD_TOKEN}$1${BOLD_TOKEN}`)
     .replace(/(?<![\w_])__([^_\n]+?)__(?![\w_])/g, `${BOLD_TOKEN}$1${BOLD_TOKEN}`)
     .replace(/(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)/g, "_$1_")
     .replace(/~~([^~\n]+?)~~/g, "~$1~")
-    .replace(/<(https?:\/\/[^|>\s]+)\|([^>\n]+)>/g, "[$2]($1)")
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, (m, text, url) => (target === "api" ? `<${url}|${text}>` : m))
+    // API 向けはこの時点で `<URL|文言>` になっているので、ここに当たるのは入力欄に貼る方だけ
+    .replace(MD_LINK_TAIL, "$& ")
     .replaceAll(BOLD_TOKEN, "*")
 
-const convertLine = (line: string): string => {
+/** 分割で守った `<URL|文言>` を、入力欄に貼る向けには `[文言](URL)` に戻す */
+const convertProtected = (part: string, target: SlackTarget): string =>
+  target === "paste" ? part.replace(/^<(https?:\/\/[^>|\n]+)\|([^>\n]+)>$/, "[$2]($1)") : part
+
+const convertLine = (line: string, target: SlackTarget): string => {
   const heading = line.match(/^#{1,6}\s+(.*)$/)
   if (heading) {
     // 見出しの中の `**` は落とす。太字の入れ子は Slack に無く、退避した印と衝突する
     return `${BOLD_TOKEN}${(heading[1] ?? "").replace(/\*\*|__/g, "").trim()}${BOLD_TOKEN}`
   }
-  return line.replace(/^(\s*)[-*+]\s+/, "$1• ")
+  // 入力欄は `- ` を貼った時点で箇条書きにするので残す。API 経由はただの文字なので `•` にする
+  return target === "api" ? line.replace(/^(\s*)[-*+]\s+/, "$1• ") : line
 }
 
 /**
  * GitHub風 Markdown を Slack mrkdwn にする。表だけは機械的に畳めないのでそのまま残す
  * (lintSlack が `slack-table` で出すので、人が短い行に組み替える)。
  */
-export const toSlackMrkdwn = (content: string): string =>
+export const toSlackMrkdwn = (content: string, { target = "paste" }: SlackOptions = {}): string =>
   padSlackCodeSpans(
     padSlackEmphasis(
-      mapOutsideFences(content, (segment) => segment.split("\n").map(convertLine).join("\n"))
-        .split(/(```[\s\S]*?```|`[^`\n]+`|<https?:\/\/[^>|\n]+>)/g)
-        .map((part, index) => (index % 2 === 1 ? part : convertInline(part)))
+      mapOutsideFences(content, (segment) =>
+        segment
+          .split("\n")
+          .map((line) => convertLine(fixJaParens(line), target))
+          .join("\n"),
+      )
+        .split(/(```[\s\S]*?```|`[^`\n]+`|<https?:\/\/[^>\n]+>)/g)
+        .map((part, index) => (index % 2 === 1 ? convertProtected(part, target) : convertInline(part, target)))
         .join(""),
     ),
   )

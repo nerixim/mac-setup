@@ -5,15 +5,16 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { fixGithubMarkdown, lint } from "./lint.ts"
 import { lintSlack, toSlackMrkdwn } from "./slack.ts"
 
-const USAGE = `Usage: bun ~/.claude/skills/mdfmt/mdfmt.ts [--slack] [--fix] [--docs|--backlog] [--en] <file.md>... | -
+const USAGE = `Usage: bun ~/.claude/skills/mdfmt/mdfmt.ts [--slack|--slack-api] [--fix] [--docs|--backlog] [--en] <file.md>... | -
 
   <file.md>...             GitHub/Backlog の表記をlint(違反があれば exit 1)
   --fix <file.md>...       機械的に直せる分だけ上書き(全角/半角の空白・#123・閉じ強調)
   --backlog <file.md>...   Backlog の本文として、リンクにしていないコミットSHAも見る
   --docs <file.md>...      リポジトリの文書として、リンクにしていないコミットSHAと末尾の「最終更新日: YYYY-MM-DD」も見る
   --en <file.md>...        英語の文の詰め込みも見る(1文30語超、1段に `;` が2つ以上)。日本語の文は見ない
-  --slack <file.md>...     Slack の下書きとしてlint(表・**・見出し・[](URL)・2段落)
-  --slack --fix <file>...  Slack mrkdwn に変換して上書き(表は畳めないので残す)
+  --slack <file.md>...     Slack の入力欄に貼る下書きとしてlint(表・**・見出し・<URL|文言>・2段落)
+  --slack --fix <file>...  Slack mrkdwn に変換して上書き(リンクは [文言](URL) のまま。表は畳めないので残す)
+  --slack-api ...          API(chat.postMessage)で送る本文として。リンクだけ逆で <URL|文言> を要求し、--fix で変換する
   -                        標準入力を読み、--fix の結果を標準出力へ出す
 
 直さないもの: 斜体・太字の多さ・段落数・英語の文の長さは判断が要るので lint が出すだけ。`
@@ -26,7 +27,7 @@ if (argv.includes("--help") || argv.includes("-h")) {
   process.exit(0)
 }
 
-const KNOWN = new Set(["--slack", "--fix", "--docs", "--backlog", "--en"])
+const KNOWN = new Set(["--slack", "--slack-api", "--fix", "--docs", "--backlog", "--en"])
 const unknown = argv.filter((arg) => arg.startsWith("--") && !KNOWN.has(arg))
 if (unknown.length > 0) {
   console.error(`error: ${unknown.join(" ")} は無い引数`)
@@ -40,7 +41,9 @@ if (files.length === 0) {
   process.exit(2)
 }
 
-const slack = argv.includes("--slack")
+const slackApi = argv.includes("--slack-api")
+const slack = argv.includes("--slack") || slackApi
+const slackTarget = slackApi ? "api" : "paste"
 const fix = argv.includes("--fix")
 const docs = argv.includes("--docs")
 const backlog = argv.includes("--backlog")
@@ -54,12 +57,13 @@ const stderr = (line: string): void => {
 
 const read = (file: string): string => (file === "-" ? readFileSync(0, "utf8") : readFileSync(file, "utf8"))
 const label = (file: string): string => (file === "-" ? "(stdin)" : file)
-const check = (content: string): Omit<Finding, "file">[] => (slack ? lintSlack(content) : lint(content, { docs, backlog, en }))
+const check = (content: string): Omit<Finding, "file">[] =>
+  slack ? lintSlack(content, { target: slackTarget }) : lint(content, { docs, backlog, en })
 
 const findings: Finding[] = []
 for (const file of files) {
   const before = read(file)
-  const after = fix ? (slack ? toSlackMrkdwn(before) : fixGithubMarkdown(before)) : before
+  const after = fix ? (slack ? toSlackMrkdwn(before, { target: slackTarget }) : fixGithubMarkdown(before)) : before
   if (fix && file === "-") {
     process.stdout.write(after)
   } else if (fix && after !== before) {

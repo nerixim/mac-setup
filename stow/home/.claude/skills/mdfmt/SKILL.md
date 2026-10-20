@@ -10,19 +10,34 @@ Two registers, two rule sets. Run the one that matches where the text is going.
 ## Slack draft
 
 ```bash
-bun ~/.claude/skills/mdfmt/mdfmt.ts --slack <draft.md>        # lint
+bun ~/.claude/skills/mdfmt/mdfmt.ts --slack <draft.md>        # lint a draft you paste into the composer
 bun ~/.claude/skills/mdfmt/mdfmt.ts --slack --fix <draft.md>  # convert to mrkdwn in place
 cat draft.md | bun ~/.claude/skills/mdfmt/mdfmt.ts --slack --fix -
+bun ~/.claude/skills/mdfmt/mdfmt.ts --slack-api <body.md>     # same, for text posted through the API
 ```
 
 Finds: markdown tables and headings (Slack renders neither), `**bold**` (Slack is
-`*one star*`), `<url|text>` (API markup: pasted into the message box it shows literally; drafts use `[text](url)`), `~~strike~~`, `*` or a code
-span pressed against Japanese so Slack leaves the marker visible, a commit SHA
-that is not a link, and more than two paragraphs.
+`*one star*`), `~~strike~~`, `*` or a code span pressed against Japanese so Slack
+leaves the marker visible, half-width parens pressed against Japanese (same
+`ja-paren` rule as the GitHub mode), a commit SHA that is not a link, and more than
+two paragraphs.
 
-`--fix` converts headings to a bold line, bullets to `•`, links to `[text](url)`,
-and pads the markers. Tables are left alone on purpose: rebuilding one as short
-lines is a judgement call, so the lint keeps reporting it.
+Links depend on how the text is sent, so there are two modes. `--slack` is for a
+draft pasted into the Slack composer: `[text](url)` becomes a link there, while
+`<url|text>` is pasted literally, so the lint flags `<url|text>`. `--slack-api` is
+for text posted through `chat.postMessage`, where it is the other way round:
+`[text](url)` is not rendered and `<url|text>` is required.
+
+In `--slack`, a `[text](url)` whose `)` is followed directly by text is also flagged
+(`slack-link-tail`): the composer's "apply formatting" reads the URL up to the next
+space, so `[語](url)の動作確認` swallows everything after `)`. `--fix` puts a
+half-width space after the `)`.
+
+`--fix` converts headings to a bold line, pads the markers, and rewrites links for
+the chosen mode (`<url|text>` to `[text](url)` under `--slack`, the reverse under
+`--slack-api`). `- ` bullets stay as they are under `--slack`, because the composer
+turns them into a list on paste; `--slack-api` rewrites them to `•`. Tables are left alone on purpose: rebuilding one
+as short lines is a judgement call, so the lint keeps reporting it.
 
 Everything below the first `---` in the draft is treated as detail you keep back,
 not part of the message, and is not counted toward the two-paragraph ceiling.
@@ -42,7 +57,14 @@ same-repo SHA by itself inside issues, PRs and comments, so the default (GitHub)
 mode leaves it alone. Only SHAs mixing digits and `a-f` count; an all-digit SHA
 prefix reads as a number and is missed on purpose.
 
-Finds: a space between fullwidth and halfwidth characters inside Japanese prose (`#123` excepted, where
+Finds: half-width parens pressed against Japanese (`ja-paren`: Japanese prose uses （）, or puts a
+space outside `( )`; `--fix` turns a pair that touches Japanese on either side into （）, leaving
+code, link targets, URLs and English prose alone). Finds: a bare commit SHA that GitHub will not autolink because the character before it is Japanese,
+fullwidth punctuation, a quote or similar (`sha-spacing`; measured through the markdown API on
+2026-10-19: only whitespace, `(`, `[`, `*` and `_` before the SHA keep the link, the character after
+it does not matter). Finds: a space between fullwidth and halfwidth characters inside Japanese prose
+(`#123` and a bare commit SHA excepted, since the autolink needs that space, so `--fix` adds a space
+around `#123` and before a SHA instead of removing it; `#123` excepted, where
 the spaces are required for the autolink; English sentences quoting a Japanese word keep their spaces, judged per table cell), a `**` that GitHub leaves literal because
 its inner side is punctuation, a bracket, a code span or a link and its outer side
 is a letter (`**強調。**続き`, `これは**「語」**です`, ``設定は**`foo`**に``), italics

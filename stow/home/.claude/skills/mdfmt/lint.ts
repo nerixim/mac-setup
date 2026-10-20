@@ -11,6 +11,8 @@ export type Rule =
   | "last-updated"
   | "repo-ref"
   | "bare-sha"
+  | "sha-spacing"
+  | "ja-paren"
   | "en-long-sentence"
   | "en-semicolon-chain"
 
@@ -28,6 +30,28 @@ const LATIN_WORD = /[A-Za-z]+/g
 const LAST_UPDATED = /^(最終更新日|Last updated):\s*\d{4}-\d{2}-\d{2}$/
 
 const WHITESPACE = /\s/
+
+// 素のコミット SHA を GitHub が自動リンクするのは、直前が行頭・空白・`(` `[` `*` `_` のときだけ。日本語・全角約物・
+// `"` `:` などに密着すると素の文字列のまま。直後は何でもよい(2026-10-19 に markdown API で実測)。
+// 数字だけ・英字だけの7〜40文字は数値や単語なので SHA と見ない
+const SHA_TOKEN = /(?<![\w#/.[-])[0-9a-f]{7,40}(?![\w\]-])/g
+const isShaLike = (token: string): boolean => /\d/.test(token) && /[a-f]/.test(token)
+const SHA_LINKABLE_BEFORE = /[\s([*_]/
+export const SHA_SPACING_HINT =
+  "GitHub autolinks a bare SHA only after whitespace, `(`, `[`, `*` or `_`; put a space before it or link it as [`<sha>`](https://github.com/<owner>/<repo>/commit/<sha>)"
+
+/** 日本語や全角約物に直前を塞がれて自動リンクされない素の SHA があるか。リンク・URL・`<…>`・コードの中は見ない */
+export const hasTightSha = (line: string): boolean => {
+  const prose = line
+    .replace(/\[[^\]\n]*\]\([^)\n]*\)/g, (m) => " ".repeat(m.length))
+    .replace(/<[^>\n]*>/g, (m) => " ".repeat(m.length))
+    .replace(/https?:\/\/\S+/g, (m) => " ".repeat(m.length))
+    .replace(/`[^`\n]*`/g, (m) => " ".repeat(m.length))
+  return [...prose.matchAll(SHA_TOKEN)].some((m) => {
+    const previous = m.index === 0 ? undefined : prose.at(m.index - 1)
+    return isShaLike(m[0]) && previous !== undefined && !SHA_LINKABLE_BEFORE.test(previous)
+  })
+}
 /** CommonMark の「punctuation character」(ASCII約物 + Unicode P/S) */
 const PUNCTUATION = /[\p{P}\p{S}]/u
 
@@ -88,8 +112,9 @@ export const maskInline = (line: string): string => {
       .replace(/`[^`]*`/g, blank)
       .replace(/\]\([^)]*\)/g, blank)
       .replace(/https?:\/\/\S+/g, blank)
-      // `#123` は前後に半角スペースを入れるのが正(でないと自動リンクされない)。JA/EN空白の例外
+      // `#123` と素の SHA は前後に半角スペースを入れるのが正(でないと自動リンクされない)。JA/EN空白の例外
       .replace(/#\d+/g, blank)
+      .replace(SHA_TOKEN, (match) => (isShaLike(match) ? blank(match) : match))
       .replace(/<[^>]*>/g, blank)
   )
 }
@@ -122,6 +147,44 @@ export const isJapaneseProse = (segment: string): boolean => {
 
 /** 表の行はセルごと、それ以外は行ごとに文の言語を見る */
 const segments = (line: string): string[] => (TABLE_ROW.test(line) ? line.split("|") : [line])
+
+// 日本語の文の丸かっこは全角（）。半角 ( ) を日本語に密着させると幅が詰まって読みにくい(オーナー 2026-10-19)。
+// 半角を使うなら外側に半角スペース。コード・リンク先・URL の中は見ない
+const PAREN_PROTECT = /(`+[\s\S]*?`+|\]\([^)\n]*\)|https?:\/\/[^\s)]+)/g
+const FULL_CHAR = new RegExp(`[${FULL}]`)
+export const JA_PAREN_HINT = "half-width parens pressed against Japanese; use （） in Japanese prose, or put a space outside ( )"
+
+/** 半角かっこの対を見つけ、どちらかの外側が日本語・全角約物なら全角にする。対にならない括弧は触らない */
+const fullwidthParenPairs = (seg: string): string => {
+  const masked = seg.replace(PAREN_PROTECT, (m) => "\u0000".repeat(m.length))
+  const out = seg.split("")
+  const open: number[] = []
+  for (let i = 0; i < masked.length; i += 1) {
+    const ch = masked[i]
+    if (ch === "(") {
+      open.push(i)
+    } else if (ch === ")" && open.length > 0) {
+      const j = open.pop() as number
+      const before = j === 0 ? undefined : masked[j - 1]
+      const after = masked[i + 1]
+      if ((before !== undefined && FULL_CHAR.test(before)) || (after !== undefined && FULL_CHAR.test(after))) {
+        out[j] = "（"
+        out[i] = "）"
+      }
+    }
+  }
+  return out.join("")
+}
+
+/** 日本語の文(表ならセル)の中で、半角かっこが日本語・全角約物に密着しているか */
+export const hasTightAsciiParen = (line: string): boolean =>
+  segments(line).some((seg) => isJapaneseProse(maskInline(seg)) && fullwidthParenPairs(seg) !== seg)
+
+/** 日本語の文(表ならセル)だけ、日本語に密着した半角かっこの対を全角にする */
+export const fixJaParens = (line: string): string =>
+  segments(line)
+    .map((seg) => (isJapaneseProse(maskInline(seg)) ? fullwidthParenPairs(seg) : seg))
+    .join("|")
 
 const hasJaEnSpace = (masked: string): boolean =>
   segments(masked).some((seg) => isJapaneseProse(seg) && JA_EN_SPACE.test(seg))
@@ -156,7 +219,6 @@ export const hasShortRepoRef = (line: string): boolean =>
 // ただの文字列で、読み手はどのリポジトリのコミットかも分からない。数字だけ・英字だけの並びは数値や単語なので見ない
 const HEX_TOKEN = /(?<![\w#/.-])[0-9a-f]{7,40}(?![\w-])/g
 const SHA_CODE_SPAN = /`\s*([0-9a-f]{7,40})\s*`/g
-const isShaLike = (token: string): boolean => /\d/.test(token) && /[a-f]/.test(token)
 export const BARE_SHA_HINT = "a bare commit SHA is not linked here; write [`<sha>`](https://github.com/<owner>/<repo>/commit/<sha>)"
 
 /** リンクになっていないコミット SHA があるか。リンク文言・URL・`<…>` の中と、SHA 以外も含むコードは見ない */
@@ -180,7 +242,7 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
     hits.push({
       rule: "ja-en-space",
       text,
-      hint: "no space between fullwidth and halfwidth in Japanese prose; `#123` is the only exception",
+      hint: "no space between fullwidth and halfwidth in Japanese prose; `#123` and a bare commit SHA are the exceptions",
     })
   }
   if (hasUnclosedEmphasis(maskForEmphasis(line))) {
@@ -199,9 +261,14 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
   }
   if ((opts.docs || opts.backlog) && hasBareSha(line)) {
     hits.push({ rule: "bare-sha", text, hint: BARE_SHA_HINT })
+  } else if (hasTightSha(line)) {
+    hits.push({ rule: "sha-spacing", text, hint: SHA_SPACING_HINT })
   }
   if (hasJaItalic(masked)) {
     hits.push({ rule: "ja-italic", text, hint: "no italics in Japanese; use bold or rephrase" })
+  }
+  if (hasTightAsciiParen(line)) {
+    hits.push({ rule: "ja-paren", text, hint: JA_PAREN_HINT })
   }
   return hits
 }
@@ -276,25 +343,45 @@ export const lint = (content: string, opts: LintOptions = {}): Violation[] => {
   return hits.sort((a, b) => a.line - b.line)
 }
 
-const GITHUB_REFERENCE = /#\d+\b/g
+/** 自動リンクのために前後の空白を守る参照: `#123` と素の SHA(リンク文言の中は除く) */
+const PROTECTED_REFERENCE = /#\d+\b|(?<![\w#/.[-])[0-9a-f]{7,40}(?![\w\]-])/g
+const isProtectedReference = (token: string): boolean => token.startsWith("#") || isShaLike(token)
 /** インラインコード全体が closing/ref キーワードだけなら外す(コードにすると GitHub がリンクしない)。 */
 const CLOSING_KEYWORD_INLINE_CODE = /`(fixes|closes|resolves|close|fix|resolve|refs)\s*(#\d+)`/gi
 
 const addReferenceSpacing = (text: string): string =>
-  text.replace(GITHUB_REFERENCE, (reference, offset: number, source: string) => {
+  text.replace(PROTECTED_REFERENCE, (reference, offset: number, source: string) => {
+    if (!isProtectedReference(reference)) {
+      return reference
+    }
     const previous = offset > 0 ? source.at(offset - 1) : undefined
     const next = source.at(offset + reference.length)
+    if (!reference.startsWith("#")) {
+      // SHA: 直前だけが効く。直後は何でもよいので触らない
+      return previous !== undefined && !SHA_LINKABLE_BEFORE.test(previous) ? ` ${reference}` : reference
+    }
+    if (previous === "[" || next === "]") {
+      return reference
+    }
     const prefix = previous && !/\s/.test(previous) ? " " : ""
     const suffix = next && !/\s/.test(next) ? " " : ""
     return `${prefix}${reference}${suffix}`
   })
 
-// `#123` の前後の空白は正(でないと自動リンクされない)なので、そこだけ残して詰める
-const dropJaEnSpace = (prose: string): string =>
-  prose
-    .split(/(#\d+)/g)
-    .map((seg, i) => (i % 2 === 1 ? seg : seg.replace(JA_EN_SPACE_ALL, "$1$3$2$4")))
-    .join("")
+// `#123` と素の SHA の前後の空白は正(でないと自動リンクされない)なので、そこだけ残して詰める
+const dropJaEnSpace = (prose: string): string => {
+  const drop = (seg: string): string => seg.replace(JA_EN_SPACE_ALL, "$1$3$2$4")
+  let out = ""
+  let last = 0
+  for (const match of prose.matchAll(PROTECTED_REFERENCE)) {
+    if (!isProtectedReference(match[0])) {
+      continue
+    }
+    out += drop(prose.slice(last, match.index)) + match[0]
+    last = match.index + match[0].length
+  }
+  return out + drop(prose.slice(last))
+}
 
 // 日本語の文(表ならセル)だけ詰める。英文のセルは触らない
 const dropJaEnSpaceInJapanese = (line: string): string =>
@@ -304,7 +391,7 @@ const dropJaEnSpaceInJapanese = (line: string): string =>
 
 const fixLine = (line: string): string =>
   padCommonMarkEmphasisClosers(
-    withProtectedCodeSpans(dropJaEnSpaceInJapanese(line).replace(CLOSING_KEYWORD_INLINE_CODE, "$1 $2"), (prose) =>
+    withProtectedCodeSpans(dropJaEnSpaceInJapanese(fixJaParens(line)).replace(CLOSING_KEYWORD_INLINE_CODE, "$1 $2"), (prose) =>
       addReferenceSpacing(prose),
     ),
   )
@@ -313,6 +400,7 @@ const fixLine = (line: string): string =>
  * 機械的に直せる分だけ直す。判断が要る違反(ja-italic・bold-density)は lint が出すだけで触らない。
  * - 日本語の文(表はセル単位)で、全角と半角の間のスペースを詰める。英文は触らない
  * - `#123` を自動リンク可能な空白区切りにする
+ * - 日本語に密着した半角かっこの対を全角（）にする
  * - `` `fixes #123` `` のコード囲みを外す
  * - 素通しになる閉じ強調の後ろにスペースを入れる
  */

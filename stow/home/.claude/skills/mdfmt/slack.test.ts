@@ -18,6 +18,19 @@ describe("lintSlack", () => {
     expect(rules("[手順](https://example.com) を読む")).toEqual([])
     expect(rules("<https://example.com|手順> を読む")).toEqual(["slack-link"])
   })
+  it("入力欄に貼るなら、`[文言](URL)` の `)` に文字が密着していると出す(書式の適用で後ろの文が URL に飲まれる)", () => {
+    expect(rules("STGで[16.4.2](https://example.com/AIO-1902)の動作確認をしました")).toEqual(["slack-link-tail"])
+    expect(rules("[手順](https://example.com)。")).toEqual(["slack-link-tail"])
+    expect(rules("[手順](https://example.com) を読む")).toEqual([])
+    expect(rules("[手順](https://example.com)")).toEqual([])
+    expect(rules("[手順](https://example.com)\n次の行")).toEqual([])
+    expect(apiRules("[手順](https://example.com)を読む")).toEqual(["slack-link"])
+  })
+  it("同じ行で2回続けて判定しても結果が変わらない(正規表現の lastIndex を持ち越さない)", () => {
+    const line = "[a](https://example.com/a)を読む"
+    expect(rules(line)).toEqual(["slack-link-tail"])
+    expect(rules(line)).toEqual(["slack-link-tail"])
+  })
   it("API で送るなら逆で、`[文言](URL)` を出し `<URL|文言>` を通す", () => {
     expect(apiRules("[手順](https://example.com) を読む")).toEqual(["slack-link"])
     expect(apiRules("<https://example.com|手順> を読む")).toEqual([])
@@ -68,6 +81,16 @@ describe("toSlackMrkdwn", () => {
   it("入力欄に貼る(既定)ならリンクは `[文言](URL)` のままにし、`<URL|文言>` は戻す", () => {
     expect(toSlackMrkdwn("[手順](https://example.com/a) を読む")).toBe("[手順](https://example.com/a) を読む")
     expect(toSlackMrkdwn("<https://example.com/a|手順> を読む")).toBe("[手順](https://example.com/a) を読む")
+  })
+  it("入力欄に貼るなら、`)` に密着した文字との間に半角スペースを入れる", () => {
+    expect(toSlackMrkdwn("STGで[16.4.2](https://example.com/AIO-1902)の動作確認をしました")).toBe(
+      "STGで[16.4.2](https://example.com/AIO-1902) の動作確認をしました",
+    )
+    expect(toSlackMrkdwn("[a](https://example.com/a)と[b](https://example.com/b)を読む")).toBe(
+      "[a](https://example.com/a) と[b](https://example.com/b) を読む",
+    )
+    expect(toSlackMrkdwn("[手順](https://example.com/a) を読む")).toBe("[手順](https://example.com/a) を読む")
+    expect(toSlackMrkdwn("[手順](https://example.com/a)を読む", { target: "api" })).toBe("<https://example.com/a|手順>を読む")
   })
   it("API で送るならリンクを `<URL|文言>` にする", () => {
     expect(toSlackMrkdwn("[手順](https://example.com/a) を読む", { target: "api" })).toBe("<https://example.com/a|手順> を読む")

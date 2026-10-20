@@ -28,6 +28,11 @@ draft pasted into the Slack composer: `[text](url)` becomes a link there, while
 for text posted through `chat.postMessage`, where it is the other way round:
 `[text](url)` is not rendered and `<url|text>` is required.
 
+In `--slack`, a `[text](url)` whose `)` is followed directly by text is also flagged
+(`slack-link-tail`): the composer's "apply formatting" reads the URL up to the next
+space, so `[語](url)の動作確認` swallows everything after `)`. `--fix` puts a
+half-width space after the `)`.
+
 `--fix` converts headings to a bold line, pads the markers, and rewrites links for
 the chosen mode (`<url|text>` to `[text](url)` under `--slack`, the reverse under
 `--slack-api`). `- ` bullets stay as they are under `--slack`, because the composer

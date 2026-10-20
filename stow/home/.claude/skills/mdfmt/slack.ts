@@ -18,6 +18,7 @@ export type SlackRule =
   | "slack-bold"
   | "slack-heading"
   | "slack-link"
+  | "slack-link-tail"
   | "slack-strike"
   | "slack-boundary"
   | "slack-length"
@@ -35,6 +36,9 @@ const HEADING = /^#{1,6}\s/
 const MD_BOLD = /\*\*[^*\n]+\*\*|__[^_\n]+__/
 const MD_LINK = /\[[^\]\n]+\]\([^)\n]+\)/
 const API_LINK = /<https?:\/\/[^>|\n]+\|[^>\n]+>/
+// 入力欄の「書式を適用」は URL を次の空白まで読むので、`)` の直後に文字が続くと
+// `)` から先がリンクに飲まれ、続く文が消える(2026-10-20、`[語](URL)の動作確認` で発生)
+const MD_LINK_TAIL = /\[[^\]\n]+\]\(https?:\/\/[^)\s]+\)(?=\S)/g
 const MD_STRIKE = /~~[^~\n]+~~/
 const CODE_SPAN = /(?<!`)`([^`\n]+)`(?!`)/g
 const SLACK_SPANS = [...SLACK_EMPHASIS_MARKERS.map(slackPairPattern), CODE_SPAN]
@@ -122,6 +126,11 @@ export const lintSlack = (content: string, { target = "paste" }: SlackOptions = 
     if (target === "paste" && API_LINK.test(line)) {
       hits.push(at("slack-link", "`<url|text>` is the API syntax and is pasted literally into the composer; use `[text](url)`"))
     }
+    if (target === "paste" && line.search(MD_LINK_TAIL) !== -1) {
+      hits.push(
+        at("slack-link-tail", "the composer reads the URL up to the next space and swallows the text after `)`; put a halfwidth space after `)`"),
+      )
+    }
     if (MD_STRIKE.test(line)) {
       hits.push(at("slack-strike", "Slack strikethrough is `~one tilde~`"))
     }
@@ -162,6 +171,8 @@ const convertInline = (prose: string, target: SlackTarget): string =>
     .replace(/(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)/g, "_$1_")
     .replace(/~~([^~\n]+?)~~/g, "~$1~")
     .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, (m, text, url) => (target === "api" ? `<${url}|${text}>` : m))
+    // API 向けはこの時点で `<URL|文言>` になっているので、ここに当たるのは入力欄に貼る方だけ
+    .replace(MD_LINK_TAIL, "$& ")
     .replaceAll(BOLD_TOKEN, "*")
 
 /** 分割で守った `<URL|文言>` を、入力欄に貼る向けには `[文言](URL)` に戻す */

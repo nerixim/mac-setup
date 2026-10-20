@@ -50,8 +50,29 @@ describe("lint", () => {
     expect(rules("| Slack 通知 | closed by default with a 文法 39 label |")).toEqual(["ja-en-space"])
     expect(rules("| open | closed by default with a 文法 39 label |")).toEqual([])
   })
+  it("日本語に密着した半角かっこを出し、全角か外側に空白があれば通す。英文は見ない", () => {
+    expect(rules("ジョブ(id)を見る")).toEqual(["ja-paren"])
+    expect(rules("確認した(2件)。")).toEqual(["ja-paren"])
+    expect(rules("ジョブ (id) を見る")).toEqual([])
+    expect(rules("ジョブ（id）を見る")).toEqual([])
+    expect(rules("see (id) here")).toEqual([])
+    expect(rules("手順は [こちら](https://x/y(z)) を読む")).toEqual([])
+  })
   it("`#123` の前後のスペースは例外として通す", () => {
     expect(rules("関連 #123 を確認する")).toEqual([])
+  })
+  it("素のコミット SHA の前後のスペースも例外として通す(密着すると自動リンクされない)", () => {
+    expect(rules("関連 fe1ee990a7 を確認する")).toEqual([])
+    expect(rules("値 1234567 を見る")).toEqual(["ja-en-space"])
+  })
+  it("直前が日本語・全角約物・引用符の素の SHA は自動リンクされないので出す。行頭・空白・`(` `[` `*` `_` の後は通す", () => {
+    expect(rules("イメージは、b9562e5（2025-03-13）から")).toEqual(["sha-spacing"])
+    expect(rules("「b9562e5」の修正")).toEqual(["sha-spacing"])
+    expect(rules("版は\"b9562e5\"です")).toEqual(["sha-spacing"])
+    expect(rules("b9562e5の修正")).toEqual([])
+    expect(rules("イメージは (b9562e5) から")).toEqual([])
+    expect(rules("**b9562e5** の修正")).toEqual([])
+    expect(rules("[b9562e5](https://x/commit/b9562e5) と `b9562e5` は見ない")).toEqual([])
   })
   it("コードスパン・リンク先・URL の中は見ない", () => {
     expect(rules("`bun run check` を通す")).toEqual([])
@@ -93,9 +114,26 @@ describe("fixGithubMarkdown", () => {
     expect(fixGithubMarkdown("120,469 lifetime 伊検 applicants over 58 sessions")).toBe("120,469 lifetime 伊検 applicants over 58 sessions")
     expect(fixGithubMarkdown("| Slack 通知 | a mark for 文法 39 |")).toBe("| Slack通知 | a mark for 文法 39 |")
   })
+  it("日本語に密着した半角かっこの対を全角にする。コード・リンク先の中と英文は触らない", () => {
+    expect(fixGithubMarkdown("ジョブ(id)を見る")).toBe("ジョブ（id）を見る")
+    expect(fixGithubMarkdown("値(`x`)を見る")).toBe("値（`x`）を見る")
+    expect(fixGithubMarkdown("手順([リンク](https://x/y))を読む")).toBe("手順（[リンク](https://x/y)）を読む")
+    expect(fixGithubMarkdown("あ(い(c)d)え")).toBe("あ（い（c）d）え")
+    expect(fixGithubMarkdown("ジョブ (id) を見る")).toBe("ジョブ (id) を見る")
+    expect(fixGithubMarkdown("see (id) here")).toBe("see (id) here")
+    expect(fixGithubMarkdown("`f(x)`を呼ぶ")).toBe("`f(x)`を呼ぶ")
+  })
   it("`#123` の前後にはスペースを入れる(無いと自動リンクされない)", () => {
     expect(fixGithubMarkdown("関連#123を確認")).toBe("関連 #123 を確認")
     expect(fixGithubMarkdown("関連 #123 を確認")).toBe("関連 #123 を確認")
+  })
+  it("素のコミット SHA は直前だけスペースを入れ(直後は自動リンクに効かない)、リンク文言の中とコードの中は触らない", () => {
+    expect(fixGithubMarkdown("イメージは、b9562e5（2025-03-13）から")).toBe("イメージは、 b9562e5（2025-03-13）から")
+    expect(fixGithubMarkdown("fe1ee990a7の修正")).toBe("fe1ee990a7の修正")
+    expect(fixGithubMarkdown("関連 fe1ee990a7 を確認")).toBe("関連 fe1ee990a7 を確認")
+    expect(fixGithubMarkdown("[fe1ee990a7](https://x/commit/fe1ee990a7) の修正")).toBe("[fe1ee990a7](https://x/commit/fe1ee990a7) の修正")
+    expect(fixGithubMarkdown("`fe1ee990a7` の修正")).toBe("`fe1ee990a7` の修正")
+    expect(fixGithubMarkdown("値 1234567 を見る")).toBe("値1234567を見る")
   })
   it("素通しになる閉じ強調の後ろにスペースを入れる", () => {
     expect(fixGithubMarkdown("**強調。**続き")).toBe("**強調。** 続き")

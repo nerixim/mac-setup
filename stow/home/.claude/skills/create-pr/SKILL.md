@@ -54,9 +54,11 @@ Body rules (moved from the global CLAUDE.md, 2026-10-05):
 
 ```bash
 git push -u origin HEAD
-gh pr create --title "<Japanese Title>" --body-file /tmp/pr_description.md
+gh pr create --title "<Japanese Title>" --body-file /tmp/pr_description.md --assignee @me
 rm /tmp/pr_description.md
 ```
+
+`--assignee @me` is mandatory: reviewers filter the queue by assignee (a reviewer's request, 2026-10-15). A PR created without it gets `gh pr edit <n> --add-assignee @me` right away.
 
 ### 6. Do not stop after create — watch CI / reviews
 

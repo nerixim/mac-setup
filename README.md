@@ -28,7 +28,8 @@ so re-running any target reconciles state rather than duplicating lines.
 - **Dotfiles** under `stow/home/` are symlinked into `$HOME` with GNU stow
   (`make stow`) — the repo file *is* the live file, so there's no copy/write-back
   drift. Covers `.default-*` package lists, `.p10k.zsh`, `.terraformrc`, zellij
-  config, `.tmux.conf`, and the coding-agent config below. Files that are appended/generated
+  config, `.tmux.conf`, `.ssh/config.d/` (GitHub SSH over port 443, for wifi that
+  drops port 22; `~/.ssh/config` stays local and gets an `Include` line), and the coding-agent config below. Files that are appended/generated
   (`.zshrc`, `.aliases`, gitconfig, `.npmrc`, iTerm, lazygit) stay script-managed instead.
 - **Coding-agent config** lives in `stow/home/.claude/` (`CLAUDE.md`,
   `settings.json`, `statusline.sh`, `agents/`, `commands/`, `docs/`, own `skills/`)

@@ -4,7 +4,7 @@ set -eux
 # Symlink the dotfiles under stow/home/ into $HOME via GNU stow, so the repo file
 # IS the live file (edit once, no copy/write-back drift). Covers: .default-gems,
 # .default-npm-packages, .default-python-packages, .p10k.zsh, .terraformrc,
-# .config/zellij/, ~/.tmux.conf, and the shared coding-agent config: .claude/ (CLAUDE.md,
+# .config/zellij/, ~/.tmux.conf, .ssh/config.d/ (GitHub over 443), and the shared coding-agent config: .claude/ (CLAUDE.md,
 # settings.json, agents/, commands/, docs/, skills/, statusline.sh) plus
 # .codex/AGENTS.md and .config/opencode/AGENTS.md, which are symlinks to
 # .claude/CLAUDE.md inside the repo so every agent reads one file.
@@ -30,4 +30,14 @@ done
 # --no-folding links files one by one instead of symlinking whole directories:
 # ~/.claude and ~/.config hold machine-local state next to the tracked files,
 # and a folded ~/.config -> repo symlink would make mise.sh write into the repo.
+mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
 stow --dir="${REPO}/stow" --target="$HOME" --restow --no-folding home
+
+# ~/.ssh/config itself stays machine-local (work hosts); it only pulls in the
+# tracked .ssh/config.d/ snippets. Include must come before any Host block.
+SSH_CONFIG="${HOME}/.ssh/config"
+touch "${SSH_CONFIG}" && chmod 600 "${SSH_CONFIG}"
+if ! grep -qxF 'Include config.d/*.conf' "${SSH_CONFIG}"; then
+  printf 'Include config.d/*.conf\n\n' | cat - "${SSH_CONFIG}" > "${SSH_CONFIG}.tmp"
+  mv "${SSH_CONFIG}.tmp" "${SSH_CONFIG}"
+fi

@@ -51,6 +51,11 @@ for host in "" "-currentHost"; do
     || no "corner right-click not set in ${host:-global} domain (=$v)" "make osx-preferences  # then log out/in"
 done
 
+section "sudo"
+grep -qE '^auth[[:space:]].*pam_tid\.so' /etc/pam.d/sudo_local 2>/dev/null \
+  && ok "Touch ID for sudo (/etc/pam.d/sudo_local)" \
+  || no "Touch ID for sudo is off" "make touchid-sudo"
+
 section "Runtimes (mise)"
 if grep -qE '^min-release-age=' ~/.npmrc 2>/dev/null; then
   ok "~/.npmrc has min-release-age"

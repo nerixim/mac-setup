@@ -6,7 +6,7 @@ Apple Silicon Mac provisioning. Homebrew prefix is assumed to be `/opt/homebrew`
 
 ```shell
 make all
-# == make xcode homebrew osx-preferences vscode iterm git zsh mise
+# == make xcode homebrew osx-preferences touchid-sudo stow vscode iterm git zsh mise
 ```
 
 Individual targets also work: `make zsh`, `make osx-preferences`, etc.

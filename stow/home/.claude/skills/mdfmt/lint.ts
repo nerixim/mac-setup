@@ -10,6 +10,7 @@ export type Rule =
   | "bold-density"
   | "last-updated"
   | "repo-ref"
+  | "file-link"
   | "bare-sha"
   | "sha-spacing"
   | "ja-paren"
@@ -215,6 +216,26 @@ export const hasShortRepoRef = (line: string): boolean =>
       .replace(/[\w-]+\/[\w.-]+#\d+/g, " "),
   )
 
+// Issue・PR の本文に書いたファイル名は、読み手がそのまま開けるようリンクにする(2026-10-26、オーナー)。
+// 相対リンクは本文では404になるので blob の URL。gitignore されたファイルやローカルだけのファイルは絶対パスで書く。
+// 拡張子が JS・CSS などのものは "Next.js" と紛れるので、スラッシュを含むときだけ拾う
+const FILE_PATH_SOURCE =
+  "(?:[\\w-][\\w.-]*\\/)+[\\w-][\\w.-]*\\.[A-Za-z][A-Za-z0-9]{0,5}|[\\w-][\\w.-]*\\.(?:md|mdx|ts|tsx|mts|mjs|cjs|json|jsonl|ya?ml|toml|py|sh)"
+const BARE_FILE_PATH = new RegExp(`(?<![\\w./~:@<-])(?:${FILE_PATH_SOURCE})(?![\\w/>-])`)
+const WHOLE_FILE_PATH = new RegExp(`^(?:\\.\\/)?(?:${FILE_PATH_SOURCE})$`)
+export const FILE_LINK_HINT =
+  "link the file: [path](https://github.com/<owner>/<repo>/blob/main/<path>); a gitignored or local-only file gets its absolute path (/Users/… or ~/…)"
+
+/** リンクにしていないリポジトリ相対のファイルパスがあるか。中身がパスだけのコードスパンと地の文を見る。コマンドの中のパスは見ない */
+export const hasUnlinkedFilePath = (line: string): boolean => {
+  const unlinked = line.replace(/\[[^\]\n]*\]\([^)\n]*\)/g, " ").replace(/https?:\/\/\S+/g, " ")
+  const spans = [...unlinked.matchAll(/`([^`\n]+)`/g)].map((m) => (m[1] ?? "").trim())
+  if (spans.some((span) => WHOLE_FILE_PATH.test(span))) {
+    return true
+  }
+  return BARE_FILE_PATH.test(unlinked.replace(/`[^`\n]*`/g, " "))
+}
+
 // GitHub が素の SHA を自動リンクするのは Issue・PR・コメントの中だけ。Backlog・Slack・リポジトリの docs では
 // ただの文字列で、読み手はどのリポジトリのコミットかも分からない。数字だけ・英字だけの並びは数値や単語なので見ない
 const HEX_TOKEN = /(?<![\w#/.-])[0-9a-f]{7,40}(?![\w-])/g
@@ -258,6 +279,9 @@ const lineViolations = (line: string, masked: string, opts: LintOptions): Omit<V
       text,
       hint: "`repo#12` is not autolinked; write https://github.com/<owner>/<repo>/issues/12",
     })
+  }
+  if (!opts.docs && !opts.backlog && hasUnlinkedFilePath(line)) {
+    hits.push({ rule: "file-link", text, hint: FILE_LINK_HINT })
   }
   if ((opts.docs || opts.backlog) && hasBareSha(line)) {
     hits.push({ rule: "bare-sha", text, hint: BARE_SHA_HINT })

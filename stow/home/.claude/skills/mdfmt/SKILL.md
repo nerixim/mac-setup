@@ -57,6 +57,14 @@ same-repo SHA by itself inside issues, PRs and comments, so the default (GitHub)
 mode leaves it alone. Only SHAs mixing digits and `a-f` count; an all-digit SHA
 prefix reads as a number and is missed on purpose.
 
+The default (GitHub) mode also flags a repo-relative file path that is not a link (`file-link`,
+owner 2026-10-26): a code span holding only a path, or a path in prose, such as
+`scripts/library.mjs` or `textbook-formats-2026-09-11.md`. Link it as
+`[path](https://github.com/<owner>/<repo>/blob/main/<path>)`; a gitignored or local-only file
+gets its absolute path. Paths inside a command (`bun scripts/x.mjs run`), absolute paths,
+directories, links and URLs pass, and `--backlog`/`--docs` skip the rule. `--fix` does not link,
+since it cannot know the repo.
+
 Finds: half-width parens pressed against Japanese (`ja-paren`: Japanese prose uses （）, or puts a
 space outside `( )`; `--fix` turns a pair that touches Japanese on either side into （）, leaving
 code, link targets, URLs and English prose alone). Finds: a bare commit SHA that GitHub will not autolink because the character before it is Japanese,

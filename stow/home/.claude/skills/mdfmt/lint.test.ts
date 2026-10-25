@@ -167,6 +167,36 @@ describe("repo-ref", () => {
   })
 })
 
+describe("file-link", () => {
+  it("リンクにしていないリポジトリ相対のファイルパスを出す", () => {
+    expect(rules("Layout is in `1-language-apps/textbook-formats-2026-09-11.md`.")).toContain("file-link")
+    expect(rules("See textbook-formats-2026-09-11.md §4.1.")).toContain("file-link")
+    expect(rules("| `scripts/library.mjs` | reads loans |")).toContain("file-link")
+    expect(rules("the parser in scripts/edogawa-opac/parse.ts")).toContain("file-link")
+    expect(rules("`inputs/korean-books/README.md` has one row per book")).toContain("file-link")
+  })
+  it("リンク・URL・絶対パス・コマンドの中のパス・ディレクトリは通す", () => {
+    expect(
+      rules("[textbook-formats](https://github.com/nerixim/meta/blob/main/1-language-apps/textbook-formats-2026-09-11.md)"),
+    ).toEqual([])
+    expect(rules("[`scripts/library.mjs`](https://github.com/nerixim/meta/blob/main/scripts/library.mjs)")).toEqual([])
+    expect(rules("https://github.com/nerixim/meta/blob/main/scripts/library.mjs")).toEqual([])
+    expect(rules("`/Users/nk/ghq/github.com/nerixim/meta/inputs/korean-books/README.md`")).toEqual([])
+    expect(rules("`~/.claude/skills/mdfmt/lint.ts`")).toEqual([])
+    expect(rules("run `bun scripts/library.mjs loans` first")).toEqual([])
+    expect(rules("pages land in `inputs/korean-books/pages/<book>/`")).toEqual([])
+    expect(rules("`*.test.ts` sits next to the code")).toEqual([])
+  })
+  it("ファイル名でない語(Next.js、版番号、ドメイン、分数)は通す", () => {
+    expect(rules("Next.js 16.4.2 and Node.js on kanyomi.app/drill")).toEqual([])
+    expect(rules("1/2.5 of the pages")).toEqual([])
+  })
+  it("Backlog と docs では見ない", () => {
+    expect(rules("`scripts/library.mjs`", { backlog: true })).not.toContain("file-link")
+    expect(rules("`scripts/library.mjs`\n\n最終更新日: 2026-10-26", { docs: true })).not.toContain("file-link")
+  })
+})
+
 describe("bare-sha", () => {
   const backlog = { backlog: true }
   it("Backlog と docs では、リンクにしていない SHA を出す", () => {

@@ -16,7 +16,8 @@
 - **Draft, don't send.** Write as the sender, a peer engineer under my name, never as an assistant: no offers of service, no handing the next move to the reader.
 - **Before any Slack / Backlog / GitHub draft, read `~/.claude/skills/writing/rules.md`** (register choice, reply shape, mentions, notation, AI臭). A UserPromptSubmit hook injects it when the prompt looks like a draft; if it did not fire, read it yourself. Then `/writing` for the 型, and `mdfmt` + `lint-draft` + `ja-review` before handing over.
 - **Re-fetch before drafting.** Pull the live thread / PR / issue immediately before writing; briefings, memory and earlier turns go stale within minutes. Sent or merged is confirmed from the thread or `gh`, never from a handoff note.
-- 読み手のregister（開発者／非開発者）は名簿で引く。非開発者向けには識別子をそもそも書かない。
+- 下書きの前に、宛先ごとに誰か（所属・役割）と何ができるか（使える画面・権限）を `people lookup` と名簿で引く。名簿外なら rules.md §0 の順に引き、分からなければ書かずに聞く。依頼する手順は相手の権限で実行できるものだけ。
+- 読み手のregister（開発者／非開発者）も名簿で引く。非開発者向けには識別子をそもそも書かない。
 - 絶対日付で書く。日本語に斜体を使わない。日本語と英数字の間にスペースを入れない（例外はGitHubの `#123` の前後とSlackのインラインコード）。
 
 ## Commits, PRs, Reviews

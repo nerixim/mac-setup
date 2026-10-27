@@ -75,7 +75,7 @@ gh api repos/<owner>/<repo>/pulls/<n>/reviews | jq -r '.[] | select(.user.login|
 
 - The timeline is the only proof. A `201 Created` from the request endpoint is not: on 2026-10-20 the call returned 201 from `nikita-kamaev-trabox` and nothing happened, while the same request from a teammate's account worked. If no `copilot_work_started` appears within 2 minutes, the requesting account lacks Copilot access or the repo has Copilot code review off; stop and say so instead of retrying
 - Check the `commit_id` of the latest Copilot review against the PR head. A review on an older commit means the re-request after the push was skipped
-- Human reviewer goes on with `gh pr edit <n> --add-reviewer <login>` only after Copilot's open threads are fixed or answered. Repo history picks the human (for trabox-inc, the reviewers in memory `trabox-people.md`); none on environment-promotion PRs
+- Human reviewer goes on with `gh pr edit <n> --add-reviewer <login>` only after Copilot's open threads are fixed or answered. In trabox-inc the first candidate is the one named in memory `trabox-people.md`, app and infra alike (owner's instruction 2026-10-21); none on environment-promotion PRs
 
 ### 5.5 Stacked PRs (GitHub native stacks, GA 2026-10-06)
 

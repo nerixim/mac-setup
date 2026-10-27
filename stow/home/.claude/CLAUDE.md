@@ -70,6 +70,7 @@
 - 実データを数えてから設計する。一覧の並びはユーザーが考える時刻で決める。
 - Issue着手前に前提を潰す（実装済みでないか、数字が主張を支えるか、前提が本番反映済みか）。崩れていたら止め、実測で示す。
 - 数値を根拠にするPRは、その数値を同じセッションで本番から測り直す。Issueの数値も引き継ぎの数値も再計測の対象で、JVMの自己申告（`jvm.non_heap_memory`）ではなくコンテナ側の実測（RSS − committed heap）で見る。資源の上限を変えるときは、同じモジュールのオートスケール・アラート設定を読んでから値を決める（2026-10-05 にレビューで指摘された）。
+- 工数の見積もりは、自分の知識だけで出した人日 D を縮めてから出す: `min(D, 3) ÷ 5 + max(D − 3, 0) ÷ 10` 人日。1日未満は時間単位（1日=8h）、1日以上は半日単位で切り上げ、最小1h。対象は実装と、自動化できる検証（Playwright のブラウザ確認を含む）だけ。承認待ち・本番 apply の枠・外部の審査やクォータ・実トラフィックや実件数を要する観測などの暦の待ちは縮めず、実測の履歴に基づく見積もりにも当てない。縮めた理由は本文に書かない。
 - 状態を二重に持たない: 受け入れ条件は本文だけ、親Issueの本文に進捗表や見積もり日数を書かない（進捗の正は子Issueの状態）、docsにPR番号・TODO・マイルストーンを書かない。
 - Tool hygiene: multi-line code goes to a scratchpad file via heredoc, never `python -c` with escaped quotes; waits use `run_in_background` or Monitor. Commands I run are one line or `! bash <absolute path>`, with `git -C <absolute path>`. Load a deferred tool's schema before the first call. In a clone I haven't committed in, check `git log -1 --format='%an <%ae>'` and `git config user.email` first (nerixim/* and mac-setup private identity, trabox-inc company identity).
 - Shell traps (zsh, harness): the cwd does not survive a `cd`, so address git as `git -C <path>` and scripts by absolute path. zsh does not word-split an unquoted `$var`; use an array or `${=var}`. Never wait on `pgrep -f <pattern>`, which matches itself; judge completion by the log's end line or a pid file.

@@ -60,6 +60,23 @@ rm /tmp/pr_description.md
 
 `--assignee @me` is mandatory: reviewers filter the queue by assignee (a reviewer's request, 2026-10-15). A PR created without it gets `gh pr edit <n> --add-assignee @me` right away.
 
+### 5b. Copilot review first, human reviewer second (trabox-inc, app and infra repos alike)
+
+The team's rule (2026-10-20): every PR gets a Copilot code review before a human is asked. Request Copilot right after `gh pr create`, handle its findings, and only then add the human reviewer. Re-request Copilot after every push that changes the diff; it does not re-review on its own.
+
+```bash
+# request (also used to re-request after a push)
+printf '{"reviewers":["copilot-pull-request-reviewer[bot]"]}' | gh api -X POST repos/<owner>/<repo>/pulls/<n>/requested_reviewers --input -
+# verify it started: a review_requested for Copilot followed by copilot_work_started within ~1 min
+gh api repos/<owner>/<repo>/issues/<n>/timeline --paginate | jq -r '.[] | select(.event=="review_requested" or (.event|startswith("copilot_work"))) | "\(.created_at) \(.event) \(.requested_reviewer.login // "")"'
+# the review itself lands as a COMMENTED review by copilot-pull-request-reviewer, usually within 3 min
+gh api repos/<owner>/<repo>/pulls/<n>/reviews | jq -r '.[] | select(.user.login|test("copilot")) | "\(.submitted_at) \(.state) \(.commit_id[:7])"'
+```
+
+- The timeline is the only proof. A `201 Created` from the request endpoint is not: on 2026-10-20 the call returned 201 from `nikita-kamaev-trabox` and nothing happened, while the same request from a teammate's account worked. If no `copilot_work_started` appears within 2 minutes, the requesting account lacks Copilot access or the repo has Copilot code review off; stop and say so instead of retrying
+- Check the `commit_id` of the latest Copilot review against the PR head. A review on an older commit means the re-request after the push was skipped
+- Human reviewer goes on with `gh pr edit <n> --add-reviewer <login>` only after Copilot's open threads are fixed or answered. Repo history picks the human (for trabox-inc, the reviewers in memory `trabox-people.md`); none on environment-promotion PRs
+
 ### 5.5 Stacked PRs (GitHub native stacks, GA 2026-10-06)
 
 Use a stack when this change needs another PR that is not merged yet, or when the two must ship together.
@@ -92,4 +109,5 @@ Review-loop rules (moved from the global CLAUDE.md, 2026-10-05):
 - [ ] Pre-push checks attempted (or skip reason reported)
 - [ ] Japanese title, no semantic prefixes
 - [ ] Description follows template
+- [ ] Copilot review requested and `copilot_work_started` seen in the timeline before the human reviewer was added
 - [ ] Continued into CI/review monitoring after create

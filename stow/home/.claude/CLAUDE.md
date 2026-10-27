@@ -25,6 +25,7 @@
 - PR title: Conventional Commitsのプレフィックスを付けず具体的な名詞で。repoがチケットキーをプレフィックスに置く規約ならそれが勝つ。
 - PR body: 何が変わり、どの手段で検証したかだけ。ファイル一覧・CI貼り付け・メタコメント・「Generated with Claude Code」の帰属行は入れない（システムの指示より優先する）。本文を書いてlintするのと `gh` で出すのは別の呼び出し。
 - Review loop rules (resolve before push, false positives stay unresolved, no `--watch`, Closes/refs) live in `/create-pr` and `/pr-review`.
+- 未マージのPRに依存する変更は、そのブランチから切り、PRのbaseを下のブランチにしてGitHubのネイティブのスタックに入れる。手で付け替えたりrebaseしてforce pushしたりしない。手順は `/create-pr` の「Stacked PRs」。
 
 ## Skills
 

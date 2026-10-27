@@ -60,6 +60,18 @@ rm /tmp/pr_description.md
 
 `--assignee @me` is mandatory: reviewers filter the queue by assignee (a reviewer's request, 2026-10-15). A PR created without it gets `gh pr edit <n> --add-assignee @me` right away.
 
+### 5.5 Stacked PRs (GitHub native stacks, GA 2026-10-06)
+
+Use a stack when this change needs another PR that is not merged yet, or when the two must ship together.
+
+- Branch off the lower PR's branch and open this PR with `--base <lower branch>`. Then put the PRs into one stack: the stacks UI on the PR page, or `gh stack link <lower PR> <this PR>` (official extension `github/gh-stack`; arguments bottom to top, PR numbers or branch names; a branch argument is pushed and gets a PR if it has none; a stack number as the first argument appends to that stack). `gh stack submit` creates the PRs and the stack in one go from locally tracked branches.
+- Write the merge order in both PR bodies, and why they must land together if they must.
+- Bots that only review PRs against the default branch (e.g. Copilot auto-review) skip the upper PR: request the review by hand.
+- Merge bottom-up only. Merging the top PR lands it and every unmerged PR below it in one atomic operation (`gh stack merge <PR>` merges up to that PR, or the merge button on the top PR). `gh stack merge` checks only that each PR is open and not a draft, and branch protection is enforced only when the merge runs, so read every PR's checks with `gh` first; merge-requirement bypass is not supported for stacks. Squash makes one commit per PR, in order (observed 2026-10-27). Auto-merge for stacks is still rolling out.
+- Prefer merging the whole stack at once. If the bottom merges alone, the next PR needs a rebase: use GitHub's server-side "Rebase stack" button. `gh stack sync` / `gh stack rebase` rewrite branches locally, and `sync` / `push` push with `--force-with-lease`, which is a force push and is denied in repos that block it.
+- After merge, the upper PR still reports its old base branch. Confirm each PR landed with `git log --grep=<key> origin/<default>` before closing tickets.
+- API: GraphQL `PullRequest.stack` / `stackEntry` are read-only; the REST stacks endpoints create, extend and dissolve stacks; merging a stack by API works only through the asynchronous merge API (the sync merge endpoints refuse stacks).
+
 ### 6. Do not stop after create — watch CI / reviews
 
 After the PR URL is available, continue into the repo's review loop (Troika: `.claude/skills/pr-review-loop/SKILL.md`):

@@ -1,5 +1,3 @@
-tap 'eugenmayer/dockersync'
-tap 'kayac/tap'
 brew 'mas'
 brew 'duti'
 
@@ -29,8 +27,6 @@ brew 'zlib'
 
 # Dev tools
 brew 'mise'
-brew 'awscli'
-brew 'awslogs'
 brew 'curl'
 brew 'direnv'
 brew 'gh' # GitHub CLI
@@ -73,10 +69,8 @@ brew 'rclone' # R2 state sync for /briefing + /meeting-prep (skills/briefing/ref
 
 ## Desktop apps
 cask 'visual-studio-code', args: { appdir: '~/Applications' }
-cask 'docker'
+cask 'docker-desktop'
 cask 'iterm2', args: { appdir: '~/Applications' }
-cask 'figma', args: { appdir: '~/Applications' }
-cask 'notion', args: { appdir: '~/Applications' }
 
 # Browsers
 

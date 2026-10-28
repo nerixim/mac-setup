@@ -31,6 +31,7 @@
 | `quiz` | 製品の挙動を自分が答えられるか試す。マージ済みPRから事実を収穫し、間隔をあけて出題する | 共通＋オーバーレイ | リポジトリごとの`$Q/config.md`。`local/config.<repo>.md`が種 |
 | `work-report` | 月末の作業報告書（xlsm）を埋める。カレンダー・自分のSlack投稿・GitHub・git・Claude Codeのセッションから日ごとの作業を起こし、休日と欠勤は勤怠チャンネルから取る。手で呼ぶときだけ（`/work-report 2026-09`） | 共通＋オーバーレイ | `local/config.json`（勤怠チャンネル・定例名・リポジトリ・テンプレートの配置・文言規則）。`uv`と`openpyxl` |
 | `start-work` | 作業単位（PRになるもの・apply・文書・調査結果）に着手する前にissueを1本切り、自分に割り当てて、チームのGitHub Projectに列付きで載せる。本文はリポジトリの流儀で書く（issue作成エージェントを持つリポジトリはそれに委ねる）。PRは`refs`/`Closes`でissueを指し、`pr`・`status`で列を動かす。`backfill`がissueの無い自分のPRと板に無いissueを並べる。返信・DM・人に関するメモはissueにしない（`briefing`の板に置く） | 共通＋オーバーレイ | `local/config.json`（org・Project番号・列名）と`local/issue-style.md`。`gh`に`project` scope。本文は`mdfmt`と`factcheck/bin/lint-draft`を通る |
+| `advisory-watch` | 「このCVEに当たるか」「うちのスタックに新しい勧告は出たか」。SCA（yamory・Dependabot）がGHSAの審査を待つ数日を、ベンダーの一次情報（Tomcat・OpenJDK・Adoptium・Spring）とGitHubの未審査勧告・OSVで埋める。`bin/inventory`が構成をGitHubから組み、`bin/check`が照合して前回からの新規を出す。客先の日次triageが`--brief`で呼ぶ | 共通＋オーバーレイ | `local/config.json`（リポジトリと本番イメージのDockerfile、静的な行）。`gh`。マージ済みの版を読むので、本番の版は別に確かめる |
 | `mdfmt` | Markdownの記法を機械で見る。Slack宛と、GitHub・Backlog宛で規則が違う | dotfiles | `bun`。`bun test`が31件 |
 | `commit` | 日本語の説明でConventional Commitsのコミットを作る。compile・lint・testも回す | dotfiles | — |
 | `greenfield` | 新規プロジェクトのスタック既定（Node LTS・Biome・Zod v4・Next.js+Hono・Supabase・Tailwind v4・vitest+Playwright）。既存repoには当てない | dotfiles | — |

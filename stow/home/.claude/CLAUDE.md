@@ -60,6 +60,7 @@
 - If my own findings compose into a better route, name it with a rough cost and a recommendation, and still judge the reviewed change on its own merits.
 - When the cost driver is data nobody has named as needed, ask the owner whether it is wanted.
 - Partial completion is stated as partial (`refs`), full completion as `Closes <full issue URL>`. In nerixim repos the line comes from `bun scripts/tasks.mjs prlink <issue> --met all|1,3`.
+- The turn that verifies an issue's last step (the prod apply, the manual TFC/console change, the post-apply check) closes the issue with that evidence in the same turn. Issues worked without a PR or through a `refs` chain never close on their own; on 2026-10-29 three such issues sat open after their applies until a board review.
 
 ### Engineering discipline
 

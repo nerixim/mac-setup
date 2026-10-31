@@ -83,13 +83,26 @@ gh api repos/<owner>/<repo>/pulls/<n>/reviews | jq -r '.[] | select(.user.login|
 Use a stack when this change needs another PR that is not merged yet, or when the two must ship together.
 
 - Branch off the lower PR's branch and open this PR with `--base <lower branch>`. Then put the PRs into one stack: the stacks UI on the PR page, or `gh stack link <lower PR> <this PR>` (official extension `github/gh-stack`; arguments bottom to top, PR numbers or branch names; a branch argument is pushed and gets a PR if it has none; a stack number as the first argument appends to that stack). `gh stack submit` creates the PRs and the stack in one go from locally tracked branches.
-- Write the merge order in both PR bodies, and why they must land together if they must.
+- Do not write a merge order in the PR bodies ("Merge order: after #885"). The stack panel on each PR already shows the order, the line goes stale once another PR is stacked on top, and it reads as "merge #885 first", which throws the stack away. When an upper PR cannot pass on the default branch without the lower one, say that as a dependency with its reason ("needs #885: on main without its fix this check fails"), and say why the PRs must land together if they must.
 - Bots that only review PRs against the default branch (e.g. Copilot auto-review) skip the upper PR: request the review by hand.
-- Merge bottom-up only. Merging the top PR lands it and every unmerged PR below it in one atomic operation (`gh stack merge <PR>` merges up to that PR, or the merge button on the top PR). `gh stack merge` checks only that each PR is open and not a draft, and branch protection is enforced only when the merge runs, so read every PR's checks with `gh` first; merge-requirement bypass is not supported for stacks. Squash makes one commit per PR, in order (observed 2026-10-27). Auto-merge for stacks is still rolling out.
-- Prefer merging the whole stack at once. If the bottom merges alone, the next PR needs a rebase: use GitHub's server-side "Rebase stack" button. `gh stack sync` / `gh stack rebase` rewrite branches locally, and `sync` / `push` push with `--force-with-lease`, which is a force push and is denied in repos that block it.
+- Merge the whole stack from its top PR: the top PR's "Merge stack (N)" button, or `gh stack merge <top PR>`, lands every unmerged PR below it, in order, in one atomic operation. The same button on a middle PR merges only up to that PR (stack #887 on 2026-10-31: #886 offered "Merge stack (2)", the top PR #888 "Merge stack (3)"). A ready stack is reported by its top PR, never as "merge the bottom first". Merge only a lower part when an upper PR is not ready, and say which.
+- Read every PR's checks with `gh` before merging. `gh stack merge` checks only that each PR is open and not a draft, branch protection is enforced only when the merge runs, and where the default branch requires no checks (kanyomi) GitHub merges while checks are still running. Merge-requirement bypass is not supported for stacks. Auto-merge for stacks is still rolling out.
+- Squash makes one commit per PR, in order (observed 2026-10-27). The merge-commit method makes one merge commit, for the top PR, that carries the whole stack (kanyomi stack #881, 2026-10-30).
+- A commit on a lower PR's branch (review suggestions applied in the GitHub UI, a fix pushed there) is missing from the branches above it, and GitHub shows the stack as not mergeable even when nothing conflicts. Catch up bottom to top by merging each lower branch into the branch above it, with plain pushes:
+
+  ```bash
+  git -C <upper worktree> fetch origin
+  git -C <upper worktree> merge --ff-only origin/<upper>   # commits made on GitHub, e.g. its own suggestions
+  git -C <upper worktree> merge --no-edit origin/<lower>
+  git -C <upper worktree> push origin <upper>
+  # repeat one level up, with the branch just pushed as <lower>
+  ```
+
+  The push re-runs CI on each upper PR; read the checks again before merging. Squash folds the merge commits away. Stack #881 was fixed this way on 2026-10-30, after suggestions were applied on #879 and #880: `issue/767` was merged into `issue/768`, then `issue/768` into `issue/782`.
+- Do not rebase a stack. `gh stack sync` / `gh stack rebase` rewrite branches locally, and `sync` / `push` push with `--force-with-lease`, which is a force push and is denied in repos that block it. If the bottom was merged alone, the next PR needs the default branch: merge it in the same way, or use GitHub's server-side "Rebase stack" button.
 - After merge, the upper PR still reports its old base branch. Confirm each PR landed with `git log --grep=<key> origin/<default>` before closing tickets.
 - Head branches are not auto-deleted after a stack merge, even where ordinary merges auto-delete (observed 2026-10-28). Delete the local branches with `git branch -d` while the remotes still exist, then delete each remote (`gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<branch>` where `git push --delete` is blocked).
-- The stack lands as N commits on the default branch within seconds, so push-triggered deploys run per commit and the superseded runs get cancelled. Judge the deploy by the run for the top commit.
+- With squash, the stack lands as N commits on the default branch within seconds, so push-triggered deploys run per commit and the superseded runs get cancelled. Judge the deploy by the run for the top commit.
 - Each PR needs its own required review or approval. Branch protection still applies per PR inside a stack.
 - API: GraphQL `PullRequest.stack` / `stackEntry` are read-only; the REST stacks endpoints create, extend and dissolve stacks; merging a stack by API works only through the asynchronous merge API (the sync merge endpoints refuse stacks).
 

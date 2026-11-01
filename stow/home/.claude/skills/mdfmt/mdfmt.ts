@@ -10,7 +10,8 @@ const USAGE = `Usage: bun ~/.claude/skills/mdfmt/mdfmt.ts [--slack|--slack-api] 
   <file.md>...             GitHub/Backlog の表記をlint(違反があれば exit 1)
   --fix <file.md>...       機械的に直せる分だけ上書き(全角/半角の空白・#123・閉じ強調)
   --backlog <file.md>...   Backlog の本文として、リンクにしていないコミットSHAも見る
-  --docs <file.md>...      リポジトリの文書として、リンクにしていないコミットSHAと末尾の「最終更新日: YYYY-MM-DD」も見る
+  --docs <file.md>...      リポジトリの文書として、リンクにしていないコミットSHA・末尾の「最終更新日: YYYY-MM-DD」・桁で折り返した段落も見る
+  --docs --fix <file>...   上の --fix に加えて、桁で折り返した段落を1行につなぐ
   --en <file.md>...        英語の文の詰め込みも見る(1文30語超、1段に `;` が2つ以上)。日本語の文は見ない
   --slack <file.md>...     Slack の入力欄に貼る下書きとしてlint(表・**・見出し・<URL|文言>・2段落)
   --slack --fix <file>...  Slack mrkdwn に変換して上書き(リンクは [文言](URL) のまま。表は畳めないので残す)
@@ -63,7 +64,7 @@ const check = (content: string): Omit<Finding, "file">[] =>
 const findings: Finding[] = []
 for (const file of files) {
   const before = read(file)
-  const after = fix ? (slack ? toSlackMrkdwn(before, { target: slackTarget }) : fixGithubMarkdown(before)) : before
+  const after = fix ? (slack ? toSlackMrkdwn(before, { target: slackTarget }) : fixGithubMarkdown(before, { docs })) : before
   if (fix && file === "-") {
     process.stdout.write(after)
   } else if (fix && after !== before) {

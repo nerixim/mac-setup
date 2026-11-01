@@ -2,6 +2,7 @@
 // レビューでしか守られていなかった規則を落とす。判断が要る規則(register・敬語・長さ)はここでは見ない。
 import { mapOutsideFences, padCommonMarkEmphasisClosers, withProtectedCodeSpans } from "./emphasis.ts"
 import { checkEnglish } from "./english.ts"
+import { findWrappedParagraphs, unwrapParagraphs } from "./wrap.ts"
 
 export type Rule =
   | "ja-en-space"
@@ -16,6 +17,7 @@ export type Rule =
   | "ja-paren"
   | "en-long-sentence"
   | "en-semicolon-chain"
+  | "hard-wrap"
 
 export type Violation = { line: number; rule: Rule; text: string; hint: string }
 
@@ -351,10 +353,27 @@ export const hasLastUpdated = (content: string): boolean => {
   return last !== undefined && LAST_UPDATED.test(last)
 }
 
+export const HARD_WRAP_HINT =
+  "hand-wrapped paragraph: a single newline renders as a space, so put the paragraph on one line (`mdfmt --docs --fix` joins it); if each line is its own item, make it a list or end the line with two spaces"
+
+/** 桁で折り返した段落を、段落の先頭行で1回だけ出す */
+export const checkHardWrap = (content: string): Violation[] => {
+  const lines = content.split("\n")
+  return findWrappedParagraphs(lines).map(({ start, end }) => ({
+    line: start + 1,
+    rule: "hard-wrap" as const,
+    text: `${(lines[start] ?? "").trim()} (${end - start + 1} lines)`,
+    hint: HARD_WRAP_HINT,
+  }))
+}
+
 export const lint = (content: string, opts: LintOptions = {}): Violation[] => {
   const hits = checkLines(content, opts)
   if (opts.en) {
     hits.push(...checkEnglish(content))
+  }
+  if (opts.docs) {
+    hits.push(...checkHardWrap(content))
   }
   if (opts.docs && !hasLastUpdated(content)) {
     hits.push({
@@ -422,14 +441,15 @@ const fixLine = (line: string): string =>
 
 /**
  * 機械的に直せる分だけ直す。判断が要る違反(ja-italic・bold-density)は lint が出すだけで触らない。
+ * - docs: 桁で折り返した段落を1行につなぐ(描画は変わらない)
  * - 日本語の文(表はセル単位)で、全角と半角の間のスペースを詰める。英文は触らない
  * - `#123` を自動リンク可能な空白区切りにする
  * - 日本語に密着した半角かっこの対を全角（）にする
  * - `` `fixes #123` `` のコード囲みを外す
  * - 素通しになる閉じ強調の後ろにスペースを入れる
  */
-export const fixGithubMarkdown = (markdown: string): string =>
-  mapOutsideFences(markdown, (prose) =>
+export const fixGithubMarkdown = (markdown: string, opts: LintOptions = {}): string =>
+  mapOutsideFences(opts.docs ? unwrapParagraphs(markdown) : markdown, (prose) =>
     prose
       .split("\n")
       .map((line) => (/^\s*(```|~~~)/.test(line) ? line : fixLine(line)))

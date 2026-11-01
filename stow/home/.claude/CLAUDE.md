@@ -57,6 +57,7 @@
 ### Scope discipline
 
 - Touch only the surface I reported. Problems found nearby get reported, not fixed.
+- Red CI comes first, whoever broke it: when the base branch's checks are red, fixing them is the recommended first step, in its own PR, before the task's own change. Skip it only when an open PR, a claimed session or an issue In progress already owns the fix, and say so. A red main skips deploys and turns every later PR red (2026-11-01: nerixim.dev main stayed red after PR 35, so the unpublish never deployed).
 - If my own findings compose into a better route, name it with a rough cost and a recommendation, and still judge the reviewed change on its own merits.
 - When the cost driver is data nobody has named as needed, ask the owner whether it is wanted.
 - Partial completion is stated as partial (`refs`), full completion as `Closes <full issue URL>`. In nerixim repos the line comes from `bun scripts/tasks.mjs prlink <issue> --met all|1,3`.

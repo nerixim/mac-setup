@@ -29,7 +29,7 @@ Handle GitHub PR review comments systematically. Here's what I'll do:
 Start by fetching the PR information for PR #$1.
 
 ```bash
-!gh pr view $1 ${2:+--repo $2} --json number,title,headRefName,headRepository,baseRefName
+!gh pr view $1 ${2:+--repo $2} --json number,title,headRefName,headRepository,baseRefName,mergeable,mergeStateStatus
 ```
 
 Get comments for the particular PR review if specified:
@@ -66,6 +66,7 @@ Thread handling rules (moved from the global CLAUDE.md, 2026-10-05):
 - Resolve the threads you fixed before pushing; pushing first makes the bot re-review on top of stale threads and duplicate findings
 - False positives: reply with a concrete rebuttal and leave the thread unresolved (bots dedupe on open threads). After three repeats, add an exclusion to the reviewer's prompt
 - Never `gh pr checks --watch`; classify from a snapshot and fix failing lint/tests first
+- Every status read of a PR (the fetch above, each check snapshot, each tick of a watch loop) reads `mergeable` and `mergeStateStatus` next to the checks. `CONFLICTING` / `DIRTY` is handled like a red check: merge the base branch into the PR branch (never rebase), resolve, run the repo's check, push. `UNKNOWN` means GitHub has not computed it yet: read again after about 10 seconds, never report it as mergeable. 2026-11-03: kanyomi #926 went CONFLICTING five minutes after creation when another PR merged, and a checks-only watch missed it until the owner pointed it out
 
 **Comments Not to Address:**
 

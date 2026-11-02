@@ -22,7 +22,10 @@ git branch --show-current
 git log --oneline main..HEAD
 git diff main..HEAD --stat
 git diff main..HEAD --name-only
+git fetch origin && git merge-tree --write-tree origin/main HEAD   # conflicts against the live base, before anything is pushed
 ```
+
+A conflict listed by `merge-tree` means the base moved under the branch: merge `origin/<base>` into the branch now (never rebase), resolve, rerun the repo's check, and only then continue. The base keeps moving after the push too, so the same read is part of every status snapshot in step 6.
 
 ### 2. Pre-push checks (strongly recommended, not a hard stop)
 
@@ -110,7 +113,7 @@ Use a stack when this change needs another PR that is not merged yet, or when th
 
 After the PR URL is available, continue into the repo's review loop (Troika: `.claude/skills/pr-review-loop/SKILL.md`):
 
-1. List existing review threads and CI immediately (do not start with a long wait)
+1. List existing review threads, CI and mergeability immediately (do not start with a long wait): `gh pr checks <n>` and `gh pr view <n> --json mergeable,mergeStateStatus` in the same read
 2. Fix red CI and actionable review comments
 3. After resolving bot "Changes requested" threads, dismiss stale bot CHANGES_REQUESTED reviews (or re-request human reviewers) so the PR does not keep looking blocked
 4. Wait for remaining CI / review passes and loop until merge-ready or the user stops you
@@ -120,6 +123,7 @@ Review-loop rules (moved from the global CLAUDE.md, 2026-10-05):
 - Resolve before push: resolve the review threads you fixed, then push. Pushing first makes CI review on top of stale threads and duplicates the same findings
 - False positives are not resolved: reply with a concrete rebuttal and leave the thread open. Bots dedupe on open threads, so resolving brings the same false positive back on the next push. After three repeats, add an exclusion to the reviewer's prompt
 - No full CI wait: never `gh pr checks --watch`. Classify from a snapshot and fix failing lint/tests without waiting for the rest. Do not stop at the PR URL; stay until the reviews are handled
+- Mergeability is part of every status read, including each tick of a watch loop and the read before a merge: `CONFLICTING` / `DIRTY` is a red check (merge the base in, never rebase, resolve, check, push), `UNKNOWN` is "not computed yet" (read again after about 10 seconds, never report it as mergeable). 2026-11-03: kanyomi #926 went CONFLICTING five minutes after creation when the base merged another PR; a checks-only watch missed it until the owner pointed it out
 
 ## Quality Checklist
 

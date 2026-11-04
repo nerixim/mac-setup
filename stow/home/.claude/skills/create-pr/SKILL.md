@@ -63,7 +63,7 @@ rm /tmp/pr_description.md
 
 `--assignee @me` is mandatory: reviewers filter the queue by assignee (a reviewer's request, 2026-10-15). A PR created without it gets `gh pr edit <n> --add-assignee @me` right away.
 
-### 5b. Copilot review first, human reviewer second (trabox-inc, app and infra repos alike)
+### 5b. Copilot review first, human reviewer second (the client org, app and infra repos alike)
 
 The team's rule (2026-10-20): every PR gets a Copilot code review before a human is asked. Request Copilot right after `gh pr create`, handle its findings, and only then add the human reviewer. Re-request Copilot after every push that changes the diff; it does not re-review on its own.
 
@@ -76,10 +76,10 @@ gh api repos/<owner>/<repo>/issues/<n>/timeline --paginate | jq -r '.[] | select
 gh api repos/<owner>/<repo>/pulls/<n>/reviews | jq -r '.[] | select(.user.login|test("copilot")) | "\(.submitted_at) \(.state) \(.commit_id[:7])"'
 ```
 
-- The timeline is the only proof. A `201 Created` from the request endpoint is not: on 2026-10-20 the call returned 201 from `nikita-kamaev-trabox` and nothing happened, while the same request from a teammate's account worked. If no `copilot_work_started` appears within 2 minutes, the requesting account lacks Copilot access or the repo has Copilot code review off; stop and say so instead of retrying
+- The timeline is the only proof. A `201 Created` from the request endpoint is not: on 2026-10-20 the call returned 201 from the work account and nothing happened, while the same request from a teammate's account worked. If no `copilot_work_started` appears within 2 minutes, the requesting account lacks Copilot access or the repo has Copilot code review off; stop and say so instead of retrying
 - Check the `commit_id` of the latest Copilot review against the PR head. A review on an older commit means the re-request after the push was skipped
 - Quota reached: the request still succeeds and lands in the timeline, but the review body says "the user who requested the review has reached their quota limit". Do not wait a day for Copilot. Add the human reviewer right away, and optionally ask them in one line to trigger Copilot from their own account because yours hit the quota (owner's rule 2026-10-23)
-- Human reviewer goes on with `gh pr edit <n> --add-reviewer <login>` only after Copilot's open threads are fixed or answered (or Copilot is skipped for quota, above). In trabox-inc the first candidate is the one named in memory `trabox-people.md`, app and infra alike (owner's instruction 2026-10-21); none on environment-promotion PRs
+- Human reviewer goes on with `gh pr edit <n> --add-reviewer <login>` only after Copilot's open threads are fixed or answered (or Copilot is skipped for quota, above). In the client org the first candidate is the one named in the project memory's people roster, app and infra alike (owner's instruction 2026-10-21); none on environment-promotion PRs
 
 ### 5.5 Stacked PRs (GitHub native stacks, GA 2026-10-06)
 

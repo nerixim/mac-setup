@@ -22,6 +22,16 @@ sudo nvram SystemAudioVolume=" "
 # Check for software updates daily, not just once per week
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 
+# Keep app windows across quit/relaunch (System Settings > Desktop & Dock >
+# "Close windows when quitting an application" = off). iTerm2 saves its
+# window/tab state only while this is on (iTermRestorableStateController reads
+# NSQuitAlwaysKeepsWindows), so on the macOS default it has nothing to restore
+# after a forced shutdown. Relaunch iTerm2 after changing it.
+defaults write NSGlobalDomain NSQuitAlwaysKeepsWindows -bool true
+
+# Default the restart/logout dialog's "Reopen windows when logging back in" to on.
+defaults write com.apple.loginwindow TALLogoutSavesState -bool true
+
 # Trackpad: tap-to-click, and map the bottom-right CORNER to secondary (right) click.
 # System Settings writes the trackpad keys to BOTH the per-user global domain and
 # the -currentHost (ByHost) domain (verified on a machine configured via the UI:

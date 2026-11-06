@@ -7,6 +7,10 @@ stowed file is the live file, so every pick on one machine became a diff on ever
 keys on the way into the index: the working file keeps the pick, the repo never sees it. Wired by .gitattributes
 (filter=claude-settings) and scripts/stow.sh (git config filter.claude-settings.clean). Input that is not JSON
 passes through unchanged, so a broken file still commits and shows up in review instead of being hidden.
+
+Known limit (git 2.55): after a pick changes the file size, `git status` lists the file although `git diff` is empty,
+because ie_modified() trusts a size mismatch without re-running the filter. `git add` of the file clears it and
+stages nothing.
 """
 import json
 import sys

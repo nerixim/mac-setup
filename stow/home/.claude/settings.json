@@ -156,7 +156,6 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus",
   "skillOverrides": {
     "agent-md-refactor": "off",
     "ai-sdk": "off",
@@ -308,12 +307,6 @@
     }
   },
   "alwaysThinkingEnabled": true,
-  "effortLevel": "high",
-  "modelSettings": {
-    "claude-opus-5-5": {
-      "effortLevel": "high"
-    }
-  },
   "showClearContextOnPlanAccept": true,
   "theme": "dark",
   "switchModelsOnFlag": false,

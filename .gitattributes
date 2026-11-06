@@ -1,0 +1,2 @@
+# /model, /effort and /fast picks stay out of the repo (scripts/claude-settings-filter.py)
+stow/home/.claude/settings.json filter=claude-settings

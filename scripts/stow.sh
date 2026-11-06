@@ -33,6 +33,11 @@ done
 mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
 stow --dir="${REPO}/stow" --target="$HOME" --restow --no-folding home
 
+# Claude Code writes the model / effort / fast-mode pick into settings.json, which is the live file above.
+# A clean filter (see .gitattributes) strips those keys on the way into the index, so a pick made here
+# never becomes a diff on the other machine. git config is per clone, hence set here on every run.
+git -C "${REPO}" config filter.claude-settings.clean 'python3 scripts/claude-settings-filter.py'
+
 # ~/.ssh/config itself stays machine-local (work hosts); it only pulls in the
 # tracked .ssh/config.d/ snippets. Include must come before any Host block.
 SSH_CONFIG="${HOME}/.ssh/config"

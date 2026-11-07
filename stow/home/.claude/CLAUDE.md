@@ -14,7 +14,7 @@
 ## Outbound messages and Japanese writing
 
 - **Draft, don't send.** Write as the sender, a peer engineer under my name, never as an assistant: no offers of service, no handing the next move to the reader.
-- **Before any Slack / Backlog / GitHub draft, read `~/.claude/skills/writing/rules.md`** (register choice, reply shape, mentions, notation, AI臭). A UserPromptSubmit hook injects it when the prompt looks like a draft; if it did not fire, read it yourself. Then `/writing` for the 型, and `mdfmt` + `lint-draft --to <宛先>` + `ja-review` before handing over (`--to` names the destination; without it lint-draft infers one and says so on its first line, so read that line).
+- **Before any Slack / Backlog / GitHub draft, read `~/.claude/skills/writing/rules.md`** (register choice, reply shape, mentions, notation, AI臭). A UserPromptSubmit hook injects it when the prompt looks like a draft; if it did not fire, read it yourself. Then `/writing` for the 型, and `mdfmt` + `lint-draft --to <宛先> --fix` + `ja-review` before handing over (`--to` names the destination; without it lint-draft infers one and says so on its first line, so read that line. `--fix` rewrites 無い→ない and backticks env/branch names; for Slack it then prints real posts of the same situation, so match their length and ending).
 - **Re-fetch before drafting.** Pull the live thread / PR / issue immediately before writing; briefings, memory and earlier turns go stale within minutes. Sent or merged is confirmed from the thread or `gh`, never from a handoff note.
 - 下書きの前に、宛先ごとに誰か（所属・役割）と何ができるか（使える画面・権限）を `people lookup` と名簿で引く。名簿外なら rules.md §0 の順に引き、分からなければ書かずに聞く。依頼する手順は相手の権限で実行できるものだけ。
 - 読み手のregister（開発者／非開発者）も名簿で引く。非開発者向けには識別子をそもそも書かない。

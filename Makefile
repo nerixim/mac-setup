@@ -23,7 +23,7 @@ osx-preferences:
 touchid-sudo:
 	./scripts/$@.sh
 
-# Symlink dotfiles from stow/home/ into $HOME (default-* lists, p10k, zellij, tmux).
+# Symlink dotfiles from stow/home/ into $HOME (default-* lists, p10k, tmux).
 stow:
 	./scripts/$@.sh
 
@@ -62,7 +62,7 @@ xcode-app: homebrew
 	mas install 497799835
 	$(brin) cocoapods
 
-# Install zellij + starter config (opt-in; not part of `make all`).
+# Install zellij (opt-in; not part of `make all`).
 zellij: homebrew
 	./scripts/$@.sh
 
